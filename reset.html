@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QForge - Reset Password</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+  background:#111113; color:#ffffff;
+  font-family:'DM Sans',sans-serif; font-weight:300;
+  min-height:100vh; display:flex; flex-direction:column;
+  align-items:center; justify-content:center; padding:20px;
+}
+.logo { display:flex; align-items:center; justify-content:center; gap:8px; font-weight:800; font-size:1.8rem; letter-spacing:-0.5px; margin-bottom:32px; font-family:'Plus Jakarta Sans',sans-serif; }
+.logo-box { background:#E63946; width:48px; height:48px; border-radius:6px; display:flex; align-items:center; justify-content:center; font-size:1.6rem; color:#fff; font-family:'Plus Jakarta Sans',sans-serif; font-weight:900; }
+.logo span { color:#E63946; }
+.card {
+  background:#1c1c1f; border:1px solid rgba(255,255,255,0.1);
+  border-radius:14px; padding:36px 32px;
+  width:100%; max-width:420px;
+}
+.card h2 { font-family:'Plus Jakarta Sans',sans-serif; font-size:1.3rem; font-weight:800; margin-bottom:8px; }
+.card p { font-size:0.85rem; color:#aaa; margin-bottom:24px; line-height:1.6; }
+.form-group { display:flex; flex-direction:column; gap:5px; margin-bottom:16px; }
+.form-group label { font-size:0.78rem; color:#c0c0c0; font-weight:500; }
+.form-group input {
+  background:#2a2a2f; border:1px solid rgba(255,255,255,0.2);
+  border-radius:8px; color:#fff;
+  font-family:'DM Sans',sans-serif; font-size:0.9rem;
+  padding:12px 14px; outline:none; transition:border-color 0.2s;
+  width:100%;
+}
+.form-group input:focus { border-color:#E63946; }
+.btn {
+  width:100%; padding:14px; border-radius:8px;
+  background:#E63946; color:#fff; border:none;
+  font-family:'Plus Jakarta Sans',sans-serif; font-size:0.95rem; font-weight:700;
+  cursor:pointer; transition:all 0.18s; margin-top:8px;
+}
+.btn:hover { background:#e04d10; transform:translateY(-1px); }
+.btn:disabled { opacity:0.5; cursor:not-allowed; transform:none; }
+.success {
+  background:rgba(46,204,113,0.1); border:1px solid rgba(46,204,113,0.3);
+  border-radius:8px; padding:14px; font-size:0.85rem; color:#2ecc71;
+  margin-bottom:16px; display:none; text-align:center;
+}
+.error {
+  background:rgba(231,76,60,0.1); border:1px solid rgba(231,76,60,0.2);
+  border-radius:8px; padding:12px; font-size:0.82rem; color:#e74c3c;
+  margin-bottom:16px; display:none;
+}
+.back-link { margin-top:20px; text-align:center; font-size:0.82rem; color:#888; }
+.back-link a { color:#E63946; text-decoration:none; cursor:pointer; }
+.password-rules { font-size:0.75rem; color:#666; margin-top:6px; line-height:1.5; }
+.password-wrap{position:relative;}
+.password-wrap input{padding-right:42px;}
+.eye-btn{position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:#888;font-size:1rem;padding:4px;}
+</style>
+</head>
+<body>
+
+<div class="logo"><div class="logo-box">Q</div><span>Forge</span></div>
+
+<div class="card">
+  <h2>Set New Password</h2>
+  <p>Enter your new password below. Make sure it is at least 6 characters long.</p>
+
+  <div class="success" id="successMsg">
+    Password updated successfully! Redirecting to login...
+  </div>
+  <div class="error" id="errorMsg"></div>
+
+  <div class="form-group">
+    <label>New Password</label>
+    <div class="password-wrap"><input type="password" id="newPassword" placeholder="Min 6 characters"><button class="eye-btn" type="button" onclick="togglePwd('newPassword',this)">&#128065;</button></div>
+    <div class="password-rules">At least 6 characters</div>
+  </div>
+  <div class="form-group">
+    <label>Confirm New Password</label>
+    <div class="password-wrap"><input type="password" id="confirmPassword" placeholder="Repeat your password" onkeydown="if(event.key==='Enter')resetPassword()"><button class="eye-btn" type="button" onclick="togglePwd('confirmPassword',this)">&#128065;</button></div>
+  </div>
+
+  <button class="btn" id="resetBtn" onclick="resetPassword()">Update Password</button>
+
+  <div class="back-link">
+    <a href="https://coruscating-kleicha-3452bb.netlify.app">Back to Login</a>
+  </div>
+</div>
+
+<script>
+const { createClient } = supabase;
+const sb = createClient(
+  'https://blfhvkbjfhhjsnobvfct.supabase.co',
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJsZmh2a2JqZmhoanNub2J2ZmN0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAyNjA4MjIsImV4cCI6MjA5NTgzNjgyMn0.w0CUm6N52U8OIYWqrpu84QfeFUm1TYpcpTVKCxCl-YM'
+);
+
+function togglePwd(id, btn) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.type = el.type === 'password' ? 'text' : 'password';
+  btn.innerHTML = el.type === 'password' ? '&#128065;' : '&#128064;';
+}
+
+async function resetPassword() {
+  const newPass = document.getElementById('newPassword').value;
+  const confirmPass = document.getElementById('confirmPassword').value;
+  const errorEl = document.getElementById('errorMsg');
+  const successEl = document.getElementById('successMsg');
+  const btn = document.getElementById('resetBtn');
+
+  errorEl.style.display = 'none';
+
+  if (!newPass || newPass.length < 6) {
+    errorEl.textContent = 'Password must be at least 6 characters.';
+    errorEl.style.display = 'block';
+    return;
+  }
+  if (newPass !== confirmPass) {
+    errorEl.textContent = 'Passwords do not match.';
+    errorEl.style.display = 'block';
+    return;
+  }
+
+  btn.textContent = 'Updating...';
+  btn.disabled = true;
+
+  try {
+    const { error } = await sb.auth.updateUser({ password: newPass });
+    if (error) {
+      errorEl.textContent = error.message || 'Something went wrong. Please try again.';
+      errorEl.style.display = 'block';
+      btn.textContent = 'Update Password';
+      btn.disabled = false;
+    } else {
+      successEl.style.display = 'block';
+      btn.style.display = 'none';
+      setTimeout(() => {
+        window.location.href = 'https://coruscating-kleicha-3452bb.netlify.app';
+      }, 2500);
+    }
+  } catch(e) {
+    errorEl.textContent = 'Something went wrong. Please try again.';
+    errorEl.style.display = 'block';
+    btn.textContent = 'Update Password';
+    btn.disabled = false;
+  }
+}
+
+// Check if we have a valid reset session
+window.addEventListener('load', async () => {
+  const { data: { session } } = await sb.auth.getSession();
+  if (!session) {
+    document.getElementById('errorMsg').textContent = 'This reset link has expired. Please request a new one.';
+    document.getElementById('errorMsg').style.display = 'block';
+    document.getElementById('resetBtn').disabled = true;
+  }
+});
+</script>
+</body>
+</html>

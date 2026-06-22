@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QForge - View Quote</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&family=Space+Grotesk:wght@500;600;700&family=Bebas+Neue&display=swap" rel="stylesheet">
+<style>
+:root{--red:#E63946;--red-dark:#C41E3A;--red-light:rgba(230,57,70,0.08);--bg:#f7f7f7;--dark:#1a1a1a;--white:#ffffff;--border:#e0e0e0;}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg);font-family:'Plus Jakarta Sans',sans-serif;min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:20px 16px 60px;}
+
+/* ──── DOC WRAP ──── */
+.doc-wrap{
+  background:var(--white);width:100%;max-width:720px;border-radius:16px;overflow:hidden;
+  box-shadow:0 4px 20px rgba(0,0,0,0.1);border:1px solid #f0f0f0;transition:all 0.3s;
+}
+
+/* ──── HEADER ──── */
+.doc-header{
+  padding:16px 20px;display:flex;align-items:flex-start;justify-content:space-between;
+  border-bottom:2px solid var(--red);background:#fafafa;gap:14px;
+  flex-wrap:nowrap;
+}
+.doc-header > div:first-child{
+  display:flex;align-items:center;gap:12px;flex-shrink:0;
+}
+.doc-header > div:last-child{
+  text-align:right;flex-shrink:0;
+}
+.doc-logo{max-height:44px;max-width:90px;object-fit:contain;border-radius:6px;}
+.doc-company{font-family:'Plus Jakarta Sans',sans-serif;font-size:0.82rem;font-weight:800;color:var(--dark);margin-bottom:1px;}
+.doc-tagline{font-size:0.54rem;color:#999;text-transform:uppercase;letter-spacing:0.12em;margin-top:2px;}
+.doc-contact{font-size:0.63rem;color:#666;margin-top:6px;line-height:1.5;}
+.doc-quote-label{font-size:0.50rem;font-weight:700;letter-spacing:0.15em;text-transform:uppercase;color:#999;margin-bottom:3px;text-align:right;}
+.doc-quote-number{font-family:'Plus Jakarta Sans',sans-serif;font-size:1.3rem;font-weight:800;color:var(--red);text-align:right;}
+.doc-quote-date{font-size:0.58rem;color:#666;margin-top:4px;text-align:right;}
+.doc-quote-valid{font-size:0.56rem;color:#999;margin-top:2px;text-align:right;}
+
+/* ──── INFO BAND ──── */
+.doc-info-band{background:var(--white);display:grid;grid-template-columns:1fr;border-bottom:1px solid var(--border);}
+.doc-from{display:none;}
+.doc-for{padding:12px 20px;}
+.doc-info-label{font-size:0.50rem;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:#999;margin-bottom:4px;display:block;}
+.doc-client-name{font-family:'Plus Jakarta Sans',sans-serif;font-size:0.78rem;font-weight:700;color:var(--dark);}
+.doc-client-detail{font-size:0.62rem;color:#666;line-height:1.5;margin-top:3px;}
+
+/* ──── SCOPE ──── */
+.doc-scope{padding:12px 20px;background:var(--red-light);border-left:4px solid var(--red);font-size:0.65rem;color:var(--dark);line-height:1.6;font-style:italic;}
+
+/* ──── ITEMS TABLE ──── */
+.doc-table{width:100%;border-collapse:collapse;background:var(--white);}
+.doc-table th{background:var(--dark);color:#fff;font-size:0.54rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;padding:10px 20px;text-align:left;}
+.doc-table th:nth-child(2){text-align:center;width:50px;}
+.doc-table th:nth-child(3){text-align:right;}
+.doc-table th:nth-child(4){text-align:right;padding-right:20px;}
+.doc-table td{padding:10px 20px;font-size:0.66rem;border-bottom:1px solid #f5f5f5;vertical-align:middle;color:#333;}
+.doc-table td:nth-child(2){text-align:center;color:#999;}
+.doc-table td:nth-child(3){text-align:right;color:#666;}
+.doc-table td:last-child{text-align:right;font-weight:600;color:var(--dark);}
+.doc-table tr:last-child td{border-bottom:none;}
+.doc-item-desc{font-size:0.58rem;color:#999;margin-top:2px;}
+
+/* ──── TOTALS ──── */
+.doc-totals{padding:16px 20px;display:flex;flex-direction:column;align-items:flex-end;gap:6px;background:var(--red-light);}
+.doc-total-row{display:flex;gap:40px;font-size:0.68rem;color:var(--dark);}
+.doc-total-row span:first-child{color:#666;font-weight:500;}
+.doc-total-row span:last-child{min-width:100px;text-align:right;font-weight:600;}
+.doc-total-due{display:flex;gap:40px;font-family:'Plus Jakarta Sans',sans-serif;font-size:0.82rem;font-weight:800;color:var(--dark);margin-top:8px;padding-top:8px;border-top:2px solid rgba(230,57,70,0.3);}
+.doc-total-due span:last-child{min-width:100px;text-align:right;color:var(--red);}
+
+/* ──── NOTES SECTION ──── */
+.doc-notes{padding:12px 20px;background:#f9f9f9;border-top:1px solid var(--border);}
+.doc-notes-title{font-size:0.52rem;font-weight:700;color:var(--red);text-transform:uppercase;letter-spacing:0.12em;margin-bottom:8px;display:block;}
+.doc-notes-content{font-size:0.65rem;color:#555;line-height:1.6;white-space:pre-wrap;}
+
+/* ──── FOOTER ──── */
+.doc-footer{background:var(--dark);padding:12px 20px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;}
+.doc-footer-note{font-size:0.65rem;color:rgba(255,255,255,0.6);font-style:italic;max-width:300px;line-height:1.5;}
+.doc-footer-terms{font-size:0.62rem;color:#aaa;text-align:right;line-height:1.5;}
+
+/* ──── BANKING SECTION ──── */
+.banking-info{background:#f8f7f5;border-top:1px solid #eee;padding:8px 12px;font-size:0.58rem;color:#555;line-height:1.3;margin-bottom:2px;}
+.banking-info strong{color:#333;}
+
+/* ──── SIGNATURE SECTION ──── */
+.doc-sig{padding:20px;background:var(--white);border-top:1px solid var(--border);display:grid;grid-template-columns:1fr 1fr;gap:20px;}
+.sig-field{height:2px;background:var(--border);margin-bottom:10px;}
+.sig-label{font-size:0.58rem;color:#999;text-transform:uppercase;letter-spacing:0.1em;font-weight:600;}
+
+/* ──── SIGN FORM ──── */
+.sign-wrap{background:var(--white);width:100%;max-width:720px;border-radius:16px;box-shadow:0 4px 20px rgba(0,0,0,0.1);padding:40px;margin-top:16px;border:1px solid #f0f0f0;}
+.sign-title{font-family:'Plus Jakarta Sans',sans-serif;font-size:1.4rem;font-weight:800;color:var(--dark);margin-bottom:8px;}
+.sign-sub{font-size:0.9rem;color:#666;margin-bottom:28px;line-height:1.6;}
+.sign-label{font-size:0.75rem;font-weight:700;color:var(--dark);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:10px;display:block;}
+#signerName{width:100%;padding:14px 16px;border:1.5px solid var(--border);border-radius:10px;font-size:0.95rem;margin-bottom:20px;font-family:'DM Sans',sans-serif;background:var(--white);transition:all 0.2s;}
+#signerName:focus{outline:none;border-color:var(--red);box-shadow:0 0 0 3px var(--red-light);}
+#signerName::placeholder{color:#ccc;}
+#signatureCanvas{width:100%;height:160px;border:2px solid var(--border);border-radius:10px;cursor:crosshair;background:var(--white);display:block;touch-action:none;transition:all 0.2s;}
+#signatureCanvas:focus{outline:none;border-color:var(--red);box-shadow:0 0 0 3px var(--red-light);}
+
+/* ──── BUTTONS ──── */
+.btn-group{display:flex;gap:12px;margin-top:24px;}
+.btn{padding:14px 28px;border-radius:10px;font-family:'Plus Jakarta Sans',sans-serif;font-size:0.9rem;font-weight:700;cursor:pointer;border:none;transition:all 0.2s;text-align:center;flex:1;}
+.btn-orange{background:var(--red);color:#fff;box-shadow:0 4px 12px rgba(230,57,70,0.3);}
+.btn-orange:hover{background:var(--red-dark);transform:translateY(-2px);box-shadow:0 6px 16px rgba(230,57,70,0.4);}
+.btn-orange:disabled{background:#ccc;cursor:not-allowed;transform:none;}
+.btn-ghost{background:transparent;color:var(--dark);border:2px solid var(--border);}
+.btn-ghost:hover{background:var(--white);border-color:var(--dark);}
+#signError{display:none;color:#e74c3c;font-size:0.82rem;margin-top:12px;padding:12px;background:rgba(220,38,38,0.08);border-radius:8px;border-left:3px solid #e74c3c;}
+
+/* ──── BADGES ──── */
+.signed-badge{background:rgba(46,204,113,0.1);border:1.5px solid rgba(46,204,113,0.3);border-radius:10px;padding:16px 20px;display:flex;align-items:center;gap:12px;font-size:0.9rem;color:#16a34a;font-weight:700;}
+
+/* ──── ERROR & LOADING ──── */
+.error-wrap{background:var(--white);width:100%;max-width:720px;border-radius:16px;padding:60px 40px;text-align:center;box-shadow:0 4px 20px rgba(0,0,0,0.1);border:1px solid #f0f0f0;}
+.spinner{width:40px;height:40px;border:3px solid #f0f0f0;border-top-color:var(--red);border-radius:50%;animation:spin 0.8s linear infinite;margin:0 auto 20px;}
+@keyframes spin{to{transform:rotate(360deg);}}
+#loadingWrap{font-size:0.9rem;color:#999;}
+
+/* ──── MOBILE ──── */
+@media(max-width:680px){
+  body{padding:12px 10px 50px;}
+  .doc-wrap{border-radius:10px;box-shadow:0 2px 10px rgba(0,0,0,0.06);}
+  .doc-header{padding:12px 10px;gap:6px;flex-direction:row;justify-content:space-between;align-items:flex-start;}
+  .doc-header > div:first-child{flex-shrink:0;display:flex;align-items:center;gap:8px;}
+  .doc-header > div:last-child{flex-shrink:0;text-align:right;}
+  .doc-info-band{grid-template-columns:1fr;}
+  .doc-from{border-right:none;border-bottom:none;}
+  .doc-from,.doc-for{padding:10px 14px;}
+  .doc-quote-number{font-size:1rem;}
+  .doc-scope{padding:10px 14px;font-size:0.6rem;}
+  .doc-table{font-size:0.6rem;}
+  .doc-table th,.doc-table td{padding:8px 10px;}
+  .doc-table th:nth-child(4),.doc-table td:nth-child(4){padding-right:10px;}
+  .doc-totals{padding:14px;gap:4px;}
+  .doc-total-row,.doc-total-due{gap:16px;font-size:0.6rem;}
+  .doc-footer{padding:10px 14px;flex-direction:column;text-align:center;gap:6px;}
+  .doc-footer-note,.doc-footer-terms{max-width:100%;text-align:center;}
+  .doc-sig{padding:12px 14px;grid-template-columns:1fr;gap:10px;}
+  .sign-wrap{padding:16px;margin-top:10px;}
+  .sign-title{font-size:0.85rem;}
+  .sign-sub{font-size:0.65rem;margin-bottom:12px;}
+  .btn-group{flex-direction:column;gap:8px;}
+  .btn{padding:10px 16px;font-size:0.7rem;}
+  #signatureCanvas{height:100px;}
+}
+</style>
+</head>
+<body>
+
+<div id="loadingWrap" style="display:flex;flex-direction:column;align-items:center;padding:60px 0;">
+  <div class="spinner"></div>
+  <div style="font-size:0.82rem;color:#888;margin-top:4px;">Loading quote...</div>
+</div>
+
+<div id="quoteWrap" style="display:none;width:100%;max-width:680px;"></div>
+<div id="signWrap" style="display:none;width:100%;max-width:680px;margin-top:12px;"></div>
+<div id="errorWrap" class="error-wrap" style="display:none;"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script type="text/javascript">
+const { createClient } = supabase;
+const sb = createClient('https://blfhvkbjfhhjsnobvfct.supabase.co','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJsZmh2a2JqZmhoanNub2J2ZmN0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAyNjA4MjIsImV4cCI6MjA5NTgzNjgyMn0.w0CUm6N52U8OIYWqrpu84QfeFUm1TYpcpTVKCxCl-YM');
+
+let quote=null, profile=null, isDrawing=false, lastX=0, lastY=0, canvas, ctx;
+
+function hideLogo(el){ el.style.display='none'; }
+function esc(s){ return s?String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'):''; }
+function fmt(n){ return 'R '+(parseFloat(n)||0).toLocaleString('en-ZA',{minimumFractionDigits:2,maximumFractionDigits:2}); }
+function showError(msg){ document.getElementById('loadingWrap').style.display='none'; const e=document.getElementById('errorWrap'); e.style.display='block'; e.innerHTML='<div style="font-size:2rem;margin-bottom:14px;">&#128533;</div><h3 style="color:#111;margin-bottom:8px;">'+msg+'</h3><p style="color:#aaa;font-size:0.8rem;">If this is an error, please contact the sender.</p>'; }
+
+async function loadQuote() {
+  const params = new URLSearchParams(window.location.search);
+  const qid = params.get('id');
+  if (!qid) { showError('No quote ID provided.'); return; }
+  try {
+    const { data, error } = await sb.from('quotes').select('*').eq('id', qid).single();
+    if (error || !data) { showError('Quote not found. The link may be incorrect or expired.'); return; }
+    quote = data;
+    if (quote.user_id) {
+      const { data: pd } = await sb.from('profiles').select('*').eq('id', quote.user_id).single();
+      profile = pd || {};
+    } else { profile = {}; }
+    if (!quote.viewed_at) {
+      await sb.from('quotes').update({ viewed_at: new Date().toISOString() }).eq('id', qid);
+    }
+    document.getElementById('loadingWrap').style.display = 'none';
+    renderQuote();
+  } catch(e) {
+    console.error('loadQuote error:', e);
+    showError('Could not load quote. Please try again.');
+  }
+}
+
+function renderQuote() {
+  const signed = !!quote.signed_by;
+  const isInvoice = quote.id && quote.id.toUpperCase().startsWith('INV-');
+  const docLabel = isInvoice ? 'TAX INVOICE' : 'QUOTATION';
+  const items = (quote.items||[]).map(item => {
+    const sub = ((parseFloat(item.qty)||1)*(parseFloat(item.price)||0));
+    return '<tr><td><div style="font-weight:600;">' + esc(item.name||'') + '</div>' +
+      (item.desc?'<div class="doc-item-desc">'+esc(item.desc)+'</div>':'') + '</td>' +
+      '<td>' + (item.qty||1) + '</td>' +
+      '<td>' + fmt(item.price||0) + '</td>' +
+      '<td><strong>' + fmt(sub) + '</strong></td></tr>';
+  }).join('');
+  const subtotal = parseFloat(quote.subtotal)||0;
+  const vat = parseFloat(quote.vat)||0;
+  const total = parseFloat(quote.amount)||0;
+  const logoHtml = (profile&&profile.logo) ? '<img src="'+profile.logo+'" class="doc-logo" alt="logo" onerror="hideLogo(this)">' : '';
+  const depositLine = quote.deposit ? 'Deposit: '+quote.deposit+'% required on acceptance' : 'Payment: EFT preferred';
+  const qwrap = document.getElementById('quoteWrap');
+  qwrap.style.display = 'block';
+  qwrap.innerHTML =
+    '<div class="doc-wrap">' +
+    '<div class="doc-header">' +
+      '<div style="display:flex;align-items:center;gap:12px;">' +
+        (logoHtml?logoHtml+'<div>':'<div>') +
+        '<div class="doc-company">' + esc(profile.company||'') + '</div>' +
+        '<div class="doc-tagline">' + esc(profile.industry||'') + '</div>' +
+        '<div class="doc-contact">' +
+          (profile.phone?'Tel: '+esc(profile.phone)+'<br>':'') +
+          (profile.email?'Email: '+esc(profile.email)+'<br>':'') +
+          (profile.vat_number?'VAT No: '+esc(profile.vat_number):'') +
+        '</div></div>' +
+      '</div>' +
+      '<div>' +
+        '<div class="doc-quote-label">' + docLabel + '</div>' +
+        '<div class="doc-quote-number">' + esc(quote.id) + '</div>' +
+        '<div class="doc-quote-date">Date: ' + new Date(quote.date||Date.now()).toLocaleDateString('en-ZA',{day:'numeric',month:'long',year:'numeric'}) + '</div>' +
+        '<div class="doc-quote-valid">Valid for ' + (quote.valid_days||14) + ' days</div>' +
+      '</div>' +
+    '</div>' +
+    '<div class="doc-info-band">' +
+      '<div class="doc-from"><div class="doc-info-label">From</div>' +
+        '<div class="doc-client-name">' + esc(profile.company||'') + '</div>' +
+        '<div class="doc-client-detail">' + esc(profile.email||'') + '<br>' + esc(profile.phone||'') + '</div>' +
+      '</div>' +
+      '<div class="doc-for"><div class="doc-info-label">Quoted For</div>' +
+        '<div class="doc-client-name">' + esc(quote.client||'') + '</div>' +
+        '<div class="doc-client-detail">' + esc(quote.contact||'') + '<br>' + esc(quote.address||'') + '</div>' +
+      '</div>' +
+    '</div>' +
+    (quote.scope?'<div class="doc-scope">'+esc(quote.scope)+'</div>':'') +
+    '<table class="doc-table"><thead><tr><th>Description</th><th>Qty</th><th>Unit Price</th><th>Amount</th></tr></thead><tbody>' + items + '</tbody></table>' +
+    '<div class="doc-totals">' +
+      '<div class="doc-total-row"><span>Subtotal</span><span>' + fmt(subtotal) + '</span></div>' +
+      (vat>0?'<div class="doc-total-row"><span>VAT @ 15%</span><span>' + fmt(vat) + '</span></div>':'') +
+      '<div style="width:180px;height:1px;background:#1a1a1a;margin:4px 0;"></div>' +
+      '<div class="doc-total-due"><span>Total Due</span><span>' + fmt(total) + '</span></div>' +
+    '</div>' +
+    (quote.notes?'<div style="padding:10px 16px;background:#faf9f7;border-top:1px solid #eee;border-left:4px solid #E63946;"><div style="font-size:0.52rem;font-weight:700;color:#E63946;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:4px;">Notes & Terms</div><div style="font-size:0.68rem;color:#444;line-height:1.6;white-space:pre-wrap;">'+esc(quote.notes)+'</div></div>':'') +
+    (profile?.bank_name ? '<div style="padding:10px 16px;background:#f8f7f5;border-top:1px solid #eee;"><div style="font-size:0.52rem;font-weight:700;color:#E63946;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:6px;">Banking Details</div><div style="font-size:0.65rem;color:#555;line-height:1.5;"><strong>Bank:</strong> '+esc(profile.bank_name)+(profile.account_holder?'<br><strong>Account:</strong> '+esc(profile.account_holder):'')+(profile.account_number?'<br><strong>Number:</strong> '+esc(profile.account_number):'')+(profile.branch_code?'<br><strong>Branch:</strong> '+esc(profile.branch_code):'')+'</div></div>' : '') +
+    '<div class="doc-footer">' +
+      '<div class="doc-footer-note">Thank you for the opportunity to quote.</div>' +
+      '<div class="doc-footer-terms">' + depositLine + '<br>Balance due on completion</div>' +
+    '</div>' +
+    (signed?'<div class="doc-sig"><div><div class="sig-field"></div><div class="sig-label">Client Signature — '+esc(quote.signed_by)+'</div></div><div><div class="sig-field"></div><div class="sig-label">Authorised Signatory</div></div></div>':'') +
+    '</div>';
+  renderSignForm(signed, isInvoice);
+}
+
+function renderSignForm(signed, isInvoice) {
+  const sw = document.getElementById('signWrap');
+  sw.style.display = 'block';
+  if (signed) {
+    sw.innerHTML = '<div class="doc-wrap" style="padding:18px 20px;"><div class="signed-badge">&#10003;&nbsp; Signed by <strong>'+esc(quote.signed_by)+'</strong>'+(quote.signed_at?' on '+new Date(quote.signed_at).toLocaleDateString('en-ZA'):'')+' </div></div>';
+    return;
+  }
+  if (isInvoice) {
+    sw.innerHTML = '<div class="doc-wrap" style="padding:18px 20px;text-align:center;"><div style="color:#888;font-size:0.8rem;">Invoice reference: '+esc(quote.id)+'</div></div>';
+    return;
+  }
+  sw.innerHTML =
+    '<div class="doc-wrap" style="padding:20px;">' +
+    '<div class="sign-title">Accept & Sign Quote</div>' +
+    '<div class="sign-sub">By signing you agree to the terms and pricing outlined above.</div>' +
+    '<div class="sign-label">Your Full Name</div>' +
+    '<input type="text" id="signerName" placeholder="Type your full name here">' +
+    '<div class="sign-label" style="margin-bottom:5px;">Signature</div>' +
+    '<canvas id="signatureCanvas"></canvas>' +
+    '<div style="display:flex;gap:10px;margin-top:12px;">' +
+      '<button class="btn btn-orange" onclick="acceptQuote()" id="acceptBtn">Accept and Sign Quote</button>' +
+      '<button class="btn btn-ghost" onclick="clearSig()">Clear</button>' +
+    '</div>' +
+    '<div id="signError" style="display:none;color:#e74c3c;font-size:0.76rem;margin-top:8px;"></div>' +
+    '</div>';
+  setTimeout(initCanvas, 100);
+}
+
+function initCanvas() {
+  canvas = document.getElementById('signatureCanvas');
+  if (!canvas) return;
+  ctx = canvas.getContext('2d');
+  canvas.width = canvas.offsetWidth;
+  canvas.height = 140;
+  ctx.strokeStyle = '#1a1a1a';
+  ctx.lineWidth = 2;
+  ctx.lineCap = 'round';
+  function getPos(e){ const r=canvas.getBoundingClientRect(); const t=e.touches?e.touches[0]:e; return {x:(t.clientX-r.left)*(canvas.width/r.width),y:(t.clientY-r.top)*(canvas.height/r.height)}; }
+  canvas.addEventListener('mousedown',e=>{isDrawing=true;const p=getPos(e);lastX=p.x;lastY=p.y;});
+  canvas.addEventListener('mousemove',e=>{if(!isDrawing)return;const p=getPos(e);ctx.beginPath();ctx.moveTo(lastX,lastY);ctx.lineTo(p.x,p.y);ctx.stroke();lastX=p.x;lastY=p.y;});
+  canvas.addEventListener('mouseup',()=>isDrawing=false);
+  canvas.addEventListener('touchstart',e=>{e.preventDefault();isDrawing=true;const p=getPos(e);lastX=p.x;lastY=p.y;},{passive:false});
+  canvas.addEventListener('touchmove',e=>{e.preventDefault();if(!isDrawing)return;const p=getPos(e);ctx.beginPath();ctx.moveTo(lastX,lastY);ctx.lineTo(p.x,p.y);ctx.stroke();lastX=p.x;lastY=p.y;},{passive:false});
+  canvas.addEventListener('touchend',()=>isDrawing=false);
+}
+
+function clearSig(){ if(ctx&&canvas) ctx.clearRect(0,0,canvas.width,canvas.height); }
+
+async function acceptQuote() {
+  const name = document.getElementById('signerName')?.value.trim();
+  const errEl = document.getElementById('signError');
+  const btn = document.getElementById('acceptBtn');
+  if (!name) { errEl.style.display='block'; errEl.textContent='Please enter your full name.'; return; }
+  const sigData = canvas ? canvas.toDataURL() : null;
+  errEl.style.display = 'none';
+  btn.textContent = 'Signing...';
+  btn.disabled = true;
+  try {
+    const { error } = await sb.from('quotes').update({ status:'signed', signed_by:name, signed_at:new Date().toISOString(), signature:sigData }).eq('id',quote.id);
+    if (error) throw new Error(error.message||'Please try again.');
+    quote.signed_by = name; quote.status = 'signed';
+    renderQuote();
+  } catch(e) {
+    errEl.style.display='block'; errEl.textContent='Error: '+(e.message||'Something went wrong.');
+    btn.textContent='Accept and Sign Quote'; btn.disabled=false;
+  }
+}
+
+loadQuote();
+</script>
+</body>
+</html>

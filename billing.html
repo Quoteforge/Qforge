@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QForge - Choose Your Plan</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/blueimp-md5/2.19.0/js/md5.min.js"></script>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+  background:#111113; color:#ffffff;
+  font-family:'DM Sans',sans-serif; font-weight:300;
+  min-height:100vh; padding:40px 20px;
+}
+.logo { display:flex; align-items:center; justify-content:center; gap:8px; font-weight:800; font-size:1.4rem; letter-spacing:-0.5px; margin-bottom:8px; font-family:'Plus Jakarta Sans',sans-serif; }
+.logo-box { background:#E63946; width:40px; height:40px; border-radius:6px; display:flex; align-items:center; justify-content:center; font-size:1.3rem; color:#fff; font-family:'Plus Jakarta Sans',sans-serif; font-weight:900; }
+.logo span { color:#E63946; }
+.page-title { text-align:center; font-family:'Plus Jakarta Sans',sans-serif; font-size:2rem; font-weight:800; letter-spacing:-1px; margin:24px 0 8px; }
+.page-sub { text-align:center; color:#888; font-size:0.9rem; margin-bottom:40px; }
+.plans { display:grid; grid-template-columns:repeat(3,1fr); gap:20px; max-width:900px; margin:0 auto 40px; }
+.plan-card {
+  background:#1c1c1f; border:1px solid rgba(255,255,255,0.1);
+  border-radius:14px; padding:32px 24px; position:relative;
+  transition:border-color 0.2s;
+}
+.plan-card:hover { border-color:rgba(255,92,26,0.4); }
+.plan-card.popular {
+  border-color:#E63946;
+  background:linear-gradient(160deg,rgba(255,92,26,0.08),#1c1c1f);
+}
+.popular-badge {
+  position:absolute; top:-12px; left:50%; transform:translateX(-50%);
+  background:#E63946; color:#fff; font-size:0.7rem; font-weight:700;
+  letter-spacing:0.08em; text-transform:uppercase;
+  padding:4px 14px; border-radius:100px; white-space:nowrap;
+}
+.plan-name { font-family:'Plus Jakarta Sans',sans-serif; font-size:0.78rem; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:#E63946; margin-bottom:10px; }
+.plan-price { font-family:'Space Grotesk',sans-serif; font-size:2.6rem; font-weight:700; letter-spacing:-1px; margin-bottom:4px; }
+.plan-price sup { font-size:1.1rem; vertical-align:super; }
+.plan-period { font-size:0.78rem; color:#666; margin-bottom:20px; }
+.plan-divider { border:none; border-top:1px solid rgba(255,255,255,0.08); margin-bottom:20px; }
+.plan-features { list-style:none; margin-bottom:28px; display:flex; flex-direction:column; gap:10px; }
+.plan-features li { display:flex; align-items:flex-start; gap:8px; font-size:0.85rem; color:#bbb; }
+.plan-features li::before { content:'v'; color:#E63946; font-weight:700; flex-shrink:0; margin-top:1px; }
+.btn-plan {
+  display:block; text-align:center; padding:13px;
+  border-radius:8px; font-family:'Plus Jakarta Sans',sans-serif;
+  font-weight:700; font-size:0.88rem; cursor:pointer;
+  border:none; width:100%; transition:all 0.18s;
+}
+.btn-solid { background:#E63946; color:#fff; }
+.btn-solid:hover { background:#e04d10; transform:translateY(-1px); }
+.btn-outline { background:transparent; color:#fff; border:1px solid rgba(255,255,255,0.2); }
+.btn-outline:hover { border-color:#E63946; color:#E63946; }
+.guarantee { text-align:center; font-size:0.78rem; color:#555; margin-bottom:32px; }
+.faq { max-width:600px; margin:0 auto; }
+.faq h3 { font-family:'Plus Jakarta Sans',sans-serif; font-size:1rem; font-weight:800; margin-bottom:20px; text-align:center; }
+.faq-item { border-bottom:1px solid rgba(255,255,255,0.07); padding:14px 0; }
+.faq-q { font-size:0.88rem; font-weight:500; color:#ddd; margin-bottom:6px; }
+.faq-a { font-size:0.82rem; color:#888; line-height:1.6; }
+/* PayFast form hidden */
+#payfastForm { display:none; }
+@media(max-width:700px) {
+  .plans { grid-template-columns:1fr; }
+  .plan-card.popular { margin-top:16px; }
+}
+</style>
+</head>
+<body>
+
+<div class="logo"><div class="logo-box">Q</div><span>Forge</span></div>
+<div class="page-title">Choose Your Plan</div>
+<div class="page-sub">14-day free trial on all plans. No credit card needed to start.</div>
+
+<div class="plans">
+
+  <!-- STARTER -->
+  <div class="plan-card">
+    <div class="plan-name">Starter</div>
+    <div class="plan-price"><sup>R</sup>99</div>
+    <div class="plan-period">per month</div>
+    <hr class="plan-divider">
+    <ul class="plan-features">
+      <li>10 quotes per month</li>
+      <li>AI quote writer</li>
+      <li>PDF download</li>
+      <li>Digital e-signature</li>
+      <li>WhatsApp send</li>
+      <li>1 user</li>
+      <li>Email support</li>
+    </ul>
+    <button class="btn-plan btn-outline" onclick="subscribe('starter', 99)">Get Started</button>
+  </div>
+
+  <!-- GROWTH -->
+  <div class="plan-card popular">
+    <div class="popular-badge">Most Popular</div>
+    <div class="plan-name">Growth</div>
+    <div class="plan-price"><sup>R</sup>299</div>
+    <div class="plan-period">per month</div>
+    <hr class="plan-divider">
+    <ul class="plan-features">
+      <li>Unlimited quotes</li>
+      <li>AI quote writer</li>
+      <li>Quote to invoice</li>
+      <li>Digital e-signature</li>
+      <li>Quote tracking &amp; viewed alerts</li>
+      <li>WhatsApp follow-ups</li>
+      <li>Custom branding &amp; logo</li>
+      <li>Product library</li>
+      <li>Client management</li>
+      <li>Expense tracker</li>
+      <li>VAT auto-calculation</li>
+      <li>WhatsApp support</li>
+    </ul>
+    <button class="btn-plan btn-solid" onclick="subscribe('growth', 299)">Get Started</button>
+  </div>
+
+  <!-- AGENCY -->
+  <div class="plan-card">
+    <div class="plan-name">Agency</div>
+    <div class="plan-price"><sup>R</sup>599</div>
+    <div class="plan-period">per month</div>
+    <hr class="plan-divider">
+    <ul class="plan-features">
+      <li>Everything in Growth</li>
+      <li>Multiple users</li>
+      <li>White label branding</li>
+      <li>Priority support</li>
+      <li>Advanced analytics</li>
+      <li>Bulk quote export</li>
+      <li>Dedicated account manager</li>
+    </ul>
+    <button class="btn-plan btn-outline" onclick="subscribe('agency', 599)">Get Started</button>
+  </div>
+
+</div>
+
+<div class="guarantee">
+  14-day free trial on all plans. Cancel anytime. Powered by PayFast - South Africa's trusted payment gateway.
+</div>
+
+<!-- PayFast subscription form (hidden, submitted via JS) -->
+<form id="payfastForm" action="https://www.payfast.co.za/eng/process" method="post" style="display:none;">
+  <input type="hidden" name="return_url" id="pf_return" value="https://coruscating-kleicha-3452bb.netlify.app?payment=success">
+  <input type="hidden" name="cancel_url" id="pf_cancel" value="https://coruscating-kleicha-3452bb.netlify.app/billing.html">
+  <input type="hidden" name="merchant_id" id="pf_merchant_id" value="11853484">
+  <input type="hidden" name="merchant_key" id="pf_merchant_key" value="iqfavcdl7gn8j">
+  <input type="hidden" name="return_url" value="https://coruscating-kleicha-3452bb.netlify.app?payment=success">
+  <input type="hidden" name="cancel_url" value="https://coruscating-kleicha-3452bb.netlify.app/billing.html">
+  <input type="hidden" name="notify_url" value="https://coruscating-kleicha-3452bb.netlify.app/payment-notify">
+  <input type="hidden" name="name_first" id="pf_name_first" value="">
+  <input type="hidden" name="name_last" id="pf_name_last" value="">
+  <input type="hidden" name="email_address" id="pf_email" value="">
+  <input type="hidden" name="m_payment_id" id="pf_payment_id" value="">
+  <input type="hidden" name="amount" id="pf_amount" value="">
+  <input type="hidden" name="item_name" id="pf_item_name" value="">
+  <input type="hidden" name="item_description" id="pf_item_desc" value="">
+  <input type="hidden" name="subscription_type" value="1">
+  <input type="hidden" name="billing_date" id="pf_billing_date" value="">
+  <input type="hidden" name="recurring_amount" id="pf_recurring" value="">
+  <input type="hidden" name="frequency" value="3">
+  <input type="hidden" name="cycles" value="0">
+  <input type="hidden" name="signature" id="pf_signature" value="">
+</form>
+
+<div class="faq">
+  <h3>Common Questions</h3>
+  <div class="faq-item">
+    <div class="faq-q">Do I need a credit card for the free trial?</div>
+    <div class="faq-a">No. Start your 14-day free trial with just your email address. No payment details needed until you decide to continue.</div>
+  </div>
+  <div class="faq-item">
+    <div class="faq-q">How does billing work?</div>
+    <div class="faq-a">After your free trial, you are billed monthly via PayFast. You can pay with credit card, debit card, or EFT. Completely South African.</div>
+  </div>
+  <div class="faq-item">
+    <div class="faq-q">Can I cancel anytime?</div>
+    <div class="faq-a">Yes. Cancel anytime from your account settings. No penalties, no questions asked.</div>
+  </div>
+  <div class="faq-item">
+    <div class="faq-q">Can I change my plan?</div>
+    <div class="faq-a">Yes. Upgrade or downgrade at any time. Changes take effect on your next billing date.</div>
+  </div>
+</div>
+
+<script>
+const { createClient } = supabase;
+const sb = createClient(
+  'https://blfhvkbjfhhjsnobvfct.supabase.co',
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJsZmh2a2JqZmhoanNub2J2ZmN0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAyNjA4MjIsImV4cCI6MjA5NTgzNjgyMn0.w0CUm6N52U8OIYWqrpu84QfeFUm1TYpcpTVKCxCl-YM'
+);
+
+async function subscribe(plan, amount) {
+  let firstName = 'User', lastName = '', email = '';
+  try {
+    const { data: { session } } = await sb.auth.getSession();
+    if (session?.user) {
+      const { data: profile } = await sb.from('profiles').select('*').eq('id', session.user.id).single();
+      firstName = (profile?.first_name || session.user.email.split('@')[0] || 'User').replace(/[^a-zA-Z]/g,'').substring(0,50) || 'User';
+      lastName = (profile?.last_name || '').replace(/[^a-zA-Z ]/g,'').substring(0,50);
+      email = session.user.email;
+    }
+  } catch(e) {}
+
+  const planNames = { starter:'QForge Starter Plan', growth:'QForge Growth Plan', agency:'QForge Agency Plan' };
+  const paymentId = ('QF' + plan.toUpperCase() + Date.now()).replace(/[^a-zA-Z0-9]/g,'').substring(0,40);
+  const cleanAmount = parseFloat(amount).toFixed(2);
+  const itemName = (planNames[plan] || 'QForge Plan').replace(/[^a-zA-Z0-9 ]/g,'');
+
+  // pfEncode: trim then PHP urlencode
+  function pfEncode(val) {
+    return encodeURIComponent(String(val).trim()).replace(/%20/g,'+');
+  }
+
+  // SIMPLE payment - no subscription fields (avoids subscription validation issues)
+  // Fields in exact PayFast order
+  const fields = [];
+  fields.push(['merchant_id', '11853484']);
+  fields.push(['merchant_key', 'iqfavcdl7gn8j']);
+  fields.push(['return_url', 'https://coruscating-kleicha-3452bb.netlify.app?payment=success&plan=' + plan]);
+  fields.push(['cancel_url', 'https://coruscating-kleicha-3452bb.netlify.app/billing.html']);
+  if (firstName) fields.push(['name_first', firstName]);
+  if (lastName) fields.push(['name_last', lastName]);
+  if (email) fields.push(['email_address', email]);
+  fields.push(['m_payment_id', paymentId]);
+  fields.push(['amount', cleanAmount]);
+  fields.push(['item_name', itemName]);
+  // Subscription fields - charge monthly
+  fields.push(['subscription_type', '1']);
+  fields.push(['billing_date', new Date().toISOString().split('T')[0]]);
+  fields.push(['recurring_amount', cleanAmount]);
+  fields.push(['frequency', '3']);
+  fields.push(['cycles', '0']);
+
+  // Build signature
+  const parts = fields.map(([k,v]) => k + '=' + pfEncode(v));
+  const sigStr = parts.join('&') + '&passphrase=' + pfEncode('Quoteforge2026');
+  const signature = md5(sigStr);
+
+  console.log('SigStr:', sigStr);
+  console.log('Sig:', signature);
+
+  // Build and submit form dynamically
+  const form = document.createElement('form');
+  form.method = 'POST';
+  form.action = 'https://www.payfast.co.za/eng/process';
+  form.style.display = 'none';
+
+  fields.forEach(([k,v]) => {
+    const input = document.createElement('input');
+    input.type = 'hidden';
+    input.name = k;
+    input.value = v;
+    form.appendChild(input);
+  });
+
+  // Add signature
+  const sigInput = document.createElement('input');
+  sigInput.type = 'hidden';
+  sigInput.name = 'signature';
+  sigInput.value = signature;
+  form.appendChild(sigInput);
+
+  document.body.appendChild(form);
+  form.submit();
+}
+</script>
+</body>
+</html>
