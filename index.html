@@ -1680,10 +1680,6 @@ h1, h2, h3 {
 
 <div id="authScreen" class="screen">
   <div class="auth-left">
-    <div class="auth-brand">
-      <div class="auth-logo">Quote<span>Forge</span></div>
-      <div class="auth-tagline">Professional quotes. Faster deals. Built for SA.</div>
-    </div>
     <div class="auth-features">
       <div class="auth-feature">
         <div class="auth-feature-icon">⚡</div>
@@ -1856,7 +1852,7 @@ h1, h2, h3 {
         <span class="icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg></span> Dashboard
       </button>
       <button class="sidebar-link" id="nav-quotes" onclick="goTo('quotes')">
-        <span class="icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg></span> My Quotes <span id="quotesNotificationBadge" style="display:none;background:#E63946;color:#fff;border-radius:50%;width:20px;height:20px;font-size:0.7rem;display:flex;align-items:center;justify-content:center;font-weight:700;margin-left:6px;">0</span>
+        <span class="icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg></span> My Quotes
       </button>
       <button class="sidebar-link" id="nav-new" onclick="goTo('builder')">
         <span class="icon">➕</span> New Quote
@@ -2494,7 +2490,7 @@ function renderDashboard() {
   const signed = quotes.filter(q => q.status === 'invoice' || q.status === 'invoiced' || q.status === 'paid').length;
   const revenue = quotes.filter(q => q.status === 'invoice' || q.status === 'invoiced' || q.status === 'paid').reduce((s,q)=>s+(q.amount||0),0);
   const pending = quotes.filter(q => q.status === 'sent' || q.status === 'viewed').length;
-  const recent = [...quotes].sort((a,b)=>new Date(b.date||0)-new Date(a.date||0)).slice(0,5);
+  const recent = [...quotes].sort((a,b)=>new Date(b.date||0)-new Date(a.date||0)).slice(0,3);
 
   return `
   <div class="page-header">
@@ -2544,7 +2540,7 @@ function renderDashboard() {
 
 // Render recently accepted/signed quotes
 function renderRecentAcceptances() {
-  const accepted = quotes.filter(q => q.status === 'invoice' || q.status === 'invoiced' || q.status === 'paid').sort((a,b)=>new Date(b.date||0)-new Date(a.date||0)).slice(0,5);
+  const accepted = quotes.filter(q => q.status === 'invoice' || q.status === 'invoiced' || q.status === 'paid').sort((a,b)=>new Date(b.date||0)-new Date(a.date||0)).slice(0,3);
   if (accepted.length === 0) return '<div style="padding:16px;background:#faf9f7;border-radius:8px;text-align:center;color:var(--muted);font-size:0.85rem;">No recent acceptances yet</div>';
   
   return `<div style="display:flex;flex-direction:column;gap:8px;">
@@ -2921,7 +2917,7 @@ function renderBuilder() {
         <div class="input-group"><label>VAT</label>
           <select id="b_vat" onchange="updateBuilderPreview()">
             <option value="yes">VAT Registered - add 15%</option>
-            <option value="no">Not VAT Registered</option>
+            <option value="no" selected>Not VAT Registered</option>
           </select></div>
 
         <!-- DEPOSIT SLIDER -->
@@ -6079,7 +6075,7 @@ function exportExpensesCSV(period) {
 // ══════════════════════════════════════
 function renderPandL() {
   const period = document.getElementById('pl_period')?.value || 'monthly';
-  const paidInvoices = quotes.filter(q => q.status === 'paid');
+  const paidInvoices = quotes.filter(q => q.status === 'invoice' || q.status === 'invoiced' || q.status === 'paid');
   const allExpenses = (expenses && expenses.length) ? expenses : [];
   
   // Get date range based on period
@@ -6185,7 +6181,7 @@ function renderPandL() {
 }
 
 function downloadPandLPDF(period) {
-  const paidInvoices = quotes.filter(q => q.status === 'paid');
+  const paidInvoices = quotes.filter(q => q.status === 'invoice' || q.status === 'invoiced' || q.status === 'paid');
   const allExpenses = (expenses && expenses.length) ? expenses : [];
   
   const now = new Date();
@@ -6279,7 +6275,7 @@ function downloadPandLPDF(period) {
 }
 
 function downloadPandLCSV(period) {
-  const paidInvoices = quotes.filter(q => q.status === 'paid');
+  const paidInvoices = quotes.filter(q => q.status === 'invoice' || q.status === 'invoiced' || q.status === 'paid');
   const allExpenses = (expenses && expenses.length) ? expenses : [];
   
   const now = new Date();
@@ -6409,16 +6405,16 @@ function renderProfile() {
         <button class="btn btn-red" style="color:#fff;" onclick="saveProfile()">Save Changes</button>
       </div>
     </div>
+    <div class="profile-card">
       <div class="plan-badge">Free Trial - 14 days remaining</div>
       <p style="font-size:0.83rem;color:var(--muted);line-height:1.6;margin-bottom:16px;">Upgrade to unlock unlimited quotes, e-signature, proposal tracking, and WhatsApp notifications.</p>
       <button class="btn btn-red" style="color:#fff;" onclick="window.open('https://qforge-eight.vercel.app/billing.html','_blank')">Upgrade to Growth - R699/mo</button>
+      <hr style="margin:16px 0;border:none;border-top:1px solid var(--border);">
+      <h3 style="margin-bottom:12px;">Support</h3>
+      <p style="font-size:0.85rem;color:var(--muted);line-height:1.6;">Need help? Check out our <a href="#" style="color:var(--red);text-decoration:none;">documentation</a> or <a href="mailto:support@qforge.co.za" style="color:var(--red);text-decoration:none;">contact support</a>.</p>
     </div>
-    <div class="profile-card">
-      <h3>Support</h3>
-      <p style="font-size:0.83rem;color:var(--muted);line-height:1.6;margin-bottom:16px;">Need help? Our South African support team is available on WhatsApp during business hours.</p>
-      <button class="btn btn-ghost" style="width:100%;" onclick="showToast('WhatsApp support coming soon!','info')">WhatsApp Support</button>
-    </div>
-  </div>`;
+  </div>
+`;
 }
 
 
@@ -6756,39 +6752,22 @@ function printQuote() {
   doc.setDrawColor(230, 230, 230);
   doc.line(0, y + 28, pageW, y + 28);
 
-  // FROM label
+  // QUOTED FOR label only (remove FROM)
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(6);
   doc.setTextColor(170, 170, 170);
-  doc.text('FROM', margin, y + 6);
+  doc.text('QUOTED FOR', margin, y + 6);
 
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(11);
   doc.setTextColor(...dark);
-  doc.text(company, margin, y + 13);
+  doc.text(clientName, margin, y + 13);
 
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(7.5);
   doc.setTextColor(100, 100, 100);
-  if (currentUser?.email) doc.text(currentUser.email, margin, y + 19);
-  if (currentUser?.phone) doc.text(currentUser.phone, margin, y + 24);
-
-  // QUOTED FOR label
-  doc.setFont('helvetica', 'bold');
-  doc.setFontSize(6);
-  doc.setTextColor(170, 170, 170);
-  doc.text('QUOTED FOR', pageW/2 + 4, y + 6);
-
-  doc.setFont('helvetica', 'bold');
-  doc.setFontSize(11);
-  doc.setTextColor(...dark);
-  doc.text(clientName, pageW/2 + 4, y + 13);
-
-  doc.setFont('helvetica', 'normal');
-  doc.setFontSize(7.5);
-  doc.setTextColor(100, 100, 100);
-  if (clientContact) doc.text(clientContact, pageW/2 + 4, y + 19);
-  if (clientAddress) doc.text(clientAddress, pageW/2 + 4, y + 24);
+  if (clientContact) doc.text(clientContact, margin, y + 19);
+  if (clientAddress) doc.text(clientAddress, margin, y + 24);
 
   y += 32;
 
