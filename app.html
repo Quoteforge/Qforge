@@ -2773,11 +2773,18 @@ async function convertToInvoice(el, id) {
       if (idx > -1) {
         quotes[idx].status = 'converted';
         quotes[idx].converted_to_invoice = invNum; // Track which invoice it became
+        console.log('Updated quote in memory:', quotes[idx]); // Debug
         if (currentUser?.id && currentUser.id !== 'demo') {
-          await sb.from('quotes').update({ 
+          const updateResult = await sb.from('quotes').update({ 
             status: 'converted',
             converted_to_invoice: invNum
           }).eq('id', id);
+          console.log('Quote update result:', updateResult); // Debug
+          if (updateResult.error) {
+            console.error('Error updating quote:', updateResult.error);
+          } else {
+            console.log('Quote marked as converted successfully!');
+          }
         }
       }
 
