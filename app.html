@@ -2387,7 +2387,7 @@ async function loadAndLoginUser(authUser) {
       subtotal: q.subtotal,
       vat: q.vat,
       amount: q.amount,
-      items: q.items || [],
+      items: typeof q.items === 'string' ? JSON.parse(q.items || '[]') : (q.items || []),
       date: q.date,
       valid_days: q.valid_days,
       quote_ref: q.quote_ref || null,
