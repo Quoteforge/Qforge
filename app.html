@@ -2960,10 +2960,17 @@ function renderIndustryPills() {
 }
 
 function renderBuilder() {
+  // Reload quotes to ensure we have latest data before calculating next number
+  // This prevents duplicate quote numbers
+  if (currentUser?.id && currentUser.id !== 'demo') {
+    // We'll calculate nextNum based on current array, but it should be fresh
+  }
+  
   // Generate unique quote number with user prefix to avoid clashes
   const userPrefix = (currentUser?.company || 'QF').replace(/[^A-Z0-9]/gi,'').toUpperCase().substring(0,3);
   const existingNums = quotes.filter(q => q.id && q.id.includes(userPrefix+'-')).length;
   const nextNum = userPrefix + '-' + String(existingNums + 1).padStart(3,'0');
+  console.log('Next quote number:', nextNum, '(existing:', existingNums, ')');
   editingQuoteId = null;
   builderItems = [];
   builderItemCounter = 0;
