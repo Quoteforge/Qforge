@@ -2763,21 +2763,27 @@ async function convertToInvoice(el, id) {
           const result = await sb.from('quotes').insert([invoice]);
           console.log('Full Supabase response:', result);
           
+          let invoiceSaved = false;
           if (result.error) {
             // If it's a duplicate key error, the invoice was actually already saved!
             if (result.error.code === '23505') {
               console.log('✅ Invoice already exists in Supabase (saved from previous attempt)');
-              // Continue - it's fine, invoice is already saved
+              invoiceSaved = true;
             } else {
-              console.error('❌ Invoice save error:', result.error);
-              showToast('Error saving invoice: ' + result.error.message, 'error'); 
-              return;
+              console.error('❌ Invoice save failed:', result.error);
+              showToast('Error: ' + (result.error.message || 'Failed to save invoice'), 'error'); 
+              return; // STOP - don't continue if save failed
             }
-          } else if (!result.data) {
-            console.warn('⚠️ Invoice save returned no data, but no error either');
-          } else {
+          } else if (result.data?.length > 0) {
             console.log('✅ Invoice saved successfully!');
+            invoiceSaved = true;
+          } else {
+            console.error('❌ Invoice save failed - no data returned');
+            showToast('Error: Invoice was not saved properly', 'error');
+            return; // STOP
           }
+          
+          if (!invoiceSaved) return;
         } else {
           showToast('Session expired - please login again', 'error');
           return;
