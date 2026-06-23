@@ -2732,7 +2732,7 @@ async function convertToInvoice(el, id) {
         address: quoteToConvert.address || null,
         email: quoteToConvert.email || null,
         scope: quoteToConvert.scope || null,
-        status: isPaid ? 'paid' : 'invoice',
+        status: 'invoice', // Always start with 'invoice', will update to 'paid' after if needed
         type: 'invoice',
         subtotal: quoteToConvert.subtotal || 0,
         vat: quoteToConvert.vat || 0,
@@ -2788,6 +2788,18 @@ async function convertToInvoice(el, id) {
           }
           
           if (!invoiceSaved) return;
+          
+          // If marked as paid, update the status now
+          if (isPaid) {
+            console.log('Updating invoice status to paid...');
+            const updateResult = await sb.from('quotes').update({ status: 'paid' }).eq('id', invNum);
+            if (updateResult.error) {
+              console.error('Error updating invoice to paid:', updateResult.error);
+            } else {
+              console.log('✅ Invoice marked as paid!');
+              invoice.status = 'paid'; // Update local copy
+            }
+          }
         } else {
           showToast('Session expired - please login again', 'error');
           return;
