@@ -2710,6 +2710,8 @@ async function convertToInvoice(el, id) {
     async () => {
       // Show dialog to ask if paid or pending
       const isPaid = confirm('Click OK if this invoice is PAID. Click Cancel if PENDING PAYMENT.');
+      console.log('User clicked:', isPaid ? 'OK (PAID)' : 'CANCEL (PENDING)');
+      console.log('isPaid value:', isPaid);
       
       // Generate invoice number - strip any prefix and use just the number
       // e.g. ADC-001 -> INV-001, QF-001 -> INV-001
@@ -2721,6 +2723,7 @@ async function convertToInvoice(el, id) {
       const quoteToConvert = quotes.find(x => x.id === id);
       if (!quoteToConvert) return;
       
+      console.log('Creating invoice with status:', isPaid ? 'paid' : 'invoice');
       const invoice = {
         id: invNum,
         user_id: currentUser?.id,
