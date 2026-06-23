@@ -2721,32 +2721,34 @@ async function convertToInvoice(el, id) {
       const invoice = {
         id: invNum,
         user_id: currentUser?.id,
-        client: quoteToConvert.client,
-        contact: quoteToConvert.contact,
-        address: quoteToConvert.address,
-        scope: quoteToConvert.scope,
+        client: quoteToConvert.client || '',
+        contact: quoteToConvert.contact || '',
+        address: quoteToConvert.address || '',
+        email: quoteToConvert.email || '',
+        scope: quoteToConvert.scope || '',
         status: isPaid ? 'paid' : 'invoice',
         type: 'invoice',
-        subtotal: quoteToConvert.subtotal,
-        vat: quoteToConvert.vat,
-        amount: quoteToConvert.amount,
-        items: quoteToConvert.items,
+        subtotal: quoteToConvert.subtotal || 0,
+        vat: quoteToConvert.vat || 0,
+        amount: quoteToConvert.amount || 0,
+        items: quoteToConvert.items ? JSON.stringify(quoteToConvert.items) : JSON.stringify([]),
         date: invDate,
+        due_date: invDate, // Add due_date if needed
         valid_days: 30,
         vat_registered: true,
         quote_ref: quoteToConvert.id,
         updated_at: new Date().toISOString(),
-        // ALWAYS include vehicle details from quote - don't lose them!
-        vehicle_model: quoteToConvert.vehicle_model || null,
-        vehicle_reg_no: quoteToConvert.vehicle_reg_no || null,
-        vehicle_vin: quoteToConvert.vehicle_vin || null,
-        vehicle_engine_no: quoteToConvert.vehicle_engine_no || null,
-        vehicle_engine_type: quoteToConvert.vehicle_engine_type || null,
+        vehicle_model: quoteToConvert.vehicle_model || '',
+        vehicle_reg_no: quoteToConvert.vehicle_reg_no || '',
+        vehicle_vin: quoteToConvert.vehicle_vin || '',
+        vehicle_engine_no: quoteToConvert.vehicle_engine_no || '',
+        vehicle_engine_type: quoteToConvert.vehicle_engine_type || '',
         vehicle_km: quoteToConvert.vehicle_km || null,
-        client_vat: quoteToConvert.client_vat || null,
-        client_reg: quoteToConvert.client_reg || null,
-        deposit: quoteToConvert.deposit || null,
-        notes: quoteToConvert.notes || null
+        client_vat: quoteToConvert.client_vat || '',
+        client_reg: quoteToConvert.client_reg || '',
+        deposit: String(quoteToConvert.deposit || ''), // TEXT field - convert to string
+        notes: quoteToConvert.notes || '',
+        signature: quoteToConvert.signature_data || '' // Use 'signature' not 'signature_data'
       };
 
       // Save to Supabase
