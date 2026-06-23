@@ -3632,7 +3632,14 @@ function renderInvoices() {
 
 function viewInvoice(id) {
   console.log('Viewing invoice:', id);
-  const inv = quotes.find(x => x.id === id);
+  let inv = quotes.find(x => x.id === id);
+  
+  // If not found and id looks like a quote (not INV/DRI), search by quote_ref
+  if (!inv && !id.toUpperCase().startsWith('INV-') && !id.toUpperCase().startsWith('DRI-')) {
+    console.log('Not found by ID, searching by quote_ref...');
+    inv = quotes.find(x => x.quote_ref === id);
+  }
+  
   console.log('Found invoice:', inv);
   if (!inv) { 
     console.error('Invoice not found! Available IDs:', quotes.map(q => q.id));
