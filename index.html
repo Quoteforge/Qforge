@@ -1868,6 +1868,9 @@ h1, h2, h3 {
             <button class="sidebar-link" id="nav-products" onclick="goTo('products')">
         <span class="icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg></span> Products
       </button>
+      <button class="sidebar-link" id="nav-jobcards" onclick="goTo('jobcards')" style="display:none;" title="For mechanics and repair shops">
+        <span class="icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6-3 6 3v6l-6 3-6-3V9z"/><line x1="9" y1="22" x2="9" y2="16"/><line x1="15" y1="22" x2="15" y2="16"/><line x1="9" y1="2" x2="15" y2="2"/></svg></span> Job Cards
+      </button>
       <div class="sidebar-label">Account</div>
       <button class="sidebar-link" id="nav-admin" onclick="goTo('admin')" style="display:none;">
         <span class="icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></span> Admin
@@ -2102,6 +2105,18 @@ const INDUSTRY_TEMPLATES = {
     {key:'contract',   label:'Contract',     t:{name:'Contract Drafting',desc:'Legal contract drafting and review',qty:1,price:3500}},
     {key:'notary',     label:'Notary',       t:{name:'Notarial Services',desc:'Notarisation and attestation',qty:1,price:800}},
     {key:'retainer',   label:'Retainer',     t:{name:'Monthly Retainer',desc:'Monthly legal retainer fee',qty:1,price:5000}},
+    {key:'custom',     label:'+ Custom',     t:{name:'',desc:'',qty:1,price:0}}
+  ],
+  automotive: [
+    {key:'diagnosis',  label:'Diagnosis',    t:{name:'Vehicle Diagnosis',desc:'Full vehicle diagnostic scan',qty:1,price:450}},
+    {key:'labour',     label:'Labour (hr)',  t:{name:'Labour (hourly)',desc:'Skilled mechanic labour',qty:2,price:350}},
+    {key:'oil_change', label:'Oil Change',   t:{name:'Oil and Filter Change',desc:'Oil, filter and fluid top-up',qty:1,price:280}},
+    {key:'brakes',     label:'Brake Service',t:{name:'Brake Pads Replacement',desc:'Front or rear brake pads replacement',qty:1,price:650}},
+    {key:'tyres',      label:'Tyres',        t:{name:'Tyre Replacement',desc:'Standard tyre supply and fit',qty:1,price:850}},
+    {key:'battery',    label:'Battery',      t:{name:'Car Battery',desc:'New car battery supply and installation',qty:1,price:1200}},
+    {key:'filters',    label:'Filters',      t:{name:'Air/Cabin Filter',desc:'Air or cabin filter replacement',qty:1,price:180}},
+    {key:'suspension', label:'Suspension',   t:{name:'Suspension Repair',desc:'Shock, spring or suspension work',qty:1,price:1500}},
+    {key:'parts',      label:'Parts Supply', t:{name:'OEM Parts',desc:'Original equipment manufacturer parts',qty:1,price:0}},
     {key:'custom',     label:'+ Custom',     t:{name:'',desc:'',qty:1,price:0}}
   ]
 };
@@ -2463,7 +2478,7 @@ function showClientDetail(clientName) {
 function goTo(page) {
   currentPage = page;
   updateNotificationBadge();
-  ['dashboard','quotes','builder','invoices','clients','stats','products','profile','admin','expenses'].forEach(p => {
+  ['dashboard','quotes','builder','invoices','clients','stats','products','profile','admin','expenses','jobcards','pandl'].forEach(p => {
     const el = document.getElementById('nav-'+p);
     if (el) el.classList.toggle('active', p===page);
   });
@@ -2480,6 +2495,7 @@ function goTo(page) {
   else if (page==='profile') { mc.innerHTML = renderProfile(); setTimeout(loadNotificationSettings, 50); }
   else if (page==='expenses') { mc.innerHTML = renderExpenses(); }
   else if (page==='pandl') { mc.innerHTML = renderPandL(); }
+  else if (page==='jobcards') { mc.innerHTML = renderJobCards(); }
 }
 
 // ══════════════════════════════════════
@@ -4374,6 +4390,348 @@ function selectPaywallPlan(plan, amount, el) {
   document.getElementById('paywallCta').textContent = 'Subscribe Now - R' + amount.toLocaleString('en-ZA') + '/month';
 }
 
+// ══════════════════════════════════════
+// JOB CARDS SYSTEM (for mechanics & repairs)
+// ══════════════════════════════════════
+function renderJobCards() {
+  if (!jobCards) jobCards = [];
+  
+  const active = jobCards.filter(j => j.status !== 'invoiced' && j.status !== 'completed').length;
+  const completed = jobCards.filter(j => j.status === 'completed' || j.status === 'invoiced').length;
+  
+  return `
+  <div class="page-header">
+    <h2>Job Cards</h2>
+    <button class="btn btn-red" style="color:#fff;" onclick="createNewJobCard()">+ New Job Card</button>
+  </div>
+
+  <div class="stats-row" style="margin-bottom:24px;">
+    <div class="stat-card">
+      <div class="stat-card-label">Active Jobs</div>
+      <div class="stat-card-value stat-orange">${active}</div>
+      <div class="stat-card-sub">In progress</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-card-label">Completed</div>
+      <div class="stat-card-value stat-green">${completed}</div>
+      <div class="stat-card-sub">This month</div>
+    </div>
+  </div>
+
+  <div style="background:#fff;border:1px solid var(--border);border-radius:8px;overflow:hidden;">
+    <div style="padding:16px;border-bottom:1px solid var(--border);">
+      <h3 style="margin:0;font-size:1rem;">Active Job Cards</h3>
+    </div>
+    <div style="overflow-x:auto;">
+      <table style="width:100%;border-collapse:collapse;">
+        <thead>
+          <tr style="background:var(--light);border-bottom:1px solid var(--border);">
+            <th style="padding:12px;text-align:left;font-weight:600;font-size:0.85rem;">Vehicle</th>
+            <th style="padding:12px;text-align:left;font-weight:600;font-size:0.85rem;">Customer</th>
+            <th style="padding:12px;text-align:left;font-weight:600;font-size:0.85rem;">Mechanic</th>
+            <th style="padding:12px;text-align:left;font-weight:600;font-size:0.85rem;">Status</th>
+            <th style="padding:12px;text-align:left;font-weight:600;font-size:0.85rem;">Cost</th>
+            <th style="padding:12px;text-align:center;font-weight:600;font-size:0.85rem;">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${jobCards.filter(j => j.status !== 'invoiced').map(j => `
+            <tr style="border-bottom:1px solid var(--border);">
+              <td style="padding:12px;"><strong>${esc(j.vehicleMake||'')} ${esc(j.vehicleModel||'')}</strong><br><small style="color:var(--muted);">VIN: ${esc(j.vin||'-')}</small></td>
+              <td style="padding:12px;">${esc(j.customerName||'')}</td>
+              <td style="padding:12px;">${esc(j.mechanicName||'Unassigned')}</td>
+              <td style="padding:12px;">
+                <span style="background:${j.status==='completed'?'#4CAF50':'#FF9800'};color:#fff;padding:4px 8px;border-radius:4px;font-size:0.8rem;">
+                  ${j.status==='new'?'New':j.status==='in_progress'?'In Progress':'Completed'}
+                </span>
+              </td>
+              <td style="padding:12px;">R${(j.totalCost||0).toFixed(2)}</td>
+              <td style="padding:12px;text-align:center;">
+                <button class="btn btn-ghost btn-sm" onclick="viewJobCard('${j.id}')">View</button>
+                ${j.status==='completed'?`<button class="btn btn-red btn-sm" style="color:#fff;padding:4px 8px;font-size:0.8rem;" onclick="convertJobCardToInvoice('${j.id}')">Invoice</button>`:''}
+              </td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+      ${jobCards.filter(j => j.status !== 'invoiced').length === 0 ? `
+        <div style="padding:32px;text-align:center;color:var(--muted);">
+          <p>No active job cards. <a href="#" onclick="createNewJobCard();return false;" style="color:var(--red);text-decoration:none;font-weight:600;">Create one now</a></p>
+        </div>
+      ` : ''}
+    </div>
+  </div>
+  `;
+}
+
+function createNewJobCard() {
+  const mc = document.getElementById('mainContent');
+  mc.innerHTML = `
+  <div class="page-header">
+    <h2>New Job Card</h2>
+  </div>
+
+  <div style="background:#fff;border:1px solid var(--border);border-radius:8px;padding:24px;max-width:800px;">
+    <div class="form-row">
+      <div class="input-group">
+        <label>Customer Name *</label>
+        <input type="text" id="jc_customer" placeholder="e.g. John's Panel Beating">
+      </div>
+      <div class="input-group">
+        <label>Phone *</label>
+        <input type="tel" id="jc_phone" placeholder="0821234567">
+      </div>
+    </div>
+
+    <div style="border:2px solid var(--border);border-radius:8px;padding:16px;margin:24px 0;background:var(--light);">
+      <h3 style="margin-top:0;">Vehicle Details</h3>
+      <div class="form-row">
+        <div class="input-group">
+          <label>Make & Model *</label>
+          <input type="text" id="jc_model" placeholder="e.g. Toyota Hilux">
+        </div>
+        <div class="input-group">
+          <label>Reg No *</label>
+          <input type="text" id="jc_reg" placeholder="e.g. GP123ABC">
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="input-group">
+          <label>VIN</label>
+          <input type="text" id="jc_vin" placeholder="Vehicle Identification Number">
+        </div>
+        <div class="input-group">
+          <label>Engine No</label>
+          <input type="text" id="jc_engine" placeholder="Engine number">
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="input-group">
+          <label>Engine Type</label>
+          <input type="text" id="jc_engine_type" placeholder="e.g. 2.8L Diesel">
+        </div>
+        <div class="input-group">
+          <label>Current KM</label>
+          <input type="number" id="jc_km" placeholder="Current mileage">
+        </div>
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="input-group">
+        <label>Mechanic Assigned</label>
+        <input type="text" id="jc_mechanic" placeholder="Your name">
+      </div>
+      <div class="input-group">
+        <label>Work Description *</label>
+        <textarea id="jc_description" placeholder="What work needs to be done?" style="height:100px;"></textarea>
+      </div>
+    </div>
+
+    <div style="display:flex;gap:12px;">
+      <button class="btn btn-red" style="color:#fff;" onclick="saveJobCard()">Create Job Card</button>
+      <button class="btn btn-ghost" onclick="goTo('jobcards')">Cancel</button>
+    </div>
+  </div>
+  `;
+}
+
+function saveJobCard() {
+  const newCard = {
+    id: 'JC-' + Date.now(),
+    customerName: document.getElementById('jc_customer').value,
+    phone: document.getElementById('jc_phone').value,
+    vehicleMake: document.getElementById('jc_model').value.split(' ')[0],
+    vehicleModel: document.getElementById('jc_model').value,
+    reg: document.getElementById('jc_reg').value,
+    vin: document.getElementById('jc_vin').value,
+    engineNo: document.getElementById('jc_engine').value,
+    engineType: document.getElementById('jc_engine_type').value,
+    km: parseInt(document.getElementById('jc_km').value) || 0,
+    mechanicName: document.getElementById('jc_mechanic').value || currentUser.firstName,
+    description: document.getElementById('jc_description').value,
+    status: 'new',
+    expenses: [],
+    totalCost: 0,
+    dateCreated: new Date().toISOString(),
+    createdBy: currentUser.firstName
+  };
+
+  if (!newCard.customerName || !newCard.vehicleModel || !newCard.description) {
+    showToast('Please fill in all required fields', 'error');
+    return;
+  }
+
+  jobCards.push(newCard);
+  showToast('Job card created!', 'success');
+  goTo('jobcards');
+}
+
+function viewJobCard(jobCardId) {
+  const card = jobCards.find(j => j.id === jobCardId);
+  if (!card) return;
+
+  const mc = document.getElementById('mainContent');
+  mc.innerHTML = `
+  <div class="page-header">
+    <div>
+      <h2>${esc(card.vehicleModel)}</h2>
+      <p style="color:var(--muted);margin:4px 0;">Job Card: ${card.id}</p>
+    </div>
+    <div>
+      <button class="btn btn-ghost" onclick="goTo('jobcards')">← Back</button>
+    </div>
+  </div>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;">
+    <div style="background:#fff;border:1px solid var(--border);border-radius:8px;padding:24px;">
+      <h3>Customer & Vehicle</h3>
+      <div style="margin-top:16px;">
+        <p><strong>Customer:</strong> ${esc(card.customerName)}</p>
+        <p><strong>Phone:</strong> ${esc(card.phone)}</p>
+        <p><strong>Vehicle:</strong> ${esc(card.vehicleModel)}</p>
+        <p><strong>Reg No:</strong> ${esc(card.reg)}</p>
+        <p><strong>VIN:</strong> ${esc(card.vin || '-')}</p>
+        <p><strong>Current KM:</strong> ${card.km}</p>
+        <p><strong>Mechanic:</strong> ${esc(card.mechanicName)}</p>
+        <p><strong>Status:</strong> <span style="background:${card.status==='new'?'#2196F3':card.status==='in_progress'?'#FF9800':'#4CAF50'};color:#fff;padding:4px 8px;border-radius:4px;font-size:0.85rem;">
+          ${card.status==='new'?'New':card.status==='in_progress'?'In Progress':'Completed'}
+        </span></p>
+      </div>
+
+      <div style="margin-top:24px;display:flex;gap:8px;flex-wrap:wrap;">
+        <button class="btn btn-ghost" onclick="updateJobCardStatus('${card.id}','in_progress')">Start Work</button>
+        <button class="btn btn-ghost" onclick="updateJobCardStatus('${card.id}','completed')">Complete</button>
+        <button class="btn btn-ghost" onclick="deleteJobCard('${card.id}')">Delete</button>
+      </div>
+    </div>
+
+    <div style="background:#fff;border:1px solid var(--border);border-radius:8px;padding:24px;">
+      <h3>Work Description</h3>
+      <p style="color:var(--muted);margin-top:12px;">${esc(card.description)}</p>
+
+      <h3 style="margin-top:24px;">Expenses & Costs</h3>
+      <div id="expenses-list" style="margin-top:12px;">
+        ${card.expenses.map((exp, idx) => `
+          <div style="background:var(--light);padding:12px;border-radius:6px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;">
+            <div>
+              <strong>${esc(exp.description)}</strong><br>
+              <small style="color:var(--muted);">Qty: ${exp.qty}</small>
+            </div>
+            <div style="text-align:right;">
+              <strong>R${(exp.price * exp.qty).toFixed(2)}</strong>
+              <br>
+              <button class="btn btn-sm btn-ghost" onclick="removeExpense('${card.id}',${idx})" style="padding:2px 6px;font-size:0.75rem;">Remove</button>
+            </div>
+          </div>
+        `).join('')}
+      </div>
+
+      <div style="margin-top:16px;display:flex;gap:8px;">
+        <input type="text" placeholder="Description" id="exp_desc" style="flex:1;padding:8px;border:1px solid var(--border);border-radius:4px;">
+        <input type="number" placeholder="Price" id="exp_price" style="width:80px;padding:8px;border:1px solid var(--border);border-radius:4px;">
+        <input type="number" placeholder="Qty" id="exp_qty" value="1" style="width:60px;padding:8px;border:1px solid var(--border);border-radius:4px;">
+        <button class="btn btn-red btn-sm" style="color:#fff;white-space:nowrap;" onclick="addExpense('${card.id}')">Add</button>
+      </div>
+
+      <div style="background:var(--light);padding:16px;border-radius:8px;margin-top:16px;text-align:right;">
+        <div style="font-size:0.9rem;color:var(--muted);margin-bottom:8px;">Total Cost</div>
+        <div style="font-size:2rem;color:var(--red);font-weight:800;">R${card.totalCost.toFixed(2)}</div>
+      </div>
+
+      ${card.status==='completed'?`
+        <button class="btn btn-red" style="width:100%;color:#fff;margin-top:16px;" onclick="convertJobCardToInvoice('${card.id}')">Convert to Invoice</button>
+      `:''}
+    </div>
+  </div>
+  `;
+}
+
+function addExpense(jobCardId) {
+  const card = jobCards.find(j => j.id === jobCardId);
+  if (!card) return;
+
+  const desc = document.getElementById('exp_desc').value;
+  const price = parseFloat(document.getElementById('exp_price').value) || 0;
+  const qty = parseInt(document.getElementById('exp_qty').value) || 1;
+
+  if (!desc || price <= 0) {
+    showToast('Please enter description and price', 'error');
+    return;
+  }
+
+  card.expenses.push({ description: desc, price, qty });
+  card.totalCost = card.expenses.reduce((sum, exp) => sum + (exp.price * exp.qty), 0);
+
+  viewJobCard(jobCardId);
+  showToast('Expense added', 'success');
+}
+
+function removeExpense(jobCardId, expIdx) {
+  const card = jobCards.find(j => j.id === jobCardId);
+  if (!card) return;
+
+  card.expenses.splice(expIdx, 1);
+  card.totalCost = card.expenses.reduce((sum, exp) => sum + (exp.price * exp.qty), 0);
+
+  viewJobCard(jobCardId);
+  showToast('Expense removed', 'success');
+}
+
+function updateJobCardStatus(jobCardId, status) {
+  const card = jobCards.find(j => j.id === jobCardId);
+  if (!card) return;
+
+  card.status = status;
+  showToast(`Job status updated to ${status}`, 'success');
+  viewJobCard(jobCardId);
+}
+
+function convertJobCardToInvoice(jobCardId) {
+  const card = jobCards.find(j => j.id === jobCardId);
+  if (!card) return;
+
+  // Create an invoice from the job card
+  const newQuote = {
+    id: 'INV-' + Date.now().toString().slice(-6),
+    client: card.customerName,
+    phone: card.phone,
+    address: '',
+    amount: card.totalCost,
+    status: 'invoiced',
+    date: new Date().toISOString(),
+    items: card.expenses.map(exp => ({
+      name: exp.description,
+      desc: exp.description,
+      qty: exp.qty,
+      price: exp.price,
+      code: ''
+    })),
+    notes: `Vehicle: ${card.vehicleModel} (Reg: ${card.reg})\\nVIN: ${card.vin}\\nOriginal Job Card: ${card.id}`,
+    signed_by: null
+  };
+
+  quotes.push(newQuote);
+  card.status = 'invoiced';
+
+  showToast('Invoice created from job card!', 'success');
+  goTo('jobcards');
+}
+
+function deleteJobCard(jobCardId) {
+  if (!confirm('Delete this job card? This cannot be undone.')) return;
+
+  jobCards = jobCards.filter(j => j.id !== jobCardId);
+  showToast('Job card deleted', 'success');
+  goTo('jobcards');
+}
+
+// Job Cards storage
+let jobCards = [];
+
+
 function goToPayment() {
   document.getElementById('paywallOverlay').classList.remove('show');
   window.open('https://qforge-eight.vercel.app/billing.html?plan=' + selectedPaywallPlan.plan, '_blank');
@@ -6133,15 +6491,15 @@ function renderPandL() {
   return `
   <div class="page-header">
     <h2>Profit & Loss</h2>
-    <div style="display:flex;gap:1px;">
-      <select id="pl_period" onchange="goTo('pandl')" style="padding:8px;border:1px solid #ddd;border-radius:6px;font-size:0.9rem;">
-        <option value="daily" ${period==='daily'?'selected':''}>Daily</option>
-        <option value="weekly" ${period==='weekly'?'selected':''}>Weekly</option>
-        <option value="monthly" ${period==='monthly'?'selected':''}>Monthly</option>
-        <option value="yearly" ${period==='yearly'?'selected':''}>Yearly</option>
+    <div style="display:flex;gap:8px;align-items:center;">
+      <select id="pl_period" onchange="goTo('pandl')" style="padding:8px 12px;border:1px solid var(--border);border-radius:6px;font-size:0.9rem;font-family:'Plus Jakarta Sans',sans-serif;background:#fff;cursor:pointer;color:var(--dark);">
+        <option value="daily">Daily</option>
+        <option value="weekly">Weekly</option>
+        <option value="monthly" selected>Monthly</option>
+        <option value="yearly">Yearly</option>
       </select>
-      <button class="btn btn-ghost" onclick="downloadPandLPDF('${period}')">📄 PDF</button>
-      <button class="btn btn-ghost" onclick="downloadPandLCSV('${period}')">📊 CSV</button>
+      <button class="btn btn-red" style="color:#fff;padding:8px 14px;font-size:0.9rem;" onclick="downloadPandLPDF('${period}')">📄 PDF</button>
+      <button class="btn btn-red" style="color:#fff;padding:8px 14px;font-size:0.9rem;" onclick="downloadPandLCSV('${period}')">📊 CSV</button>
     </div>
   </div>
 
@@ -6612,6 +6970,12 @@ async function saveProfile() {
   currentUser.phone = document.getElementById('pf_phone')?.value.trim()||currentUser.phone;
   currentUser.vatNumber = document.getElementById('pf_vat')?.value.trim()||currentUser.vatNumber;
   currentUser.industry = document.getElementById('pf_industry')?.value||currentUser.industry||'other';
+  
+  // Show/hide Job Cards button for automotive industry
+  const jobCardsBtn = document.getElementById('nav-jobcards');
+  if (jobCardsBtn) {
+    jobCardsBtn.style.display = currentUser.industry === 'automotive' ? 'flex' : 'none';
+  }
   
   // Get banking details from inputs
   const bankName = document.getElementById('pf_bank_name')?.value.trim() || '';

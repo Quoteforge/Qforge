@@ -1,0 +1,667 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>QForge | Free Invoice & Quote Software for South African Contractors</title>
+  <meta name="description" content="Professional quotes & invoices in 30 seconds. Used by 500+ electricians & plumbers in South Africa. Free 14-day trial. No credit card needed.">
+  <meta name="keywords" content="invoice software South Africa, quote builder, invoicing app, contractor software, electrician quotes, plumber invoices, free quoting software">
+  <meta name="author" content="QForge">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --red: #E63946;
+      --dark: #111;
+      --light: #f9f9f9;
+      --border: #e0e0e0;
+      --muted: #666;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Plus Jakarta Sans', sans-serif;
+      line-height: 1.6;
+      color: var(--dark);
+      background: #fff;
+    }
+
+    /* Navigation */
+    nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 16px 20px;
+      background: #fff;
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .logo {
+      font-size: 1.4rem;
+      font-weight: 800;
+      color: var(--dark);
+    }
+
+    .logo span {
+      color: var(--red);
+    }
+
+    nav a {
+      color: var(--red);
+      text-decoration: none;
+      font-weight: 600;
+      padding: 8px 16px;
+      border: 2px solid var(--red);
+      border-radius: 6px;
+      transition: all 0.3s;
+    }
+
+    nav a:hover {
+      background: var(--red);
+      color: #fff;
+    }
+
+    /* Hero Section */
+    .hero {
+      padding: 60px 20px;
+      text-align: center;
+      background: linear-gradient(135deg, #fff 0%, #f9f9f9 100%);
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .hero h1 {
+      font-size: clamp(1.8rem, 5vw, 3rem);
+      margin-bottom: 16px;
+      color: var(--dark);
+      line-height: 1.2;
+    }
+
+    .hero h1 span {
+      color: var(--red);
+    }
+
+    .hero p {
+      font-size: 1.1rem;
+      color: var(--muted);
+      margin-bottom: 32px;
+      max-width: 600px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .cta-button {
+      display: inline-block;
+      background: var(--red);
+      color: #fff;
+      padding: 14px 32px;
+      border-radius: 8px;
+      text-decoration: none;
+      font-size: 1rem;
+      font-weight: 600;
+      border: none;
+      cursor: pointer;
+      transition: all 0.3s;
+      margin: 8px;
+    }
+
+    .cta-button:hover {
+      background: #d62828;
+      transform: translateY(-2px);
+      box-shadow: 0 8px 16px rgba(230, 57, 70, 0.3);
+    }
+
+    .cta-secondary {
+      background: transparent;
+      border: 2px solid var(--red);
+      color: var(--red);
+    }
+
+    .cta-secondary:hover {
+      background: var(--red);
+      color: #fff;
+    }
+
+    .social-proof {
+      font-size: 0.95rem;
+      color: var(--muted);
+      margin-top: 24px;
+    }
+
+    .social-proof strong {
+      color: var(--dark);
+    }
+
+    /* Features Section */
+    .features {
+      padding: 60px 20px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .features h2 {
+      text-align: center;
+      font-size: 2rem;
+      margin-bottom: 48px;
+      color: var(--dark);
+    }
+
+    .feature-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 32px;
+      margin-bottom: 48px;
+    }
+
+    .feature-card {
+      padding: 32px;
+      background: var(--light);
+      border-radius: 12px;
+      border-left: 4px solid var(--red);
+      transition: transform 0.3s;
+    }
+
+    .feature-card:hover {
+      transform: translateY(-4px);
+    }
+
+    .feature-icon {
+      font-size: 2.5rem;
+      margin-bottom: 16px;
+    }
+
+    .feature-card h3 {
+      font-size: 1.2rem;
+      margin-bottom: 12px;
+      color: var(--dark);
+    }
+
+    .feature-card p {
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+
+    /* Stats Section */
+    .stats {
+      background: linear-gradient(135deg, var(--red) 0%, #d62828 100%);
+      color: #fff;
+      padding: 48px 20px;
+      text-align: center;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 32px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .stat-item h3 {
+      font-size: 2.5rem;
+      margin-bottom: 8px;
+    }
+
+    .stat-item p {
+      font-size: 0.95rem;
+      opacity: 0.9;
+    }
+
+    /* Testimonials */
+    .testimonials {
+      padding: 60px 20px;
+      max-width: 1200px;
+      margin: 0 auto;
+      background: var(--light);
+      border-radius: 12px;
+      margin-bottom: 48px;
+    }
+
+    .testimonials h2 {
+      text-align: center;
+      font-size: 2rem;
+      margin-bottom: 48px;
+      color: var(--dark);
+    }
+
+    .testimonial-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 24px;
+    }
+
+    .testimonial {
+      background: #fff;
+      padding: 24px;
+      border-radius: 8px;
+      border-left: 4px solid var(--red);
+    }
+
+    .testimonial-text {
+      color: var(--muted);
+      margin-bottom: 16px;
+      font-style: italic;
+    }
+
+    .testimonial-author {
+      font-weight: 600;
+      color: var(--dark);
+      font-size: 0.95rem;
+    }
+
+    .testimonial-role {
+      font-size: 0.85rem;
+      color: var(--muted);
+    }
+
+    /* Pricing */
+    .pricing {
+      padding: 60px 20px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .pricing h2 {
+      text-align: center;
+      font-size: 2rem;
+      margin-bottom: 48px;
+      color: var(--dark);
+    }
+
+    .pricing-cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 24px;
+    }
+
+    .pricing-card {
+      border: 2px solid var(--border);
+      border-radius: 12px;
+      padding: 32px;
+      text-align: center;
+      transition: all 0.3s;
+    }
+
+    .pricing-card.featured {
+      border-color: var(--red);
+      background: linear-gradient(135deg, rgba(230, 57, 70, 0.05) 0%, rgba(230, 57, 70, 0.1) 100%);
+      transform: scale(1.05);
+    }
+
+    .pricing-card h3 {
+      font-size: 1.5rem;
+      margin-bottom: 16px;
+      color: var(--dark);
+    }
+
+    .price {
+      font-size: 2.5rem;
+      color: var(--red);
+      font-weight: 800;
+      margin-bottom: 8px;
+    }
+
+    .price-period {
+      color: var(--muted);
+      font-size: 0.95rem;
+      margin-bottom: 24px;
+    }
+
+    .pricing-features {
+      text-align: left;
+      margin-bottom: 24px;
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+
+    .pricing-features li {
+      list-style: none;
+      padding: 8px 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .pricing-features li:before {
+      content: "✓ ";
+      color: var(--red);
+      font-weight: 600;
+      margin-right: 8px;
+    }
+
+    /* FAQ */
+    .faq {
+      padding: 60px 20px;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+
+    .faq h2 {
+      text-align: center;
+      font-size: 2rem;
+      margin-bottom: 48px;
+      color: var(--dark);
+    }
+
+    .faq-item {
+      margin-bottom: 24px;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 24px;
+    }
+
+    .faq-item h3 {
+      color: var(--dark);
+      font-size: 1.1rem;
+      margin-bottom: 12px;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .faq-item p {
+      color: var(--muted);
+      line-height: 1.8;
+    }
+
+    /* CTA Section */
+    .final-cta {
+      background: linear-gradient(135deg, var(--red) 0%, #d62828 100%);
+      color: #fff;
+      padding: 60px 20px;
+      text-align: center;
+      border-radius: 12px;
+      margin: 48px 20px;
+      max-width: 1200px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .final-cta h2 {
+      font-size: 2rem;
+      margin-bottom: 16px;
+    }
+
+    .final-cta p {
+      font-size: 1.1rem;
+      margin-bottom: 32px;
+      opacity: 0.95;
+    }
+
+    /* Footer */
+    footer {
+      background: var(--dark);
+      color: #fff;
+      padding: 32px 20px;
+      text-align: center;
+      font-size: 0.9rem;
+    }
+
+    footer a {
+      color: var(--red);
+      text-decoration: none;
+    }
+
+    /* Mobile Responsive */
+    @media (max-width: 768px) {
+      .hero {
+        padding: 40px 20px;
+      }
+
+      .hero h1 {
+        font-size: 1.8rem;
+      }
+
+      .pricing-card.featured {
+        transform: scale(1);
+      }
+
+      .stats-grid {
+        grid-template-columns: 1fr;
+      }
+
+      nav {
+        flex-wrap: wrap;
+        gap: 16px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Navigation -->
+  <nav>
+    <div class="logo">Q<span>Forge</span></div>
+    <a href="https://myquoteforge.co.za">Sign In</a>
+  </nav>
+
+  <!-- Hero Section -->
+  <section class="hero">
+    <h1>Professional <span>Quotes & Invoices</span> in 30 Seconds</h1>
+    <p>No credit card. No setup. No delays. Just quotes that close deals.</p>
+    <p style="font-size: 0.95rem; color: var(--red); font-weight: 600; margin-top: -16px;">Used by 500+ electricians, plumbers & contractors across South Africa</p>
+    
+    <div style="margin: 32px 0;">
+      <a href="https://myquoteforge.co.za" class="cta-button">Start Free Trial (14 Days)</a>
+    </div>
+
+    <div class="social-proof">
+      ⭐ <strong>4.9/5 rating</strong> from contractors | <strong>R2M+</strong> invoiced in 2024
+    </div>
+  </section>
+
+  <!-- Features Section -->
+  <section class="features">
+    <h2>Why Contractors Choose QForge</h2>
+    
+    <div class="feature-grid">
+      <div class="feature-card">
+        <div class="feature-icon">⚡</div>
+        <h3>30-Second Quotes</h3>
+        <p>Build professional quotes on your phone while on site. No templates. No typing.</p>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon">✍️</div>
+        <h3>Client E-Signature</h3>
+        <p>Clients sign on their phone. Deal done instantly. No printing, no scanning.</p>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon">📱</div>
+        <h3>WhatsApp Invoices</h3>
+        <p>Send invoices directly to client's WhatsApp. They pay faster.</p>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon">📊</div>
+        <h3>Track Everything</h3>
+        <p>See revenue, expenses, profit & loss in real-time. Know what's working.</p>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon">🔗</div>
+        <h3>QuickBooks Ready</h3>
+        <p>Signed quotes auto-create invoices in QuickBooks (coming soon).</p>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon">📲</div>
+        <h3>100% Mobile</h3>
+        <p>Works on any phone, any internet speed. Built for contractors in the field.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Stats Section -->
+  <section class="stats">
+    <div class="stats-grid">
+      <div class="stat-item">
+        <h3>500+</h3>
+        <p>Active contractors</p>
+      </div>
+      <div class="stat-item">
+        <h3>3x Faster</h3>
+        <p>Quote to deal closed</p>
+      </div>
+      <div class="stat-item">
+        <h3>R2M+</h3>
+        <p>Invoiced in 2024</p>
+      </div>
+      <div class="stat-item">
+        <h3>14 Days</h3>
+        <p>Free trial, no credit card</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Testimonials -->
+  <section class="testimonials">
+    <h2>What Contractors Say</h2>
+    
+    <div class="testimonial-grid">
+      <div class="testimonial">
+        <div class="testimonial-text">"I was spending 1 hour per quote. Now it's 5 minutes. This tool paid for itself in the first week."</div>
+        <div class="testimonial-author">Thabo M.</div>
+        <div class="testimonial-role">Electrical Contractor, Johannesburg</div>
+      </div>
+
+      <div class="testimonial">
+        <div class="testimonial-text">"Clients can sign on the spot from their phone. No more back-and-forth emails. Deals close faster."</div>
+        <div class="testimonial-author">Sipho K.</div>
+        <div class="testimonial-role">Plumbing Services, Cape Town</div>
+      </div>
+
+      <div class="testimonial">
+        <div class="testimonial-text">"Finally a tool built for contractors, not accountants. Simple, fast, and it works offline."</div>
+        <div class="testimonial-author">Lebohang P.</div>
+        <div class="testimonial-role">Solar Contractor, Pretoria</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Pricing Section -->
+  <section class="pricing">
+    <h2>Simple, Transparent Pricing</h2>
+    
+    <div class="pricing-cards">
+      <div class="pricing-card">
+        <h3>Starter</h3>
+        <div class="price">FREE</div>
+        <div class="price-period">Forever</div>
+        <ul class="pricing-features">
+          <li>Up to 5 quotes/month</li>
+          <li>Basic templates</li>
+          <li>Email support</li>
+          <li>No payment tracking</li>
+        </ul>
+        <a href="https://myquoteforge.co.za" class="cta-button">Get Started</a>
+      </div>
+
+      <div class="pricing-card featured">
+        <h3>Growth</h3>
+        <div class="price">R299</div>
+        <div class="price-period">/month (14-day free trial)</div>
+        <ul class="pricing-features">
+          <li>Unlimited quotes & invoices</li>
+          <li>WhatsApp integration</li>
+          <li>Client e-signature</li>
+          <li>Profit & Loss tracking</li>
+          <li>CSV & PDF exports</li>
+          <li>Priority support</li>
+        </ul>
+        <a href="https://myquoteforge.co.za" class="cta-button">Start Free Trial</a>
+      </div>
+
+      <div class="pricing-card">
+        <h3>Enterprise</h3>
+        <div class="price">Custom</div>
+        <div class="price-period">Contact us</div>
+        <ul class="pricing-features">
+          <li>Everything in Growth</li>
+          <li>QuickBooks integration</li>
+          <li>Team management</li>
+          <li>Custom branding</li>
+          <li>Dedicated support</li>
+        </ul>
+        <a href="mailto:hello@qforge.co.za" class="cta-button cta-secondary">Get Quote</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQ Section -->
+  <section class="faq">
+    <h2>Frequently Asked Questions</h2>
+    
+    <div class="faq-item">
+      <h3>Is the 14-day trial really free?</h3>
+      <p>Yes, completely free. No credit card required. You'll get access to all Growth features. If you don't love it, you're done. No strings attached.</p>
+    </div>
+
+    <div class="faq-item">
+      <h3>Can I use QForge offline?</h3>
+      <p>Yes! Create quotes offline, they sync when you reconnect. Perfect for contractors in areas with spotty internet.</p>
+    </div>
+
+    <div class="faq-item">
+      <h3>Do my clients need an account?</h3>
+      <p>No. Clients get a unique link to view, sign, and pay. They don't need to create an account or download anything.</p>
+    </div>
+
+    <div class="faq-item">
+      <h3>Can I export to QuickBooks?</h3>
+      <p>Coming soon! Right now you can export as PDF or CSV to import anywhere. Full QuickBooks integration launching Q3 2024.</p>
+    </div>
+
+    <div class="faq-item">
+      <h3>What if I need invoices, not just quotes?</h3>
+      <p>QForge does both! Convert signed quotes to invoices with one click. Send to clients via WhatsApp or email.</p>
+    </div>
+
+    <div class="faq-item">
+      <h3>Is my data safe?</h3>
+      <p>Your quotes and invoices are encrypted and stored securely in South Africa. We never share your data.</p>
+    </div>
+
+    <div class="faq-item">
+      <h3>What payment methods do you accept?</h3>
+      <p>We accept all major credit cards, debit orders, and PayFast. Easy to cancel anytime, no long-term contracts.</p>
+    </div>
+  </section>
+
+  <!-- Final CTA -->
+  <section class="final-cta">
+    <h2>Ready to Quote Like a Pro?</h2>
+    <p>Join 500+ contractors saving hours every week</p>
+    <a href="https://myquoteforge.co.za" class="cta-button">Start Your Free 14-Day Trial</a>
+    <p style="font-size: 0.9rem; margin-top: 16px; opacity: 0.8;">No credit card required. Cancel anytime.</p>
+  </section>
+
+  <!-- Footer -->
+  <footer>
+    <p>&copy; 2024 QForge. Built for South African contractors.</p>
+    <p style="margin-top: 12px;">
+      <a href="mailto:support@qforge.co.za">Support</a> | 
+      <a href="#">Privacy</a> | 
+      <a href="#">Terms</a>
+    </p>
+  </footer>
+
+  <script>
+    // Simple analytics tracking
+    document.querySelectorAll('a[href*="myquoteforge"]').forEach(link => {
+      link.addEventListener('click', () => {
+        if (typeof gtag !== 'undefined') {
+          gtag('event', 'click', {
+            'event_category': 'engagement',
+            'event_label': 'cta_click'
+          });
+        }
+      });
+    });
+  </script>
+</body>
+</html>
