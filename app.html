@@ -3546,7 +3546,7 @@ function fallbackScope(company,address,items) {
 // PROFILE PAGE
 // ══════════════════════════════════════
 function renderInvoices() {
-  const invoices = quotes.filter(q => q.status === 'invoice' || q.status === 'paid');
+  const invoices = quotes.filter(q => q.status === 'invoice' || q.status === 'invoiced' || q.status === 'paid');
   const totalInvoiced = invoices.reduce((s,i) => s + (i.amount||0), 0);
   const totalPaid = invoices.filter(i => i.status === 'paid').reduce((s,i) => s + (i.amount||0), 0);
   const totalOutstanding = totalInvoiced - totalPaid;
