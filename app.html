@@ -2589,6 +2589,7 @@ function renderRecentAcceptances() {
 function renderQuotes() {
   // Show quotes: exclude type='invoice' and also exclude items with status='invoice', 'invoiced', 'paid'
   const onlyQuotes = quotes.filter(q => q.type !== 'invoice' && q.status !== 'invoice' && q.status !== 'invoiced' && q.status !== 'paid');
+  console.log('renderQuotes: total quotes:', quotes.length, 'filtered:', onlyQuotes.length, 'converted:', quotes.filter(q => q.status === 'converted').length);
   return `
   <div class="page-header">
     <div>
