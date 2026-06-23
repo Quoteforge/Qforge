@@ -2765,12 +2765,13 @@ async function convertToInvoice(el, id) {
           
           let invoiceSaved = false;
           if (result.error) {
+            console.error('❌ Full error object:', JSON.stringify(result.error, null, 2));
             // If it's a duplicate key error, the invoice was actually already saved!
             if (result.error.code === '23505') {
               console.log('✅ Invoice already exists in Supabase (saved from previous attempt)');
               invoiceSaved = true;
             } else {
-              console.error('❌ Invoice save failed:', result.error);
+              console.error('❌ Invoice save failed with error code:', result.error.code, 'message:', result.error.message);
               showToast('Error: ' + (result.error.message || 'Failed to save invoice'), 'error'); 
               return; // STOP - don't continue if save failed
             }
