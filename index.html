@@ -2709,31 +2709,39 @@ async function convertToInvoice(el, id) {
       const invNum = 'INV-' + numPart;
       const invDate = new Date().toISOString().split('T')[0];
       
+      // Make sure we have the full quote with all fields
+      const quoteToConvert = quotes.find(x => x.id === id);
+      if (!quoteToConvert) return;
+      
       const invoice = {
         id: invNum,
         user_id: currentUser?.id,
-        client: q.client,
-        contact: q.contact,
-        address: q.address,
-        scope: q.scope,
+        client: quoteToConvert.client,
+        contact: quoteToConvert.contact,
+        address: quoteToConvert.address,
+        scope: quoteToConvert.scope,
         status: isPaid ? 'paid' : 'invoice',
         type: 'invoice',
-        subtotal: q.subtotal,
-        vat: q.vat,
-        amount: q.amount,
-        items: q.items, // Ensure items are copied
+        subtotal: quoteToConvert.subtotal,
+        vat: quoteToConvert.vat,
+        amount: quoteToConvert.amount,
+        items: quoteToConvert.items,
         date: invDate,
         valid_days: 30,
         vat_registered: true,
-        quote_ref: q.id,
+        quote_ref: quoteToConvert.id,
         updated_at: new Date().toISOString(),
-        // Preserve vehicle details from quote
-        vehicle_model: q.vehicle_model || null,
-        vehicle_reg_no: q.vehicle_reg_no || null,
-        vehicle_vin: q.vehicle_vin || null,
-        vehicle_engine_no: q.vehicle_engine_no || null,
-        vehicle_engine_type: q.vehicle_engine_type || null,
-        vehicle_km: q.vehicle_km || null
+        // ALWAYS include vehicle details from quote - don't lose them!
+        vehicle_model: quoteToConvert.vehicle_model || null,
+        vehicle_reg_no: quoteToConvert.vehicle_reg_no || null,
+        vehicle_vin: quoteToConvert.vehicle_vin || null,
+        vehicle_engine_no: quoteToConvert.vehicle_engine_no || null,
+        vehicle_engine_type: quoteToConvert.vehicle_engine_type || null,
+        vehicle_km: quoteToConvert.vehicle_km || null,
+        client_vat: quoteToConvert.client_vat || null,
+        client_reg: quoteToConvert.client_reg || null,
+        deposit: quoteToConvert.deposit || null,
+        notes: quoteToConvert.notes || null
       };
 
       // Save to Supabase
