@@ -2754,16 +2754,21 @@ async function convertToInvoice(el, id) {
         const { data: { session } } = await sb.auth.getSession();
         if (session) {
           invoice.user_id = session.user.id;
-          console.log('Creating invoice:', invoice); // Debug log
-          const { data, error } = await sb.from('quotes').upsert(invoice, { onConflict: 'id' });
-          if (error) { 
-            console.error('Invoice save error:', error); // Debug log
-            showToast('Error creating invoice: ' + error.message, 'error'); 
+          console.log('Invoice object before save:', JSON.stringify(invoice, null, 2));
+          const result = await sb.from('quotes').upsert(invoice, { onConflict: 'id' });
+          console.log('Full Supabase response:', result);
+          
+          if (result.error) { 
+            console.error('❌ Invoice save error:', result.error);
+            showToast('Error saving invoice: ' + result.error.message, 'error'); 
             return; 
           }
-          console.log('Invoice save response:', data, error); // Debug log
-          if (data) {
-            console.log('✅ Invoice saved to Supabase successfully!');
+          if (!result.data) {
+            console.error('❌ Invoice save returned null data - Supabase silently rejected it');
+            console.log('Available columns might be missing from invoice object');
+            showToast('Warning: Invoice may not have saved properly', 'warning');
+          } else {
+            console.log('✅ Invoice saved successfully!');
           }
         } else {
           showToast('Session expired - please login again', 'error');
