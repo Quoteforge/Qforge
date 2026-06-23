@@ -3394,6 +3394,12 @@ async function saveQuote() {
   const qNum = document.getElementById('b_quoteNumber')?.value.trim()||'QUA-001';
   const vatOn = document.getElementById('b_vat')?.value === 'yes';
   const validDays = parseInt(document.getElementById('b_validDays')?.value||'14');
+  
+  // Check if this is an invoice (by ID or type) - FIRST, before fallback
+  const isInvoiceId = editingQuoteId && editingQuoteId.toUpperCase().startsWith('INV-');
+  const foundQuote = editingQuoteId ? quotes.find(q=>q.id===editingQuoteId) : null;
+  const isInvoiceType = foundQuote?.type === 'invoice';
+  
   const quoteData = {
     id: editingQuoteId || qNum,
     user_id: currentUser?.id,
@@ -3411,9 +3417,12 @@ async function saveQuote() {
     scope: builderScope,
     deposit: document.getElementById('b_deposit')?.value || null,
     notes: document.getElementById('b_notes')?.value.trim() || null,
-    // Preserve status and type - especially important for invoices!
-    status: editingQuoteId ? (quotes.find(q=>q.id===editingQuoteId)?.status || (editingQuoteId.startsWith('INV-') ? 'invoice' : 'draft')) : 'draft',
-    type: editingQuoteId ? (quotes.find(q=>q.id===editingQuoteId)?.type || (editingQuoteId.startsWith('INV-') ? 'invoice' : 'quote')) : 'quote',
+    status: editingQuoteId ? (
+      isInvoiceId || isInvoiceType ? 'invoice' : (foundQuote?.status || 'draft')
+    ) : 'draft',
+    type: editingQuoteId ? (
+      isInvoiceId || isInvoiceType ? 'invoice' : (foundQuote?.type || 'quote')
+    ) : 'quote',
     subtotal: Math.round(subtotal),
     vat: Math.round(vat),
     amount: Math.round(total),
