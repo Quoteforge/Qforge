@@ -3078,10 +3078,13 @@ function renderBuilder() {
                 <div class="doc-client-detail" id="pv_clientAddress">&#8212;</div>
               </div>
             </div>
-            <div class="doc-info-col" id="pv_vehicleSection" style="display:none;margin-left:12px;">
+            <div class="doc-info-col" id="pv_vehicleSection" style="display:none;">
               <span class="doc-info-col-label">Vehicle Details</span>
               <div class="doc-client-name" id="pv_vehicleModel">Vehicle</div>
               <div class="doc-client-detail" id="pv_vehicleInfo">&#8212;</div>
+              <div id="pv_vehicleEngine" style="display:none;margin-top:6px;">
+                <div class="doc-client-detail" id="pv_engineDetails">&#8212;</div>
+              </div>
             </div>
           </div>
 
@@ -3272,15 +3275,34 @@ function updateBuilderPreview() {
   const vehicleModel = gv('b_vehicleModel');
   const vehicleReg = gv('b_regNo');
   const vehicleVin = gv('b_vin');
+  const vehicleEngine = gv('b_engineNo');
+  const vehicleEngineType = gv('b_engineType');
+  const vehicleKm = gv('b_km');
   const vehicleSection = document.getElementById('pv_vehicleSection');
   if (vehicleSection) {
-    if (vehicleModel || vehicleReg || vehicleVin) {
+    if (vehicleModel || vehicleReg || vehicleVin || vehicleEngine || vehicleEngineType || vehicleKm) {
       vehicleSection.style.display = 'block';
       st('pv_vehicleModel', vehicleModel || 'Vehicle');
       let vehicleInfo = '';
       if (vehicleReg) vehicleInfo += 'Reg: ' + vehicleReg;
       if (vehicleVin) vehicleInfo += (vehicleInfo ? '<br>' : '') + 'VIN: ' + vehicleVin;
       si('pv_vehicleInfo', vehicleInfo || '&#8212;');
+      
+      // Engine details
+      const engineEl = document.getElementById('pv_vehicleEngine');
+      const engineDetailsEl = document.getElementById('pv_engineDetails');
+      if (engineEl && engineDetailsEl) {
+        if (vehicleEngine || vehicleEngineType || vehicleKm) {
+          engineEl.style.display = 'block';
+          let engineDetails = '';
+          if (vehicleEngine) engineDetails += 'Engine: ' + vehicleEngine;
+          if (vehicleEngineType) engineDetails += (engineDetails ? '<br>' : '') + 'Type: ' + vehicleEngineType;
+          if (vehicleKm) engineDetails += (engineDetails ? '<br>' : '') + 'KM: ' + vehicleKm;
+          si('pv_engineDetails', engineDetails || '&#8212;');
+        } else {
+          engineEl.style.display = 'none';
+        }
+      }
     } else {
       vehicleSection.style.display = 'none';
     }
@@ -7234,7 +7256,7 @@ function printQuote() {
   const vehicleEngineType = document.getElementById('b_engineType')?.value;
   const vehicleKm = document.getElementById('b_km')?.value;
   
-  if (vehicleModel || vehicleVin || vehicleReg) {
+  if (vehicleModel || vehicleVin || vehicleReg || vehicleEngine || vehicleEngineType || vehicleKm) {
     const vehicleX = pageW / 2 + 5; // Right side, with margin
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(6);
