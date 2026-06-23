@@ -2757,7 +2757,7 @@ async function convertToInvoice(el, id) {
         if (session) {
           invoice.user_id = session.user.id;
           console.log('Invoice object before save:', JSON.stringify(invoice, null, 2));
-          const result = await sb.from('quotes').upsert(invoice, { onConflict: 'id' });
+          const result = await sb.from('quotes').insert([invoice]);
           console.log('Full Supabase response:', result);
           
           if (result.error) { 
