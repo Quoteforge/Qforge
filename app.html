@@ -2796,7 +2796,9 @@ async function convertToInvoice(el, id) {
       // Add invoice to local list (make sure items are included)
       const invoiceWithItems = {
         ...invoice,
-        items: q.items ? [...q.items] : [] // Ensure items array is preserved
+        items: q.items ? [...q.items] : [], // Ensure items array is preserved
+        type: 'invoice', // Force type to invoice
+        status: isPaid ? 'paid' : 'invoice' // Force correct status
       };
       console.log('Adding invoice to quotes array:', invoiceWithItems);
       quotes.unshift(invoiceWithItems);
