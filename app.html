@@ -2763,7 +2763,7 @@ async function convertToInvoice(el, id) {
         if (session) {
           invoice.user_id = session.user.id;
           console.log('Invoice object before save:', JSON.stringify(invoice, null, 2));
-          const result = await sb.from('quotes').insert([invoice]);
+          const result = await sb.from('quotes').insert([invoice]).select();
           console.log('Full Supabase response:', result);
           
           let invoiceSaved = false;
