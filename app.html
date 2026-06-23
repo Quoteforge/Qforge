@@ -2752,9 +2752,20 @@ async function convertToInvoice(el, id) {
         const { data: { session } } = await sb.auth.getSession();
         if (session) {
           invoice.user_id = session.user.id;
+          console.log('Creating invoice:', invoice); // Debug log
           const { error } = await sb.from('quotes').upsert(invoice, { onConflict: 'id' });
-          if (error) { showToast('Error creating invoice: ' + error.message, 'error'); return; }
+          if (error) { 
+            console.error('Invoice save error:', error); // Debug log
+            showToast('Error creating invoice: ' + error.message, 'error'); 
+            return; 
+          }
+          console.log('Invoice saved successfully!'); // Debug log
+        } else {
+          showToast('Session expired - please login again', 'error');
+          return;
         }
+      } else if (isDemoMode || !currentUser?.id) {
+        showToast('📌 Demo Mode - Invoice not saved. Login to save invoices.', 'info');
       }
 
       // Update quote status to converted (keep it visible in quotes tab)
