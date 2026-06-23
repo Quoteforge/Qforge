@@ -2374,6 +2374,9 @@ async function loadAndLoginUser(authUser) {
 
     // Load quotes from Supabase
     const { data: qdata } = await sb.from('quotes').select('*').eq('user_id', authUser.id).order('created_at', { ascending: false });
+    console.log('Loaded from Supabase:', qdata?.length, 'quotes');
+    const paidFromDB = qdata?.filter(q => q.status === 'paid');
+    console.log('Paid invoices from Supabase:', paidFromDB?.length, paidFromDB);
     quotes = (qdata || []).map(q => ({
       id: q.id,
       client: q.client,
