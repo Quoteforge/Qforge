@@ -2727,7 +2727,14 @@ async function convertToInvoice(el, id) {
         valid_days: 30,
         vat_registered: true,
         quote_ref: q.id,
-        updated_at: new Date().toISOString()
+        updated_at: new Date().toISOString(),
+        // Preserve vehicle details from quote
+        vehicle_model: q.vehicle_model || null,
+        vehicle_reg_no: q.vehicle_reg_no || null,
+        vehicle_vin: q.vehicle_vin || null,
+        vehicle_engine_no: q.vehicle_engine_no || null,
+        vehicle_engine_type: q.vehicle_engine_type || null,
+        vehicle_km: q.vehicle_km || null
       };
 
       // Save to Supabase
@@ -7257,7 +7264,7 @@ function printQuote() {
   const vehicleKm = document.getElementById('b_km')?.value;
   
   if (vehicleModel || vehicleVin || vehicleReg || vehicleEngine || vehicleEngineType || vehicleKm) {
-    const vehicleX = pageW / 2 + 5; // Right side, with margin
+    const vehicleX = pageW / 2 + 3; // Right side, center divider at 105mm
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(6);
     doc.setTextColor(170, 170, 170);
