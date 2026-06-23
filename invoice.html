@@ -392,10 +392,14 @@ function renderInvoice() {
           <div class="doc-client-detail">
             ${invoice.contact?esc(invoice.contact)+'<br>':''}
             ${invoice.address?esc(invoice.address):''}
-            ${invoice.vehicle_model?'<br><strong>Vehicle:</strong> '+esc(invoice.vehicle_model):''}
-            ${invoice.vehicle_reg_no?'<br><strong>Reg:</strong> '+esc(invoice.vehicle_reg_no):''}
-            ${invoice.vehicle_vin?'<br><strong>VIN:</strong> '+esc(invoice.vehicle_vin):''}
           </div>
+          ${invoice.vehicle_model || invoice.vehicle_reg_no || invoice.vehicle_vin ? 
+            '<div style="margin-top:12px;padding-top:12px;border-top:1px solid #eee;"><span class="doc-info-col-label">Vehicle Details</span><div style="font-size:0.75rem;color:#555;line-height:1.5;">' +
+            (invoice.vehicle_model ? '<strong>' + esc(invoice.vehicle_model) + '</strong><br>' : '') +
+            (invoice.vehicle_reg_no ? 'Reg: ' + esc(invoice.vehicle_reg_no) + '<br>' : '') +
+            (invoice.vehicle_vin ? 'VIN: ' + esc(invoice.vehicle_vin) : '') +
+            '</div></div>'
+          : ''}
           ${invoice.quote_ref?'<div style="margin-top:10px;"><span class="doc-info-col-label">Quote Reference</span><div style="font-size:0.78rem;color:#555;">'+esc(invoice.quote_ref)+'</div></div>':''}
         </div>
       </div>

@@ -3055,7 +3055,7 @@ function renderBuilder() {
             </div>
           </div>
 
-          <!-- 2. WHITE INFO BAND: Client info only -->
+          <!-- 2. WHITE INFO BAND: Client info + Vehicle info -->
           <div class="doc-info-band">
             <div class="doc-info-col">
               <span class="doc-info-col-label">Quoted For</span>
@@ -3065,6 +3065,11 @@ function renderBuilder() {
                 <span class="doc-info-col-label">Site Address</span>
                 <div class="doc-client-detail" id="pv_clientAddress">&#8212;</div>
               </div>
+            </div>
+            <div class="doc-info-col" id="pv_vehicleSection" style="display:none;margin-left:12px;">
+              <span class="doc-info-col-label">Vehicle Details</span>
+              <div class="doc-client-name" id="pv_vehicleModel">Vehicle</div>
+              <div class="doc-client-detail" id="pv_vehicleInfo">&#8212;</div>
             </div>
           </div>
 
@@ -3250,6 +3255,24 @@ function updateBuilderPreview() {
   st('pv_clientName', gv('b_clientName')||'Client Name');
   si('pv_clientDetail', gv('b_clientContact')||'-');
   si('pv_clientAddress', gv('b_clientAddress')||'-');
+  
+  // Update vehicle details in preview
+  const vehicleModel = gv('b_vehicleModel');
+  const vehicleReg = gv('b_regNo');
+  const vehicleVin = gv('b_vin');
+  const vehicleSection = document.getElementById('pv_vehicleSection');
+  if (vehicleSection) {
+    if (vehicleModel || vehicleReg || vehicleVin) {
+      vehicleSection.style.display = 'block';
+      st('pv_vehicleModel', vehicleModel || 'Vehicle');
+      let vehicleInfo = '';
+      if (vehicleReg) vehicleInfo += 'Reg: ' + vehicleReg;
+      if (vehicleVin) vehicleInfo += (vehicleInfo ? '<br>' : '') + 'VIN: ' + vehicleVin;
+      si('pv_vehicleInfo', vehicleInfo || '&#8212;');
+    } else {
+      vehicleSection.style.display = 'none';
+    }
+  }
   const currentQnum = gv('b_quoteNumber')||'QUA-001';
   st('pv_qnum', currentQnum);
   // Auto-update doc type based on number prefix
@@ -7183,8 +7206,8 @@ function printQuote() {
   doc.setTextColor(100, 100, 100);
   if (clientContact) doc.text(clientContact, margin, y + 19);
   if (clientAddress) doc.text(clientAddress, margin, y + 24);
-  
-  // Vehicle details for auto mechanics
+
+  // VEHICLE DETAILS on right side (same y level as QUOTED FOR)
   const vehicleModel = document.getElementById('b_vehicleModel')?.value;
   const vehicleVin = document.getElementById('b_vin')?.value;
   const vehicleReg = document.getElementById('b_regNo')?.value;
@@ -7193,22 +7216,26 @@ function printQuote() {
   const vehicleKm = document.getElementById('b_km')?.value;
   
   if (vehicleModel || vehicleVin || vehicleReg) {
-    let vehicleY = y + 29;
+    const vehicleX = pageW / 2 + 5; // Right side, with margin
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(6);
     doc.setTextColor(170, 170, 170);
-    doc.text('VEHICLE DETAILS', margin, vehicleY);
+    doc.text('VEHICLE DETAILS', vehicleX, y + 6);
+    
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(10);
+    doc.setTextColor(...dark);
+    if (vehicleModel) doc.text(vehicleModel, vehicleX, y + 13);
     
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(7);
     doc.setTextColor(100, 100, 100);
-    vehicleY += 4;
-    if (vehicleModel) { doc.text('Vehicle: ' + vehicleModel, margin, vehicleY); vehicleY += 3.5; }
-    if (vehicleReg) { doc.text('Reg No: ' + vehicleReg, margin, vehicleY); vehicleY += 3.5; }
-    if (vehicleVin) { doc.text('VIN: ' + vehicleVin, margin, vehicleY); vehicleY += 3.5; }
-    if (vehicleEngine) { doc.text('Engine No: ' + vehicleEngine, margin, vehicleY); vehicleY += 3.5; }
-    if (vehicleEngineType) { doc.text('Engine Type: ' + vehicleEngineType, margin, vehicleY); vehicleY += 3.5; }
-    if (vehicleKm) { doc.text('Current KM: ' + vehicleKm, margin, vehicleY); vehicleY += 3.5; }
+    let vDetailY = vehicleModel ? (y + 19) : (y + 13);
+    if (vehicleReg) { doc.text('Reg: ' + vehicleReg, vehicleX, vDetailY); vDetailY += 4; }
+    if (vehicleVin) { doc.text('VIN: ' + vehicleVin, vehicleX, vDetailY); vDetailY += 4; }
+    if (vehicleEngine) { doc.text('Engine: ' + vehicleEngine, vehicleX, vDetailY); vDetailY += 4; }
+    if (vehicleEngineType) { doc.text('Type: ' + vehicleEngineType, vehicleX, vDetailY); vDetailY += 4; }
+    if (vehicleKm) { doc.text('KM: ' + vehicleKm, vehicleX, vDetailY); }
   }
 
   y += 32;

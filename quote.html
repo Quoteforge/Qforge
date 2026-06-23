@@ -240,12 +240,17 @@ function renderQuote() {
       '</div>' +
       '<div class="doc-for"><div class="doc-info-label">Quoted For</div>' +
         '<div class="doc-client-name">' + esc(quote.client||'') + '</div>' +
-        '<div class="doc-client-detail">' + esc(quote.contact||'') + '<br>' + esc(quote.address||'') +
-        (quote.vehicle_model ? '<br><strong>Vehicle:</strong> ' + esc(quote.vehicle_model) : '') +
-        (quote.vehicle_reg_no ? '<br><strong>Reg:</strong> ' + esc(quote.vehicle_reg_no) : '') +
-        (quote.vehicle_vin ? '<br><strong>VIN:</strong> ' + esc(quote.vehicle_vin) : '') +
-        '</div>' +
+        '<div class="doc-client-detail">' + esc(quote.contact||'') + '<br>' + esc(quote.address||'') + '</div>' +
       '</div>' +
+      (quote.vehicle_model || quote.vehicle_reg_no || quote.vehicle_vin ? 
+        '<div class="doc-for" style="margin-left:12px;"><div class="doc-info-label">Vehicle Details</div>' +
+          '<div class="doc-client-detail">' +
+            (quote.vehicle_model ? '<strong>' + esc(quote.vehicle_model) + '</strong><br>' : '') +
+            (quote.vehicle_reg_no ? 'Reg: ' + esc(quote.vehicle_reg_no) + '<br>' : '') +
+            (quote.vehicle_vin ? 'VIN: ' + esc(quote.vehicle_vin) : '') +
+          '</div>' +
+        '</div>' 
+      : '') +
     '</div>' +
     (quote.scope?'<div class="doc-scope">'+esc(quote.scope)+'</div>':'') +
     '<table class="doc-table"><thead><tr><th>Description</th><th>Qty</th><th>Unit Price</th><th>Amount</th></tr></thead><tbody>' + items + '</tbody></table>' +
