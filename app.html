@@ -2730,9 +2730,8 @@ async function convertToInvoice(el, id) {
         client: quoteToConvert.client || null,
         contact: quoteToConvert.contact || null,
         address: quoteToConvert.address || null,
-        email: quoteToConvert.email || null,
         scope: quoteToConvert.scope || null,
-        status: 'invoice', // Always start with 'invoice', will update to 'paid' after if needed
+        status: 'invoice',
         type: 'invoice',
         subtotal: quoteToConvert.subtotal || 0,
         vat: quoteToConvert.vat || 0,
