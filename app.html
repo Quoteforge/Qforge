@@ -2753,13 +2753,16 @@ async function convertToInvoice(el, id) {
         if (session) {
           invoice.user_id = session.user.id;
           console.log('Creating invoice:', invoice); // Debug log
-          const { error } = await sb.from('quotes').upsert(invoice, { onConflict: 'id' });
+          const { data, error } = await sb.from('quotes').upsert(invoice, { onConflict: 'id' });
           if (error) { 
             console.error('Invoice save error:', error); // Debug log
             showToast('Error creating invoice: ' + error.message, 'error'); 
             return; 
           }
-          console.log('Invoice saved successfully!'); // Debug log
+          console.log('Invoice save response:', data, error); // Debug log
+          if (data) {
+            console.log('✅ Invoice saved to Supabase successfully!');
+          }
         } else {
           showToast('Session expired - please login again', 'error');
           return;
