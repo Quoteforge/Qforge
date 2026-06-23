@@ -3411,7 +3411,9 @@ async function saveQuote() {
     scope: builderScope,
     deposit: document.getElementById('b_deposit')?.value || null,
     notes: document.getElementById('b_notes')?.value.trim() || null,
-    status: editingQuoteId ? (quotes.find(q=>q.id===editingQuoteId)?.status||'draft') : 'draft',
+    // Preserve status and type - especially important for invoices!
+    status: editingQuoteId ? (quotes.find(q=>q.id===editingQuoteId)?.status || (editingQuoteId.startsWith('INV-') ? 'invoice' : 'draft')) : 'draft',
+    type: editingQuoteId ? (quotes.find(q=>q.id===editingQuoteId)?.type || (editingQuoteId.startsWith('INV-') ? 'invoice' : 'quote')) : 'quote',
     subtotal: Math.round(subtotal),
     vat: Math.round(vat),
     amount: Math.round(total),
