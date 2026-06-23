@@ -2798,7 +2798,9 @@ async function convertToInvoice(el, id) {
         ...invoice,
         items: q.items ? [...q.items] : [] // Ensure items array is preserved
       };
+      console.log('Adding invoice to quotes array:', invoiceWithItems);
       quotes.unshift(invoiceWithItems);
+      console.log('Quotes array now has', quotes.length, 'items');
       
       showToast('Invoice ' + invNum + ' created! ' + (isPaid ? '✓ Marked as Paid' : '⏳ Pending Payment'), 'success');
       
