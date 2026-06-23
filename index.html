@@ -933,8 +933,7 @@ select option{background:#ffffff;color:#111111;}
   .doc-header .doc-company-name{font-size:0.70rem;font-weight:700;color:#1a1a1a;line-height:1.05;margin-bottom:0px;}
   .doc-header .doc-company-sub{font-size:0.52rem;color:#777777;line-height:0.95;}
   .doc-header .doc-company-details{font-size:0.52rem;line-height:1.15;color:#555555;margin-top:0px;}
-  /* Info band */
-  .doc-info-band{grid-template-columns:1fr;gap:0;}
+  /* Info band - keep 2 columns on mobile too */
   .doc-info-col{padding:6px 6px;width:100%;box-sizing:border-box;word-break:break-word;}
   .doc-info-col:first-child{display:none;}
   .doc-info-col{border-bottom:1px solid #f0f0f0;display:block !important;}
@@ -2722,7 +2721,7 @@ async function convertToInvoice(el, id) {
         subtotal: q.subtotal,
         vat: q.vat,
         amount: q.amount,
-        items: q.items,
+        items: q.items, // Ensure items are copied
         date: invDate,
         valid_days: 30,
         vat_registered: true,
@@ -2756,10 +2755,19 @@ async function convertToInvoice(el, id) {
         }
       }
 
-      // Add invoice to local list
-      quotes.unshift(invoice);
+      // Add invoice to local list (make sure items are included)
+      const invoiceWithItems = {
+        ...invoice,
+        items: q.items ? [...q.items] : [] // Ensure items array is preserved
+      };
+      quotes.unshift(invoiceWithItems);
+      
       showToast('Invoice ' + invNum + ' created! ' + (isPaid ? '✓ Marked as Paid' : '⏳ Pending Payment'), 'success');
-      goTo('invoices');
+      
+      // Load the invoice into builder immediately
+      editingQuoteId = invNum;
+      goTo('builder');
+      setTimeout(() => loadQuoteIntoBuilder(invoiceWithItems), 100);
     }
   );
 }
