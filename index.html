@@ -2918,6 +2918,30 @@ function renderBuilder() {
             <input type="text" id="b_clientReg" placeholder="2020/123456/07" oninput="updateBuilderPreview()"></div>
         </div></div>
 
+      ${currentUser?.industry === 'automotive' ? `
+      <div style="display:flex;flex-direction:column;gap:1px;background:linear-gradient(135deg,rgba(230,57,70,0.05) 0%,rgba(230,57,70,0.1) 100%);padding:12px;border-radius:8px;border:2px solid var(--border);">
+        <div class="section-label">Vehicle Details</div>
+        <div class="input-row">
+          <div class="input-group"><label>Make & Model *</label>
+            <input type="text" id="b_vehicleModel" placeholder="e.g. Toyota Hilux" oninput="updateBuilderPreview()"></div>
+          <div class="input-group"><label>Reg No *</label>
+            <input type="text" id="b_regNo" placeholder="e.g. GP123ABC" oninput="updateBuilderPreview()"></div>
+        </div>
+        <div class="input-row">
+          <div class="input-group"><label>VIN</label>
+            <input type="text" id="b_vin" placeholder="Vehicle Identification Number" oninput="updateBuilderPreview()"></div>
+          <div class="input-group"><label>Engine No</label>
+            <input type="text" id="b_engineNo" placeholder="Engine number" oninput="updateBuilderPreview()"></div>
+        </div>
+        <div class="input-row">
+          <div class="input-group"><label>Engine Type</label>
+            <input type="text" id="b_engineType" placeholder="e.g. 2.8L Diesel" oninput="updateBuilderPreview()"></div>
+          <div class="input-group"><label>Current KM</label>
+            <input type="number" id="b_km" placeholder="Current mileage" oninput="updateBuilderPreview()"></div>
+        </div>
+      </div>
+      ` : ''}
+
       <div style="display:flex;flex-direction:column;gap:1px;">
         <div class="section-label">QUOTE SETTINGS</div>
         <div class="input-row">
@@ -3304,6 +3328,13 @@ async function saveQuote() {
     ].filter(Boolean).join(', '),
     client_vat: document.getElementById('b_clientVat')?.value.trim()||null,
     client_reg: document.getElementById('b_clientReg')?.value.trim()||null,
+    // Auto mechanic fields
+    vehicle_model: currentUser?.industry === 'automotive' ? (document.getElementById('b_vehicleModel')?.value.trim()||null) : null,
+    vehicle_vin: currentUser?.industry === 'automotive' ? (document.getElementById('b_vin')?.value.trim()||null) : null,
+    vehicle_engine_no: currentUser?.industry === 'automotive' ? (document.getElementById('b_engineNo')?.value.trim()||null) : null,
+    vehicle_reg_no: currentUser?.industry === 'automotive' ? (document.getElementById('b_regNo')?.value.trim()||null) : null,
+    vehicle_engine_type: currentUser?.industry === 'automotive' ? (document.getElementById('b_engineType')?.value.trim()||null) : null,
+    vehicle_km: currentUser?.industry === 'automotive' ? (parseInt(document.getElementById('b_km')?.value)||null) : null,
     scope: builderScope,
     deposit: document.getElementById('b_deposit')?.value || null,
     notes: document.getElementById('b_notes')?.value.trim() || null,
@@ -4466,6 +4497,56 @@ function renderJobCards() {
 
 function createNewJobCard() {
   const mc = document.getElementById('mainContent');
+  const industry = currentUser?.industry || 'automotive';
+  
+  let assetFields = '';
+  if (industry === 'automotive') {
+    assetFields = `
+      <div class="form-row">
+        <div class="input-group"><label>Make & Model *</label><input type="text" id="jc_model" placeholder="e.g. Toyota Hilux"></div>
+        <div class="input-group"><label>Reg No *</label><input type="text" id="jc_reg" placeholder="e.g. GP123ABC"></div>
+      </div>
+      <div class="form-row">
+        <div class="input-group"><label>VIN</label><input type="text" id="jc_vin" placeholder="Vehicle Identification Number"></div>
+        <div class="input-group"><label>Engine No</label><input type="text" id="jc_engine" placeholder="Engine number"></div>
+      </div>
+      <div class="form-row">
+        <div class="input-group"><label>Engine Type</label><input type="text" id="jc_engine_type" placeholder="e.g. 2.8L Diesel"></div>
+        <div class="input-group"><label>Current KM</label><input type="number" id="jc_km" placeholder="Current mileage"></div>
+      </div>
+    `;
+  } else if (industry === 'electrical') {
+    assetFields = `
+      <div class="form-row">
+        <div class="input-group"><label>Site Address *</label><input type="text" id="jc_model" placeholder="e.g. 123 Main Road, Johannesburg"></div>
+        <div class="input-group"><label>Circuit/DB Board</label><input type="text" id="jc_reg" placeholder="e.g. DB-Main-A"></div>
+      </div>
+      <div class="form-row">
+        <div class="input-group"><label>Earthing Status</label><input type="text" id="jc_vin" placeholder="e.g. TN-S, PME"></div>
+        <div class="input-group"><label>Load Capacity</label><input type="text" id="jc_engine" placeholder="e.g. 60A"></div>
+      </div>
+      <div class="form-row">
+        <div class="input-group"><label>Testing Required</label><input type="text" id="jc_engine_type" placeholder="e.g. EICR, PIR, CoC"></div>
+        <div class="input-group"><label>Certificate Ref</label><input type="text" id="jc_km" placeholder="e.g. COC-2024-001"></div>
+      </div>
+    `;
+  } else if (industry === 'plumbing') {
+    assetFields = `
+      <div class="form-row">
+        <div class="input-group"><label>Site Address *</label><input type="text" id="jc_model" placeholder="e.g. 123 Main Road, Johannesburg"></div>
+        <div class="input-group"><label>Property Type</label><input type="text" id="jc_reg" placeholder="e.g. Residential, Commercial"></div>
+      </div>
+      <div class="form-row">
+        <div class="input-group"><label>Pipe Type/Size</label><input type="text" id="jc_vin" placeholder="e.g. 15mm Copper, 20mm PVC"></div>
+        <div class="input-group"><label>Water Pressure (Bar)</label><input type="text" id="jc_engine" placeholder="e.g. 2.5"></div>
+      </div>
+      <div class="form-row">
+        <div class="input-group"><label>Testing Done</label><input type="text" id="jc_engine_type" placeholder="e.g. Pressure test, Leak detection"></div>
+        <div class="input-group"><label>Compliance Cert</label><input type="text" id="jc_km" placeholder="e.g. Cert #001"></div>
+      </div>
+    `;
+  }
+  
   mc.innerHTML = `
   <div class="page-header">
     <h2>New Job Card</h2>
@@ -4475,7 +4556,7 @@ function createNewJobCard() {
     <div class="form-row">
       <div class="input-group">
         <label>Customer Name *</label>
-        <input type="text" id="jc_customer" placeholder="e.g. John's Panel Beating">
+        <input type="text" id="jc_customer" placeholder="Customer or company name">
       </div>
       <div class="input-group">
         <label>Phone *</label>
@@ -4484,44 +4565,13 @@ function createNewJobCard() {
     </div>
 
     <div style="border:2px solid var(--border);border-radius:8px;padding:16px;margin:24px 0;background:var(--light);">
-      <h3 style="margin-top:0;">Vehicle Details</h3>
-      <div class="form-row">
-        <div class="input-group">
-          <label>Make & Model *</label>
-          <input type="text" id="jc_model" placeholder="e.g. Toyota Hilux">
-        </div>
-        <div class="input-group">
-          <label>Reg No *</label>
-          <input type="text" id="jc_reg" placeholder="e.g. GP123ABC">
-        </div>
-      </div>
-
-      <div class="form-row">
-        <div class="input-group">
-          <label>VIN</label>
-          <input type="text" id="jc_vin" placeholder="Vehicle Identification Number">
-        </div>
-        <div class="input-group">
-          <label>Engine No</label>
-          <input type="text" id="jc_engine" placeholder="Engine number">
-        </div>
-      </div>
-
-      <div class="form-row">
-        <div class="input-group">
-          <label>Engine Type</label>
-          <input type="text" id="jc_engine_type" placeholder="e.g. 2.8L Diesel">
-        </div>
-        <div class="input-group">
-          <label>Current KM</label>
-          <input type="number" id="jc_km" placeholder="Current mileage">
-        </div>
-      </div>
+      <h3 style="margin-top:0;">${industry === 'automotive' ? 'Vehicle Details' : 'Site & Asset Details'}</h3>
+      ${assetFields}
     </div>
 
     <div class="form-row">
       <div class="input-group">
-        <label>Mechanic Assigned</label>
+        <label>Mechanic/Technician Assigned</label>
         <input type="text" id="jc_mechanic" placeholder="Your name">
       </div>
       <div class="input-group">
@@ -6971,10 +7021,11 @@ async function saveProfile() {
   currentUser.vatNumber = document.getElementById('pf_vat')?.value.trim()||currentUser.vatNumber;
   currentUser.industry = document.getElementById('pf_industry')?.value||currentUser.industry||'other';
   
-  // Show/hide Job Cards button for automotive industry
+  // Show/hide Job Cards button for applicable industries
   const jobCardsBtn = document.getElementById('nav-jobcards');
   if (jobCardsBtn) {
-    jobCardsBtn.style.display = currentUser.industry === 'automotive' ? 'flex' : 'none';
+    const showJobCards = ['automotive', 'electrical', 'plumbing'].includes(currentUser.industry);
+    jobCardsBtn.style.display = showJobCards ? 'flex' : 'none';
   }
   
   // Get banking details from inputs
@@ -7132,6 +7183,33 @@ function printQuote() {
   doc.setTextColor(100, 100, 100);
   if (clientContact) doc.text(clientContact, margin, y + 19);
   if (clientAddress) doc.text(clientAddress, margin, y + 24);
+  
+  // Vehicle details for auto mechanics
+  const vehicleModel = document.getElementById('b_vehicleModel')?.value;
+  const vehicleVin = document.getElementById('b_vin')?.value;
+  const vehicleReg = document.getElementById('b_regNo')?.value;
+  const vehicleEngine = document.getElementById('b_engineNo')?.value;
+  const vehicleEngineType = document.getElementById('b_engineType')?.value;
+  const vehicleKm = document.getElementById('b_km')?.value;
+  
+  if (vehicleModel || vehicleVin || vehicleReg) {
+    let vehicleY = y + 29;
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(6);
+    doc.setTextColor(170, 170, 170);
+    doc.text('VEHICLE DETAILS', margin, vehicleY);
+    
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(7);
+    doc.setTextColor(100, 100, 100);
+    vehicleY += 4;
+    if (vehicleModel) { doc.text('Vehicle: ' + vehicleModel, margin, vehicleY); vehicleY += 3.5; }
+    if (vehicleReg) { doc.text('Reg No: ' + vehicleReg, margin, vehicleY); vehicleY += 3.5; }
+    if (vehicleVin) { doc.text('VIN: ' + vehicleVin, margin, vehicleY); vehicleY += 3.5; }
+    if (vehicleEngine) { doc.text('Engine No: ' + vehicleEngine, margin, vehicleY); vehicleY += 3.5; }
+    if (vehicleEngineType) { doc.text('Engine Type: ' + vehicleEngineType, margin, vehicleY); vehicleY += 3.5; }
+    if (vehicleKm) { doc.text('Current KM: ' + vehicleKm, margin, vehicleY); vehicleY += 3.5; }
+  }
 
   y += 32;
 

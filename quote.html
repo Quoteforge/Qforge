@@ -240,7 +240,11 @@ function renderQuote() {
       '</div>' +
       '<div class="doc-for"><div class="doc-info-label">Quoted For</div>' +
         '<div class="doc-client-name">' + esc(quote.client||'') + '</div>' +
-        '<div class="doc-client-detail">' + esc(quote.contact||'') + '<br>' + esc(quote.address||'') + '</div>' +
+        '<div class="doc-client-detail">' + esc(quote.contact||'') + '<br>' + esc(quote.address||'') +
+        (quote.vehicle_model ? '<br><strong>Vehicle:</strong> ' + esc(quote.vehicle_model) : '') +
+        (quote.vehicle_reg_no ? '<br><strong>Reg:</strong> ' + esc(quote.vehicle_reg_no) : '') +
+        (quote.vehicle_vin ? '<br><strong>VIN:</strong> ' + esc(quote.vehicle_vin) : '') +
+        '</div>' +
       '</div>' +
     '</div>' +
     (quote.scope?'<div class="doc-scope">'+esc(quote.scope)+'</div>':'') +
