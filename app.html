@@ -3621,8 +3621,14 @@ function renderInvoices() {
 }
 
 function viewInvoice(id) {
+  console.log('Viewing invoice:', id);
   const inv = quotes.find(x => x.id === id);
-  if (!inv) return;
+  console.log('Found invoice:', inv);
+  if (!inv) { 
+    console.error('Invoice not found! Available IDs:', quotes.map(q => q.id));
+    showToast('Invoice not found - try refreshing the page', 'error');
+    return;
+  }
   // Load into builder as view-only
   editingQuoteId = id;
   goTo('builder');
