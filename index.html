@@ -3351,13 +3351,6 @@ async function saveQuote() {
     ].filter(Boolean).join(', '),
     client_vat: document.getElementById('b_clientVat')?.value.trim()||null,
     client_reg: document.getElementById('b_clientReg')?.value.trim()||null,
-    // Auto mechanic fields
-    vehicle_model: currentUser?.industry === 'automotive' ? (document.getElementById('b_vehicleModel')?.value.trim()||null) : null,
-    vehicle_vin: currentUser?.industry === 'automotive' ? (document.getElementById('b_vin')?.value.trim()||null) : null,
-    vehicle_engine_no: currentUser?.industry === 'automotive' ? (document.getElementById('b_engineNo')?.value.trim()||null) : null,
-    vehicle_reg_no: currentUser?.industry === 'automotive' ? (document.getElementById('b_regNo')?.value.trim()||null) : null,
-    vehicle_engine_type: currentUser?.industry === 'automotive' ? (document.getElementById('b_engineType')?.value.trim()||null) : null,
-    vehicle_km: currentUser?.industry === 'automotive' ? (parseInt(document.getElementById('b_km')?.value)||null) : null,
     scope: builderScope,
     deposit: document.getElementById('b_deposit')?.value || null,
     notes: document.getElementById('b_notes')?.value.trim() || null,
@@ -3391,7 +3384,14 @@ async function saveQuote() {
     contact: quoteData.contact, address: quoteData.address,
     scope: builderScope, status: quoteData.status,
     subtotal: quoteData.subtotal, vat: quoteData.vat, amount: quoteData.amount,
-    items: [...builderItems], date: quoteData.date
+    items: [...builderItems], date: quoteData.date,
+    // Vehicle details (local only, not in DB)
+    vehicle_model: currentUser?.industry === 'automotive' ? (document.getElementById('b_vehicleModel')?.value.trim()||null) : null,
+    vehicle_vin: currentUser?.industry === 'automotive' ? (document.getElementById('b_vin')?.value.trim()||null) : null,
+    vehicle_reg_no: currentUser?.industry === 'automotive' ? (document.getElementById('b_regNo')?.value.trim()||null) : null,
+    vehicle_engine_no: currentUser?.industry === 'automotive' ? (document.getElementById('b_engineNo')?.value.trim()||null) : null,
+    vehicle_engine_type: currentUser?.industry === 'automotive' ? (document.getElementById('b_engineType')?.value.trim()||null) : null,
+    vehicle_km: currentUser?.industry === 'automotive' ? (parseInt(document.getElementById('b_km')?.value)||null) : null,
   };
   if (editingQuoteId) {
     const idx = quotes.findIndex(q=>q.id===editingQuoteId);
