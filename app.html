@@ -2760,15 +2760,18 @@ async function convertToInvoice(el, id) {
           const result = await sb.from('quotes').insert([invoice]);
           console.log('Full Supabase response:', result);
           
-          if (result.error) { 
-            console.error('❌ Invoice save error:', result.error);
-            showToast('Error saving invoice: ' + result.error.message, 'error'); 
-            return; 
-          }
-          if (!result.data) {
-            console.error('❌ Invoice save returned null data - Supabase silently rejected it');
-            console.log('Available columns might be missing from invoice object');
-            showToast('Warning: Invoice may not have saved properly', 'warning');
+          if (result.error) {
+            // If it's a duplicate key error, the invoice was actually already saved!
+            if (result.error.code === '23505') {
+              console.log('✅ Invoice already exists in Supabase (saved from previous attempt)');
+              // Continue - it's fine, invoice is already saved
+            } else {
+              console.error('❌ Invoice save error:', result.error);
+              showToast('Error saving invoice: ' + result.error.message, 'error'); 
+              return;
+            }
+          } else if (!result.data) {
+            console.warn('⚠️ Invoice save returned no data, but no error either');
           } else {
             console.log('✅ Invoice saved successfully!');
           }
