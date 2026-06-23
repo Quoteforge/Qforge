@@ -2785,6 +2785,15 @@ function loadQuoteIntoBuilder(q) {
   sv('b_quoteNumber', q.id);
   sv('b_deposit', q.deposit||'');
   sv('b_notes', q.notes||'');
+  
+  // Restore vehicle details (for automotive industry)
+  sv('b_vehicleModel', q.vehicle_model||'');
+  sv('b_regNo', q.vehicle_reg_no||'');
+  sv('b_vin', q.vehicle_vin||'');
+  sv('b_engineNo', q.vehicle_engine_no||'');
+  sv('b_engineType', q.vehicle_engine_type||'');
+  sv('b_km', q.vehicle_km||'');
+  
   builderScope = q.scope||'';
   document.getElementById('previewScope').textContent = builderScope || 'Click "Generate Scope with AI" to add a description.';
   builderItems = q.items ? q.items.map((i,idx) => ({...i, id:++builderItemCounter})) : [];
