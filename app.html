@@ -2621,7 +2621,7 @@ function renderQuoteTable(list, compact) {
     <div class="qt-amount">${q.amount>0?'R'+q.amount.toLocaleString('en-ZA'):'-'}</div>
     <div></div>
     <div class="qt-actions" onclick="event.stopPropagation()">
-      ${isConverted ? '<button class="btn btn-ghost btn-sm" onclick="event.stopPropagation();viewInvoice(\''+q.converted_to_invoice+'\')" style="color:#E63946;border-color:#E63946;">View Invoice</button>' : '<button class="btn btn-ghost btn-sm" onclick="editQuote(\''+q.id+'\')">Edit</button>'}
+      ${isConverted ? '<button class="btn btn-ghost btn-sm" onclick="event.stopPropagation();viewInvoice(\''+(q.converted_to_invoice || q.id)+'\')" style="color:#E63946;border-color:#E63946;">View Invoice</button>' : '<button class="btn btn-ghost btn-sm" onclick="editQuote(\''+q.id+'\')">Edit</button>'}
       ${!isConverted && !isInvoice ? '<button class="btn btn-ghost btn-sm" onclick="event.stopPropagation();openFollowUp(\''+q.id+'\')" title="Follow Up" style="color:#e8b84b;border-color:#e8b84b;">F/U</button>' : ''}
       ${!isConverted && !isInvoice ? '<button class="btn btn-wa btn-sm" onclick="event.stopPropagation();sendWhatsApp(\''+q.id+'\')" title="Send via WhatsApp">WA</button>' : ''}
       ${!isConverted && !isInvoice ? '<button class="btn btn-red btn-sm" onclick="event.stopPropagation();convertToInvoice(this,\''+q.id+'\')">Invoice</button>' : ''}
