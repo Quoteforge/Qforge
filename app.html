@@ -2582,8 +2582,9 @@ function renderRecentAcceptances() {
 // QUOTES PAGE
 // ══════════════════════════════════════
 function renderQuotes() {
-  // Show all quotes EXCEPT invoices - but INCLUDE converted quotes so user sees history
-  const onlyQuotes = quotes.filter(q => q.status !== 'invoice' && q.status !== 'paid');
+  // Show all quotes EXCEPT invoices (status='invoice', 'invoiced', or 'paid')
+  // But DO include converted quotes so user sees history
+  const onlyQuotes = quotes.filter(q => q.status !== 'invoice' && q.status !== 'invoiced' && q.status !== 'paid');
   return `
   <div class="page-header">
     <div>
