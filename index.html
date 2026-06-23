@@ -1776,6 +1776,9 @@ h1, h2, h3 {
           <div class="industry-card" data-industry="plumbing" onclick="selectIndustry(this,'plumbing')">
             <span class="ic-icon">🔧</span><span class="ic-label">Plumbing & Gas</span>
           </div>
+          <div class="industry-card" data-industry="automotive" onclick="selectIndustry(this,'automotive')">
+            <span class="ic-icon">🚗</span><span class="ic-label">Automotive & Mechanics</span>
+          </div>
           <div class="industry-card" data-industry="marketing" onclick="selectIndustry(this,'marketing')">
             <span class="ic-icon">📱</span><span class="ic-label">Marketing & Design</span>
           </div>
@@ -3371,7 +3374,14 @@ async function saveQuote() {
     date: new Date().toISOString().split('T')[0],
     valid_days: validDays,
     vat_registered: vatOn,
-    updated_at: new Date().toISOString()
+    updated_at: new Date().toISOString(),
+    // Vehicle details (save if automotive)
+    vehicle_model: currentUser?.industry === 'automotive' ? (document.getElementById('b_vehicleModel')?.value.trim()||null) : null,
+    vehicle_reg_no: currentUser?.industry === 'automotive' ? (document.getElementById('b_regNo')?.value.trim()||null) : null,
+    vehicle_vin: currentUser?.industry === 'automotive' ? (document.getElementById('b_vin')?.value.trim()||null) : null,
+    vehicle_engine_no: currentUser?.industry === 'automotive' ? (document.getElementById('b_engineNo')?.value.trim()||null) : null,
+    vehicle_engine_type: currentUser?.industry === 'automotive' ? (document.getElementById('b_engineType')?.value.trim()||null) : null,
+    vehicle_km: currentUser?.industry === 'automotive' ? (parseInt(document.getElementById('b_km')?.value)||null) : null,
   };
 
   // Save to Supabase if logged in with real account
