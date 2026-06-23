@@ -50,10 +50,10 @@ body{background:var(--bg);font-family:'Plus Jakarta Sans',sans-serif;font-weight
 .due-late{color:#dc2626;}
 
 /* Info band */
-.doc-info-band{background:#fff;display:grid;grid-template-columns:1fr;border-bottom:1px solid #eee;}
-.doc-info-col{padding:10px 16px;}
+.doc-info-band{background:#fff;display:grid;grid-template-columns:1fr 1fr;border-bottom:1px solid #eee;}
+.doc-info-col{padding:10px 16px;border-right:1px solid #eee;}
 .doc-info-col:first-child{display:none;}
-.doc-info-col:nth-child(2){border-right:none;}
+.doc-info-col:last-child{border-right:none;}
 .doc-info-col-label{font-size:0.48rem;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:#aaa;margin-bottom:4px;display:block;}
 .doc-company-name{font-family:'Plus Jakarta Sans',sans-serif;font-size:0.82rem;font-weight:800;color:var(--dark);margin-bottom:1px;}
 .doc-company-sub{font-size:0.54rem;color:#999;text-transform:uppercase;letter-spacing:0.12em;margin-top:2px;}
@@ -393,15 +393,15 @@ function renderInvoice() {
             ${invoice.contact?esc(invoice.contact)+'<br>':''}
             ${invoice.address?esc(invoice.address):''}
           </div>
-          ${invoice.vehicle_model || invoice.vehicle_reg_no || invoice.vehicle_vin ? 
-            '<div style="margin-top:12px;padding-top:12px;border-top:1px solid #eee;"><span class="doc-info-col-label">Vehicle Details</span><div style="font-size:0.75rem;color:#555;line-height:1.5;">' +
-            (invoice.vehicle_model ? '<strong>' + esc(invoice.vehicle_model) + '</strong><br>' : '') +
-            (invoice.vehicle_reg_no ? 'Reg: ' + esc(invoice.vehicle_reg_no) + '<br>' : '') +
-            (invoice.vehicle_vin ? 'VIN: ' + esc(invoice.vehicle_vin) : '') +
-            '</div></div>'
-          : ''}
           ${invoice.quote_ref?'<div style="margin-top:10px;"><span class="doc-info-col-label">Quote Reference</span><div style="font-size:0.78rem;color:#555;">'+esc(invoice.quote_ref)+'</div></div>':''}
         </div>
+        ${invoice.vehicle_model || invoice.vehicle_reg_no || invoice.vehicle_vin ? 
+          '<div class="doc-info-col"><span class="doc-info-col-label">Vehicle Details</span><div style="font-size:0.75rem;color:#555;line-height:1.5;">' +
+          (invoice.vehicle_model ? '<strong>' + esc(invoice.vehicle_model) + '</strong><br>' : '') +
+          (invoice.vehicle_reg_no ? 'Reg: ' + esc(invoice.vehicle_reg_no) + '<br>' : '') +
+          (invoice.vehicle_vin ? 'VIN: ' + esc(invoice.vehicle_vin) : '') +
+          '</div></div>'
+        : '<div class="doc-info-col"></div>'}
       </div>
 
       <!-- ITEMS TABLE -->

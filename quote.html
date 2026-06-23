@@ -38,12 +38,14 @@ body{background:var(--bg);font-family:'Plus Jakarta Sans',sans-serif;min-height:
 .doc-quote-valid{font-size:0.56rem;color:#999;margin-top:2px;text-align:right;}
 
 /* ──── INFO BAND ──── */
-.doc-info-band{background:var(--white);display:grid;grid-template-columns:1fr;border-bottom:1px solid var(--border);}
+.doc-info-band{background:var(--white);display:grid;grid-template-columns:1fr 1fr;border-bottom:1px solid var(--border);}
 .doc-from{display:none;}
-.doc-for{padding:12px 20px;}
+.doc-for{padding:12px 20px;border-right:1px solid var(--border);}
+.doc-for:last-child{border-right:none;}
 .doc-info-label{font-size:0.50rem;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:#999;margin-bottom:4px;display:block;}
 .doc-client-name{font-family:'Plus Jakarta Sans',sans-serif;font-size:0.78rem;font-weight:700;color:var(--dark);}
 .doc-client-detail{font-size:0.62rem;color:#666;line-height:1.5;margin-top:3px;}
+.doc-vehicle{padding:12px 20px;border-left:1px solid var(--border);}
 
 /* ──── SCOPE ──── */
 .doc-scope{padding:12px 20px;background:var(--red-light);border-left:4px solid var(--red);font-size:0.65rem;color:var(--dark);line-height:1.6;font-style:italic;}
@@ -243,14 +245,14 @@ function renderQuote() {
         '<div class="doc-client-detail">' + esc(quote.contact||'') + '<br>' + esc(quote.address||'') + '</div>' +
       '</div>' +
       (quote.vehicle_model || quote.vehicle_reg_no || quote.vehicle_vin ? 
-        '<div class="doc-for" style="margin-left:12px;"><div class="doc-info-label">Vehicle Details</div>' +
-          '<div class="doc-client-detail">' +
+        '<div class="doc-vehicle"><div class="doc-info-label">Vehicle Details</div>' +
+          '<div style="font-size:0.66rem;color:#333;line-height:1.6;">' +
             (quote.vehicle_model ? '<strong>' + esc(quote.vehicle_model) + '</strong><br>' : '') +
             (quote.vehicle_reg_no ? 'Reg: ' + esc(quote.vehicle_reg_no) + '<br>' : '') +
             (quote.vehicle_vin ? 'VIN: ' + esc(quote.vehicle_vin) : '') +
           '</div>' +
-        '</div>' 
-      : '') +
+        '</div>'
+      : '<div class="doc-vehicle"></div>') +
     '</div>' +
     (quote.scope?'<div class="doc-scope">'+esc(quote.scope)+'</div>':'') +
     '<table class="doc-table"><thead><tr><th>Description</th><th>Qty</th><th>Unit Price</th><th>Amount</th></tr></thead><tbody>' + items + '</tbody></table>' +
