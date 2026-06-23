@@ -1925,6 +1925,7 @@ let builderItems = [];
 let builderItemCounter = 0;
 let builderScope = '';
 let editingQuoteId = null;
+let isViewOnly = false; // Set to true when viewing invoice in read-only mode
 let currentClientId = null;
 let customItems = []; // user's saved custom quick-add items
 let productLibrary = []; // imported product catalogue
@@ -2479,6 +2480,7 @@ function showClientDetail(clientName) {
   window.scrollTo(0, 0);
 }
 function goTo(page) {
+  isViewOnly = false; // Reset view-only mode when navigating
   currentPage = page;
   updateNotificationBadge();
   ['dashboard','quotes','builder','invoices','clients','stats','products','profile','admin','expenses','jobcards','pandl'].forEach(p => {
@@ -3416,6 +3418,12 @@ function updateBuilderPreview() {
 // SAVE QUOTE
 // ══════════════════════════════════════
 async function saveQuote() {
+  // Prevent saving when viewing an invoice (read-only mode)
+  if (isViewOnly) {
+    showToast('Cannot edit - this invoice is in view-only mode. Click Back to return.', 'error');
+    return;
+  }
+  
   const clientName = document.getElementById('b_clientName')?.value.trim();
   if (!clientName) { showToast('Please enter a client name', 'error'); return; }
   const {subtotal,vat,total} = calcBuilderTotals();
@@ -3646,8 +3654,13 @@ function viewInvoice(id) {
     showToast('Invoice not found - try refreshing the page', 'error');
     return;
   }
-  // Load into builder as view-only
-  editingQuoteId = id;
+  
+  // Show invoice in view mode (don't allow editing)
+  isViewOnly = true; // Set read-only flag
+  editingQuoteId = null; // Don't set editing mode
+  showToast('📄 Viewing Invoice (Read-Only)', 'info');
+  
+  // Load into builder
   goTo('builder');
   setTimeout(() => loadQuoteIntoBuilder(inv), 50);
 }
