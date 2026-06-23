@@ -2966,11 +2966,18 @@ function renderBuilder() {
     // We'll calculate nextNum based on current array, but it should be fresh
   }
   
-  // Generate unique quote number with user prefix to avoid clashes
+  // Generate unique quote number - find the HIGHEST number and add 1
   const userPrefix = (currentUser?.company || 'QF').replace(/[^A-Z0-9]/gi,'').toUpperCase().substring(0,3);
-  const existingNums = quotes.filter(q => q.id && q.id.includes(userPrefix+'-')).length;
-  const nextNum = userPrefix + '-' + String(existingNums + 1).padStart(3,'0');
-  console.log('Next quote number:', nextNum, '(existing:', existingNums, ')');
+  const driQuotes = quotes.filter(q => q.id && q.id.startsWith(userPrefix + '-'));
+  const numbers = driQuotes
+    .map(q => {
+      const match = q.id.match(new RegExp(userPrefix + '-(\\d+)'));
+      return match ? parseInt(match[1]) : 0;
+    })
+    .filter(n => n > 0);
+  const highestNum = numbers.length > 0 ? Math.max(...numbers) : 0;
+  const nextNum = userPrefix + '-' + String(highestNum + 1).padStart(3,'0');
+  console.log('Next quote number:', nextNum, '(highest existing:', highestNum, ')');
   editingQuoteId = null;
   builderItems = [];
   builderItemCounter = 0;
