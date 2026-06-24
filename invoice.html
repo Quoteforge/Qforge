@@ -326,16 +326,17 @@ async function loadInvoice() {
   invoice = data;
   profile = data.profiles;
   
-  // Apply template colors based on invoice's saved template
+  // Apply template colors FIRST before rendering
   const templateId = invoice.template_id || 'professional-bw';
   applyInvoiceTemplate(templateId);
-  console.log('Invoice template:', templateId); // Debug
+  console.log('Applied template:', templateId);
 
   // Mark as viewed
   if (invoice.status === 'invoice' || invoice.status === 'invoiced') {
     await sb.from('quotes').update({ status: 'invoice', viewed_at: new Date().toISOString() }).eq('id', iid);
   }
 
+  // Now render with colors applied
   renderInvoice();
 }
 
