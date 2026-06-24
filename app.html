@@ -3864,9 +3864,15 @@ function downloadInvoicePDF(id) {
 }
 
 function printInvoicePDF(inv) {
-  // Fallback if selectedTemplate is not set
-  if (!selectedTemplate) {
-    selectedTemplate = QUOTE_TEMPLATES[0];
+  // Get the invoice's saved template
+  let templateToUse = selectedTemplate;
+  if (inv && inv.template_id) {
+    templateToUse = getTemplate(inv.template_id) || selectedTemplate;
+  }
+  
+  // Fallback if template not set
+  if (!templateToUse) {
+    templateToUse = QUOTE_TEMPLATES[0];
   }
   
   const { jsPDF } = window.jspdf;
@@ -3874,9 +3880,9 @@ function printInvoicePDF(inv) {
   const pageW = 210;
   const margin = 15;
   
-  // Use template colors
-  const primary = hexToRgb(selectedTemplate.primary);
-  const secondary = hexToRgb(selectedTemplate.secondary);
+  // Use INVOICE's saved template colors
+  const primary = hexToRgb(templateToUse.primary);
+  const secondary = hexToRgb(templateToUse.secondary);
   const dark = [26, 26, 26];
   const white = [255, 255, 255];
   const midGrey = [120, 120, 120];
@@ -7393,9 +7399,18 @@ function printQuote() {
     return;
   }
   
-  // Fallback if selectedTemplate is not set
-  if (!selectedTemplate) {
-    selectedTemplate = QUOTE_TEMPLATES[0];
+  // Get the quote's saved template (if editing existing quote)
+  let templateToUse = selectedTemplate;
+  if (editingQuoteId) {
+    const quote = quotes.find(q => q.id === editingQuoteId);
+    if (quote && quote.template_id) {
+      templateToUse = getTemplate(quote.template_id) || selectedTemplate;
+    }
+  }
+  
+  // Fallback if template not set
+  if (!templateToUse) {
+    templateToUse = QUOTE_TEMPLATES[0];
   }
   
   const { jsPDF } = window.jspdf;
@@ -7407,7 +7422,7 @@ function printQuote() {
   let y = 0;
 
   // ── COLOURS ──
-  const primary = hexToRgb(selectedTemplate.primary); // Use template color
+  const primary = hexToRgb(templateToUse.primary); // Use QUOTE's saved template color
   const dark = [26, 26, 26];
   const white = [255, 255, 255];
   const lightGrey = [248, 247, 245];
