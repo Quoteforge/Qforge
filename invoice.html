@@ -324,6 +324,17 @@ async function loadInvoice() {
   if (error || !data) { showError('Invoice not found. The link may be incorrect.'); return; }
 
   invoice = data;
+  
+  // CRITICAL: Parse items if it's a JSON string
+  if (typeof invoice.items === 'string') {
+    try {
+      invoice.items = JSON.parse(invoice.items);
+    } catch(e) {
+      console.error('Failed to parse items:', e);
+      invoice.items = [];
+    }
+  }
+  
   profile = data.profiles;
   
   // Apply template colors FIRST before rendering
