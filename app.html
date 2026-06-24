@@ -2011,6 +2011,15 @@ function hexToRgb(hex) {
   const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
   return result ? [parseInt(result[1], 16), parseInt(result[2], 16), parseInt(result[3], 16)] : [38, 99, 235];
 }
+
+// Extract clean invoice number from composite ID (user_id|INV-001 → INV-001)
+function getDisplayInvoiceNumber(invoiceId) {
+  if (!invoiceId) return '';
+  if (invoiceId.includes('|')) {
+    return invoiceId.split('|')[1]; // Get the part after |
+  }
+  return invoiceId; // Fallback for old format
+}
 let currentClientId = null;
 let customItems = []; // user's saved custom quick-add items
 let productLibrary = []; // imported product catalogue
@@ -2803,14 +2812,21 @@ async function convertToInvoice(el, id) {
       console.log('User clicked:', isPaid ? 'OK (PAID)' : 'CANCEL (PENDING)');
       console.log('isPaid value:', isPaid);
       
-      // Generate UNIQUE invoice number using timestamp suffix
-      // e.g., INV-001-1718830400 (invoice-number-timestamp)
-      const timestamp = Math.floor(Date.now() / 1000); // Unix timestamp for uniqueness
-      const numPart = q.id.replace(/^[A-Z]+-/i, '');   // Get just the number from quote ID
-      const invNum = 'INV-' + numPart + '-' + timestamp; // INV-001-1718830400 (unique!)
+      // Generate UNIQUE per-user invoice number
+      // Store as: user_id|INV-001 (unique across all users)
+      // Display as: INV-001 (clean for user)
+      const { data: userProfile } = await sb.from('profiles').select('invoice_counter').eq('id', currentUser.id).single();
+      const currentCounter = (userProfile?.invoice_counter || 0) + 1;
+      
+      // Update the counter in profiles table
+      await sb.from('profiles').update({ invoice_counter: currentCounter }).eq('id', currentUser.id);
+      
+      // Generate unique invoice ID: user_id|INV-001 (prevents duplicates)
+      const invoiceNumber = 'INV-' + String(currentCounter).padStart(3, '0');
+      const invNum = currentUser.id + '|' + invoiceNumber; // Unique ID for database
       const invDate = new Date().toISOString().split('T')[0];
       
-      console.log('Generated unique invoice number:', invNum);
+      console.log('Generated invoice:', invoiceNumber, 'stored as:', invNum);
       
       // Make sure we have the full quote with all fields
       const quoteToConvert = quotes.find(x => x.id === id);
@@ -3769,10 +3785,11 @@ function renderInvoices() {
     </div>` :
     invoices.map(inv => {
       const isPaid = inv.status === 'paid';
+      const displayNum = getDisplayInvoiceNumber(inv.id); // Clean number: INV-001
       return '<div class="inv-row" onclick="viewInvoice(\'' + inv.id + '\')">' +
         '<div class="inv-row-main">' +
         '<div class="qt-client">' + esc(inv.client) + '</div>' +
-        '<div class="qt-num">' + inv.id + (inv.quote_ref ? ' <span style="color:var(--muted);font-size:0.68rem;">ref: ' + esc(inv.quote_ref) + '</span>' : '') + '</div>' +
+        '<div class="qt-num">' + displayNum + (inv.quote_ref ? ' <span style="color:var(--muted);font-size:0.68rem;">ref: ' + esc(inv.quote_ref) + '</span>' : '') + '</div>' +
         '<div style="font-size:0.78rem;color:var(--muted);margin-top:2px;">' + formatDate(inv.date) + '</div>' +
         '</div>' +
         '<div class="inv-row-right">' +
@@ -3853,8 +3870,9 @@ async function sendInvoiceWhatsApp(id) {
   dueDate.setDate(dueDate.getDate() + 30);
   const dueDateStr = dueDate.toLocaleDateString('en-ZA', {day:'numeric',month:'long',year:'numeric'});
   const invoiceLink = 'https://qforge-eight.vercel.app/invoice.html?id=' + encodeURIComponent(inv.id);
+  const displayNum = getDisplayInvoiceNumber(inv.id); // Clean number for display
   waPhone = inv.contact || '';
-  const msg = 'Hi ' + inv.client + ',\n\n🧾 TAX INVOICE from ' + company + '\n\nInvoice Number: ' + inv.id + '\nAmount Due: R' + (inv.amount||0).toLocaleString('en-ZA') + '\nDue Date: ' + dueDateStr + '\n\n📲 View & Pay your INVOICE here:\n' + invoiceLink + '\n\nPayment Reference: ' + inv.id + '\n\nKind regards,\n' + company;
+  const msg = 'Hi ' + inv.client + ',\n\n🧾 TAX INVOICE from ' + company + '\n\nInvoice Number: ' + displayNum + '\nAmount Due: R' + (inv.amount||0).toLocaleString('en-ZA') + '\nDue Date: ' + dueDateStr + '\n\n📲 View & Pay your INVOICE here:\n' + invoiceLink + '\n\nPayment Reference: ' + displayNum + '\n\nKind regards,\n' + company;
   document.getElementById('waMessage').textContent = msg;
   document.getElementById('waModal').classList.add('show');
 }
