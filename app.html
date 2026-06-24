@@ -3544,12 +3544,25 @@ async function saveQuote() {
 
   // Update local state
   const localQuote = {
-    id: quoteData.id, client: clientName,
-    contact: quoteData.contact, address: quoteData.address,
-    scope: builderScope, status: quoteData.status,
-    subtotal: quoteData.subtotal, vat: quoteData.vat, amount: quoteData.amount,
-    items: [...builderItems], date: quoteData.date,
-    // Vehicle details (local only, not in DB)
+    id: quoteData.id, 
+    client: clientName,
+    contact: quoteData.contact, 
+    address: quoteData.address,
+    scope: builderScope, 
+    status: quoteData.status,
+    type: quoteData.type, // IMPORTANT: Keep type (invoice or quote)
+    subtotal: quoteData.subtotal, 
+    vat: quoteData.vat, 
+    amount: quoteData.amount,
+    items: quoteData.items, // Use quoteData.items (might be JSON string)
+    date: quoteData.date,
+    valid_days: quoteData.valid_days,
+    vat_registered: quoteData.vat_registered,
+    deposit: quoteData.deposit,
+    notes: quoteData.notes,
+    quote_ref: foundQuote?.quote_ref || null, // Preserve quote_ref if updating
+    converted_to_invoice: foundQuote?.converted_to_invoice || null, // Preserve conversion status
+    // Vehicle details
     vehicle_model: currentUser?.industry === 'automotive' ? (document.getElementById('b_vehicleModel')?.value.trim()||null) : null,
     vehicle_vin: currentUser?.industry === 'automotive' ? (document.getElementById('b_vin')?.value.trim()||null) : null,
     vehicle_reg_no: currentUser?.industry === 'automotive' ? (document.getElementById('b_regNo')?.value.trim()||null) : null,
