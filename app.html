@@ -3840,6 +3840,11 @@ function downloadInvoicePDF(id) {
 }
 
 function printInvoicePDF(inv) {
+  // Fallback if selectedTemplate is not set
+  if (!selectedTemplate) {
+    selectedTemplate = QUOTE_TEMPLATES[0];
+  }
+  
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
   const pageW = 210;
@@ -7358,6 +7363,17 @@ async function saveProfile() {
 // PRINT
 // ══════════════════════════════════════
 function printQuote() {
+  // Safety check - make sure we have items
+  if (!builderItems || builderItems.length === 0) {
+    showToast('Please add at least one item to your quote', 'error');
+    return;
+  }
+  
+  // Fallback if selectedTemplate is not set
+  if (!selectedTemplate) {
+    selectedTemplate = QUOTE_TEMPLATES[0];
+  }
+  
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
   
@@ -7526,8 +7542,8 @@ function printQuote() {
     doc.setFillColor(255, 255, 255);
     doc.rect(0, y, pageW, scopeH, 'F');
 
-    // Orange left border
-    doc.setFillColor(...orange);
+    // Primary color left border
+    doc.setFillColor(...primary);
     doc.rect(0, y, 1.5, scopeH, 'F');
 
     // Bottom border
@@ -7619,7 +7635,7 @@ function printQuote() {
   // Total due - full width dark bar
   doc.setFillColor(...dark);
   doc.rect(0, y, pageW, 11, 'F');
-  doc.setFillColor(...orange);
+  doc.setFillColor(...primary);
   doc.rect(0, y, 1.5, 11, 'F');
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(10);
@@ -7637,7 +7653,7 @@ function printQuote() {
     const notesH = noteLines.length * 4.5 + 10;
     doc.setFillColor(252, 252, 252);
     doc.rect(0, y + 2, pageW, notesH, 'F');
-    doc.setFillColor(...orange);
+    doc.setFillColor(...primary);
     doc.rect(0, y + 2, 1.5, notesH, 'F');
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(6.5);
@@ -7653,7 +7669,7 @@ function printQuote() {
   // ── FOOTER ──
   doc.setFillColor(26, 26, 26);
   doc.rect(0, y, pageW, 26, 'F');
-  doc.setFillColor(...orange);
+  doc.setFillColor(...primary);
   doc.rect(0, y, pageW, 1.5, 'F');
 
   doc.setFont('helvetica', 'italic');
