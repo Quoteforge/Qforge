@@ -171,6 +171,29 @@ function esc(s){ return s?String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').r
 function fmt(n){ return 'R '+(parseFloat(n)||0).toLocaleString('en-ZA',{minimumFractionDigits:2,maximumFractionDigits:2}); }
 function showError(msg){ document.getElementById('loadingWrap').style.display='none'; const e=document.getElementById('errorWrap'); e.style.display='block'; e.innerHTML='<div style="font-size:2rem;margin-bottom:14px;">&#128533;</div><h3 style="color:#111;margin-bottom:8px;">'+msg+'</h3><p style="color:#aaa;font-size:0.8rem;">If this is an error, please contact the sender.</p>'; }
 
+function fmt(n){ return 'R '+(parseFloat(n)||0).toLocaleString('en-ZA',{minimumFractionDigits:2,maximumFractionDigits:2}); }
+
+const QUOTE_TEMPLATES = [
+  { id: 'modern-blue', primary: '#2563eb', secondary: '#1e40af' },
+  { id: 'corporate-green', primary: '#059669', secondary: '#047857' },
+  { id: 'creative-red', primary: '#dc2626', secondary: '#b91c1c' },
+  { id: 'elegant-purple', primary: '#7c3aed', secondary: '#6d28d9' },
+  { id: 'energetic-orange', primary: '#ea580c', secondary: '#c2410c' },
+  { id: 'calm-teal', primary: '#0891b2', secondary: '#0e7490' },
+  { id: 'premium-gold', primary: '#b45309', secondary: '#92400e' },
+  { id: 'fresh-lime', primary: '#65a30d', secondary: '#4f7206' },
+  { id: 'bold-navy', primary: '#1e3a8a', secondary: '#1e40af' },
+  { id: 'minimalist-gray', primary: '#374151', secondary: '#1f2937' }
+];
+
+function getTemplate(tid) { return QUOTE_TEMPLATES.find(t => t.id === tid) || QUOTE_TEMPLATES[0]; }
+function applyTemplateColors(tid) {
+  const t = getTemplate(tid);
+  document.documentElement.style.setProperty('--red', t.primary);
+  document.documentElement.style.setProperty('--red-dark', t.secondary);
+  document.documentElement.style.setProperty('--red-light', t.primary + '14');
+}
+
 async function loadQuote() {
   const params = new URLSearchParams(window.location.search);
   const qid = params.get('id');
@@ -183,6 +206,11 @@ async function loadQuote() {
       const { data: pd } = await sb.from('profiles').select('*').eq('id', quote.user_id).single();
       profile = pd || {};
     } else { profile = {}; }
+    
+    // Apply template colors if available
+    const templateId = quote.template_id || 'modern-blue';
+    applyTemplateColors(templateId);
+    
     if (!quote.viewed_at) {
       await sb.from('quotes').update({ viewed_at: new Date().toISOString() }).eq('id', qid);
     }

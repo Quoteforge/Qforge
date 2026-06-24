@@ -1926,6 +1926,72 @@ let builderItemCounter = 0;
 let builderScope = '';
 let editingQuoteId = null;
 let isViewOnly = false; // Set to true when viewing invoice in read-only mode
+
+// ══════════════════════════════════════
+// QUOTE TEMPLATES (10 Professional Designs)
+// ══════════════════════════════════════
+const QUOTE_TEMPLATES = [
+  { id: 'modern-blue', name: 'Modern Blue', primary: '#2563eb', secondary: '#1e40af', accent: '#3b82f6', bg: '#f0f9ff' },
+  { id: 'corporate-green', name: 'Corporate Green', primary: '#059669', secondary: '#047857', accent: '#10b981', bg: '#f0fdf4' },
+  { id: 'creative-red', name: 'Creative Red', primary: '#dc2626', secondary: '#b91c1c', accent: '#ef4444', bg: '#fef2f2' },
+  { id: 'elegant-purple', name: 'Elegant Purple', primary: '#7c3aed', secondary: '#6d28d9', accent: '#a78bfa', bg: '#faf5ff' },
+  { id: 'energetic-orange', name: 'Energetic Orange', primary: '#ea580c', secondary: '#c2410c', accent: '#f97316', bg: '#fef3c7' },
+  { id: 'calm-teal', name: 'Calm Teal', primary: '#0891b2', secondary: '#0e7490', accent: '#06b6d4', bg: '#f0fdfa' },
+  { id: 'premium-gold', name: 'Premium Gold', primary: '#b45309', secondary: '#92400e', accent: '#d97706', bg: '#fffbeb' },
+  { id: 'fresh-lime', name: 'Fresh Lime', primary: '#65a30d', secondary: '#4f7206', accent: '#84cc16', bg: '#f7fee7' },
+  { id: 'bold-navy', name: 'Bold Navy', primary: '#1e3a8a', secondary: '#1e40af', accent: '#3b82f6', bg: '#f8fafc' },
+  { id: 'minimalist-gray', name: 'Minimalist Gray', primary: '#374151', secondary: '#1f2937', accent: '#6b7280', bg: '#f9fafb' }
+];
+
+let selectedTemplate = QUOTE_TEMPLATES[0]; // Default to Modern Blue
+
+function openTemplateSelector() {
+  const modal = document.getElementById('templateModal');
+  const grid = document.getElementById('templateGrid');
+  
+  if (!modal || !grid) return;
+  
+  // Render template buttons
+  grid.innerHTML = QUOTE_TEMPLATES.map(t => `
+    <button style="
+      padding:16px;
+      border:2px solid ${selectedTemplate.id === t.id ? t.primary : '#ddd'};
+      background:${t.bg};
+      border-radius:12px;
+      cursor:pointer;
+      transition:all 0.2s;
+      font-weight:600;
+      color:${t.primary};
+      box-shadow:${selectedTemplate.id === t.id ? '0 0 0 3px ' + t.primary + '33' : 'none'};
+    " 
+    onmouseover="this.style.transform='scale(1.05)'" 
+    onmouseout="this.style.transform='scale(1)'"
+    onclick="selectTemplate('${t.id}')">
+      <div style="font-size:24px;margin-bottom:4px;">■</div>
+      <div style="font-size:12px;">${t.name}</div>
+    </button>
+  `).join('');
+  
+  modal.classList.add('show');
+}
+
+function closeTemplateSelector() {
+  const modal = document.getElementById('templateModal');
+  if (modal) modal.classList.remove('show');
+}
+
+function selectTemplate(templateId) {
+  selectedTemplate = QUOTE_TEMPLATES.find(t => t.id === templateId) || QUOTE_TEMPLATES[0];
+  closeTemplateSelector();
+  showToast(`✨ Template: ${selectedTemplate.name}`, 'success');
+  updateBuilderPreview(); // Refresh to show new colors
+}
+
+// Convert hex color to RGB array [r, g, b]
+function hexToRgb(hex) {
+  const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+  return result ? [parseInt(result[1], 16), parseInt(result[2], 16), parseInt(result[3], 16)] : [38, 99, 235];
+}
 let currentClientId = null;
 let customItems = []; // user's saved custom quick-add items
 let productLibrary = []; // imported product catalogue
@@ -2989,6 +3055,7 @@ function renderBuilder() {
       <h2>Quote Builder</h2>
     </div>
     <div style="display:flex;gap:10px;flex-wrap:nowrap;">
+      <button class="btn btn-ghost" style="color:#666;" onclick="openTemplateSelector()">🎨 Design</button>
       <button class="btn btn-red" style="color:#fff;" onclick="goTo('quotes')">← Back</button>
     </div>
   </div>
@@ -3517,6 +3584,7 @@ async function saveQuote() {
     valid_days: validDays,
     vat_registered: vatOn,
     updated_at: new Date().toISOString(),
+    template_id: selectedTemplate.id, // SAVE TEMPLATE CHOICE!
     // Vehicle details (save if automotive)
     vehicle_model: currentUser?.industry === 'automotive' ? (document.getElementById('b_vehicleModel')?.value.trim()||null) : null,
     vehicle_reg_no: currentUser?.industry === 'automotive' ? (document.getElementById('b_regNo')?.value.trim()||null) : null,
@@ -3776,7 +3844,10 @@ function printInvoicePDF(inv) {
   const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
   const pageW = 210;
   const margin = 15;
-  const orange = [230, 57, 70]; // Red #E63946
+  
+  // Use template colors
+  const primary = hexToRgb(selectedTemplate.primary);
+  const secondary = hexToRgb(selectedTemplate.secondary);
   const dark = [26, 26, 26];
   const white = [255, 255, 255];
   const midGrey = [120, 120, 120];
@@ -3786,7 +3857,7 @@ function printInvoicePDF(inv) {
   // White header
   doc.setFillColor(255, 255, 255);
   doc.rect(0, 0, pageW, 34, 'F');
-  doc.setFillColor(...orange);
+  doc.setFillColor(...primary);
   doc.rect(0, 34, pageW, 1.5, 'F');
 
   // Company name
@@ -3813,7 +3884,7 @@ function printInvoicePDF(inv) {
   doc.text('TAX INVOICE', pageW - margin, 10, { align: 'right' });
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(14);
-  doc.setTextColor(...orange);
+  doc.setTextColor(...primary);
   doc.text(inv.id, pageW - margin, 20, { align: 'right' });
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(7.5);
@@ -3923,7 +3994,7 @@ function printInvoicePDF(inv) {
   // Banking details
   doc.setFillColor(248, 247, 245);
   doc.rect(0, y, pageW, 22, 'F');
-  doc.setFillColor(...orange);
+  doc.setFillColor(...primary);
   doc.rect(0, y, 1.5, 22, 'F');
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(7.5);
@@ -3938,7 +4009,7 @@ function printInvoicePDF(inv) {
   // Footer
   doc.setFillColor(26, 26, 26);
   doc.rect(0, y, pageW, 20, 'F');
-  doc.setFillColor(...orange);
+  doc.setFillColor(...primary);
   doc.rect(0, y, pageW, 1.5, 'F');
   doc.setFont('helvetica', 'italic');
   doc.setFontSize(8);
@@ -7296,20 +7367,20 @@ function printQuote() {
   let y = 0;
 
   // ── COLOURS ──
-  const orange = [230, 57, 70]; // Red #E63946
+  const primary = hexToRgb(selectedTemplate.primary); // Use template color
   const dark = [26, 26, 26];
   const white = [255, 255, 255];
   const lightGrey = [248, 247, 245];
   const midGrey = [120, 120, 120];
   const borderGrey = [220, 220, 220];
 
-  // ── HEADER BAND - white bg, orange bottom line ──
+  // ── HEADER BAND - white bg, primary color bottom line ──
   // White background
   doc.setFillColor(255, 255, 255);
   doc.rect(0, 0, pageW, 34, 'F');
 
-  // Orange bottom line
-  doc.setFillColor(...orange);
+  // Template color bottom line
+  doc.setFillColor(...primary);
   doc.rect(0, 34, pageW, 1.5, 'F');
 
   // Logo top-left, then company name
@@ -7354,10 +7425,10 @@ function printQuote() {
   doc.setTextColor(150, 150, 150);
   doc.text(docLabel, pageW - margin, 10, { align: 'right' });
 
-  // Quote number - ORANGE
+  // Quote number - template primary color
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(22);
-  doc.setTextColor(...orange);
+  doc.setTextColor(...primary);
   doc.text(qNum, pageW - margin, 20, { align: 'right' });
 
   // Date and valid - dark
@@ -7380,8 +7451,8 @@ function printQuote() {
   doc.setFillColor(255, 255, 255);
   doc.rect(0, y, pageW, 28, 'F');
 
-  // Orange left accent on FROM col
-  doc.setFillColor(...orange);
+  // Template primary color left accent on FROM col
+  doc.setFillColor(...primary);
   doc.rect(0, y, 1.5, 28, 'F');
 
   // Dividing line center
@@ -8330,6 +8401,22 @@ function hideLoadingScreen(showAuth) {
     <div style="display:flex;gap:1px;margin-top:8px;">
       <button class="btn btn-red" style="color:#fff;" style="flex:1;" onclick="saveClient()">Save Client</button>
       <button class="btn btn-ghost" onclick="document.getElementById('clientModal').classList.remove('show')">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- TEMPLATE SELECTOR MODAL -->
+<div id="templateModal" class="modal-overlay">
+  <div class="modal" style="max-width:900px;">
+    <h3>🎨 Choose Your Quote Template</h3>
+    <p>Select a professional design for your quote PDFs. You can change this anytime!</p>
+    
+    <div id="templateGrid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin:20px 0;">
+      <!-- Templates render here -->
+    </div>
+    
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeTemplateSelector()">Done</button>
     </div>
   </div>
 </div>
