@@ -3471,11 +3471,8 @@ function updateBuilderPreview() {
 // SAVE QUOTE
 // ══════════════════════════════════════
 async function saveQuote() {
-  // Prevent saving when viewing an invoice (read-only mode)
-  if (isViewOnly) {
-    showToast('Cannot edit - this invoice is in view-only mode. Click Back to return.', 'error');
-    return;
-  }
+  // If viewing invoice in read-only mode, allow save but reload after (to refresh data)
+  const isViewingInvoice = isViewOnly;
   
   const clientName = document.getElementById('b_clientName')?.value.trim();
   if (!clientName) { showToast('Please enter a client name', 'error'); return; }
@@ -3577,7 +3574,14 @@ async function saveQuote() {
     quotes.unshift(localQuote);
     editingQuoteId = qNum;
   }
-  showToast('Quote saved', 'success');
+  
+  // If viewing invoice, reload page to refresh data from Supabase
+  if (isViewingInvoice) {
+    showToast('Invoice saved! Refreshing...', 'success');
+    setTimeout(() => location.reload(), 1000);
+  } else {
+    showToast('Quote saved', 'success');
+  }
 }
 
 // ══════════════════════════════════════
