@@ -1,0 +1,49 @@
+{
+  "name": "QForge - Professional Quote & Invoice Software",
+  "short_name": "QForge",
+  "description": "Create professional quotes and invoices instantly. Perfect for trades, contractors, and small businesses.",
+  "start_url": "/app.html",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#ffffff",
+  "theme_color": "#E63946",
+  "icons": [
+    {
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect fill='%23E63946' width='192' height='192' rx='45'/><text x='96' y='120' font-size='110' fill='white' text-anchor='middle' font-family='Plus Jakarta Sans' font-weight='900'>Q</text></svg>",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><rect fill='%23E63946' width='512' height='512' rx='120'/><text x='256' y='320' font-size='280' fill='white' text-anchor='middle' font-family='Plus Jakarta Sans' font-weight='900'>Q</text></svg>",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["productivity", "business"],
+  "screenshots": [
+    {
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 540 720'><rect fill='%23f7f7f7' width='540' height='720'/><rect fill='%23E63946' width='540' height='80'/><text x='270' y='50' font-size='32' fill='white' text-anchor='middle' font-family='Plus Jakarta Sans' font-weight='800'>QForge</text><text x='30' y='150' font-size='18' font-family='Plus Jakarta Sans' font-weight='600'>Create Quotes</text><text x='30' y='200' font-size='14' fill='%23666' font-family='Plus Jakarta Sans'>Professional quotes in minutes</text><text x='30' y='260' font-size='18' font-family='Plus Jakarta Sans' font-weight='600'>Convert to Invoices</text><text x='30' y='310' font-size='14' fill='%23666' font-family='Plus Jakarta Sans'>Track payments easily</text></svg>",
+      "sizes": "540x720",
+      "type": "image/svg+xml",
+      "form_factor": "narrow"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "New Quote",
+      "short_name": "Quote",
+      "description": "Create a new quote",
+      "url": "/app.html?action=new-quote",
+      "icons": [
+        {
+          "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 96 96'><rect fill='%23E63946' width='96' height='96' rx='20'/><text x='48' y='60' font-size='50' fill='white' text-anchor='middle' font-family='Plus Jakarta Sans' font-weight='900'>+</text></svg>",
+          "sizes": "96x96",
+          "type": "image/svg+xml"
+        }
+      ]
+    }
+  ]
+}
