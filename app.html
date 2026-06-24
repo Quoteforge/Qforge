@@ -1180,11 +1180,12 @@ select option{background:#ffffff;color:#111111;}
 .item-desc-input{
   font-size:0.76rem!important;
   color:#666!important;
-  background:#0a0a0a!important;
-  border:1px solid rgba(255,255,255,0.2)!important;
-  border-color:rgba(255,255,255,0.2)!important;
-  padding:7px 10px!important;
+  background:#ffffff!important;
+  border:1px solid #ddd!important;
+  padding:8px 10px!important;
   border-radius:4px!important;
+  height:32px!important;
+  width:100%!important;
 }
 .item-row-bottom{
   display:grid;
@@ -3408,7 +3409,7 @@ function renderBuilderItems() {
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
         </button>
       </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1px;">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1px;margin-top:8px;margin-bottom:8px;">
         <input type="text" placeholder="Description (optional)" value="${esc(item.desc)}" oninput="updateBuilderItem(${idx},'desc',this.value)" class="item-desc-input">
         <input type="text" placeholder="Part / Product No (optional)" value="${esc(item.code||'')}" oninput="updateBuilderItemCode(${idx},this.value)" class="item-desc-input" style="color:#888!important;">
       </div>
