@@ -318,6 +318,7 @@ function applyInvoiceTemplate(tid) {
 
 async function loadInvoice() {
   const iid = getInvoiceId();
+  console.log('🔍 Loading invoice ID:', iid);
   if (!iid) { showError('No invoice ID found in this link.'); return; }
 
   const { data, error } = await sb.from('quotes')
@@ -325,9 +326,19 @@ async function loadInvoice() {
     .eq('id', iid)
     .single();
 
+  console.log('📦 Supabase response:', { 
+    id: data?.id, 
+    client: data?.client, 
+    company: data?.profiles?.company,
+    user_id: data?.user_id, 
+    template_id: data?.template_id,
+    error 
+  });
+  
   if (error || !data) { showError('Invoice not found. The link may be incorrect.'); return; }
 
   invoice = data;
+  console.log('✅ Invoice loaded:', invoice.id, '|', invoice.client);
   
   // CRITICAL: Parse items if it's a JSON string
   if (typeof invoice.items === 'string') {
