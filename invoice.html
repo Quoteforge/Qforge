@@ -302,14 +302,18 @@ const INVOICE_TEMPLATES = [
   { id: 'minimalist-gray', primary: '#374151', secondary: '#1f2937' }
 ];
 
+let currentInvoiceTemplate = INVOICE_TEMPLATES[0]; // Track current template
+
 function getInvoiceTemplate(tid) {
   return INVOICE_TEMPLATES.find(t => t.id === tid) || INVOICE_TEMPLATES[0];
 }
 
 function applyInvoiceTemplate(tid) {
   const t = getInvoiceTemplate(tid);
+  currentInvoiceTemplate = t; // Store for use in renderInvoice
   document.documentElement.style.setProperty('--orange', t.primary);
   document.documentElement.style.setProperty('--orange-dark', t.secondary);
+  console.log('Invoice template applied:', tid, 'primary:', t.primary);
 }
 
 async function loadInvoice() {
@@ -402,7 +406,7 @@ function renderInvoice() {
     <div class="invoice-doc">
 
       <!-- HEADER -->
-      <div class="doc-header" style="display:flex!important;flex-direction:row!important;justify-content:space-between!important;align-items:center!important;background:#fff;border-bottom:3px solid var(--orange);padding:10px 14px;gap:8px;">
+      <div class="doc-header" style="display:flex!important;flex-direction:row!important;justify-content:space-between!important;align-items:center!important;background:#fff;border-bottom:3px solid ${currentInvoiceTemplate.primary};padding:10px 14px;gap:8px;">
         <div style="flex-shrink:0;display:flex;align-items:center;">
           ${profile?.logo
             ? '<img src="'+profile.logo+'" style="max-height:48px;max-width:100px;object-fit:contain;display:block;">'
@@ -410,7 +414,7 @@ function renderInvoice() {
         </div>
         <div style="flex:1;text-align:right;">
           <div style="font-family:Syne,sans-serif;font-size:0.48rem;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;color:#999;margin-bottom:2px;">Tax Invoice</div>
-          <div style="font-family:'Bebas Neue',sans-serif;font-size:1.2rem;color:var(--orange);letter-spacing:1px;">${esc(invoice.id)}</div>
+          <div style="font-family:'Bebas Neue',sans-serif;font-size:1.2rem;color:${currentInvoiceTemplate.primary};letter-spacing:1px;">${esc(invoice.id)}</div>
           <div style="font-size:0.58rem;color:#555;margin-top:3px;">Date: ${new Date(invoice.date||Date.now()).toLocaleDateString('en-ZA',{day:'numeric',month:'long',year:'numeric'})}</div>
           <div class="doc-invoice-due ${dueStatus.cls}" style="font-size:0.58rem;margin-top:1px;">${dueStatus.text}</div>
         </div>
@@ -480,7 +484,7 @@ function renderInvoice() {
             ${profile.branch_code ? '<div class="banking-detail"><strong>Branch Code:</strong> ' + esc(profile.branch_code) + '</div>' : ''}
           </div>
         ` : '<div class="banking-detail" style="color:#999;font-size:0.6rem;margin-top:4px;">Banking details not provided. Please contact ' + esc(profile?.company||'us') + ' directly.</div>'}
-        <div class="banking-detail" style="margin-top:4px;color:var(--orange);font-size:0.62rem;">Or pay instantly below using the Pay button.</div>
+        <div class="banking-detail" style="margin-top:4px;color:${currentInvoiceTemplate.primary};font-size:0.62rem;">Or pay instantly below using the Pay button.</div>
       </div>
 
       <!-- FOOTER -->
