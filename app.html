@@ -2954,6 +2954,18 @@ async function markAsPaid(el, id) {
 }
 
 function loadQuoteIntoBuilder(q) {
+  // CRITICAL: Load quote's template or set to user's default
+  if (q.template_id) {
+    selectedTemplate = getTemplate(q.template_id) || QUOTE_TEMPLATES[0];
+    console.log('Loaded quote template:', q.template_id);
+  } else {
+    // Old quote without template - use user's default and assign it
+    selectedTemplate = getTemplate(currentUser?.preferredTemplateId) || QUOTE_TEMPLATES[0];
+    q.template_id = selectedTemplate.id; // Assign so it gets saved on next save
+    console.log('Old quote - assigned default template:', selectedTemplate.id);
+  }
+  updateBuilderPreview(); // Update color preview
+  
   sv('b_clientName', q.client);
   sv('b_clientContact', q.contact||'');
   sv('b_clientEmail', q.email||'');
@@ -3847,11 +3859,25 @@ async function sendInvoiceWhatsApp(id) {
 function downloadInvoicePDF(id) {
   const inv = quotes.find(x => x.id === id);
   if (!inv) return;
+  
+  console.log('Downloading invoice PDF:', { id: inv.id, template_id: inv.template_id });
+  
+  // Parse items if it's a JSON string
+  let items = inv.items;
+  if (typeof items === 'string') {
+    try {
+      items = JSON.parse(items);
+    } catch(e) {
+      console.error('Failed to parse items:', e);
+      items = [];
+    }
+  }
+  
   // Load into builder temporarily and generate PDF
   const savedItems = [...builderItems];
   const savedScope = builderScope;
   const savedEditing = editingQuoteId;
-  builderItems = inv.items || [];
+  builderItems = items || [];
   builderScope = inv.scope || '';
   editingQuoteId = id;
   // Override quote number display for PDF
@@ -3866,14 +3892,22 @@ function downloadInvoicePDF(id) {
 function printInvoicePDF(inv) {
   // Get the invoice's saved template
   let templateToUse = selectedTemplate;
+  console.log('printInvoicePDF - inv.template_id:', inv?.template_id, 'selectedTemplate:', selectedTemplate?.id);
+  
   if (inv && inv.template_id) {
     templateToUse = getTemplate(inv.template_id) || selectedTemplate;
+    console.log('Using invoice template:', inv.template_id);
+  } else {
+    console.log('No template_id on invoice, using selectedTemplate or default');
   }
   
   // Fallback if template not set
   if (!templateToUse) {
     templateToUse = QUOTE_TEMPLATES[0];
+    console.log('Fallback to default template');
   }
+  
+  console.log('Final template for PDF:', templateToUse?.id, templateToUse?.primary);
   
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
