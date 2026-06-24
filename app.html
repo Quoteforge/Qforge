@@ -2803,11 +2803,25 @@ async function convertToInvoice(el, id) {
       console.log('User clicked:', isPaid ? 'OK (PAID)' : 'CANCEL (PENDING)');
       console.log('isPaid value:', isPaid);
       
-      // Generate invoice number - strip any prefix and use just the number
-      // e.g. ADC-001 -> INV-001, QF-001 -> INV-001
-      const numPart = q.id.replace(/^[A-Z]+-/i, '');
-      const invNum = 'INV-' + numPart;
+      // Generate UNIQUE invoice number - find highest existing invoice
+      // Get all invoices to find the next number
+      const { data: existingInvoices } = await sb.from('quotes')
+        .select('id')
+        .ilike('id', 'INV-%')
+        .order('id', { ascending: false })
+        .limit(1);
+      
+      let nextInvoiceNum = 1;
+      if (existingInvoices && existingInvoices.length > 0) {
+        const lastInvId = existingInvoices[0].id; // e.g., "INV-009"
+        const lastNum = parseInt(lastInvId.replace('INV-', '')) || 0;
+        nextInvoiceNum = lastNum + 1;
+      }
+      
+      const invNum = 'INV-' + String(nextInvoiceNum).padStart(3, '0'); // INV-001, INV-002, etc.
       const invDate = new Date().toISOString().split('T')[0];
+      
+      console.log('Generated unique invoice number:', invNum);
       
       // Make sure we have the full quote with all fields
       const quoteToConvert = quotes.find(x => x.id === id);
