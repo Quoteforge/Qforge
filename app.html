@@ -2815,18 +2815,31 @@ async function convertToInvoice(el, id) {
       // Generate UNIQUE per-user invoice number
       // Store as: user_id|INV-001 (unique across all users)
       // Display as: INV-001 (clean for user)
-      const { data: userProfile } = await sb.from('profiles').select('invoice_counter').eq('id', currentUser.id).single();
-      const currentCounter = (userProfile?.invoice_counter || 0) + 1;
+      let currentCounter = 1;
+      try {
+        const { data: userProfile, error: profileError } = await sb.from('profiles').select('invoice_counter').eq('id', currentUser.id).single();
+        if (profileError) {
+          console.error('Error loading profile:', profileError);
+        } else {
+          currentCounter = (userProfile?.invoice_counter || 0) + 1;
+        }
+      } catch(e) {
+        console.error('Exception getting profile:', e);
+      }
       
       // Update the counter in profiles table
-      await sb.from('profiles').update({ invoice_counter: currentCounter }).eq('id', currentUser.id);
+      try {
+        await sb.from('profiles').update({ invoice_counter: currentCounter }).eq('id', currentUser.id);
+      } catch(e) {
+        console.error('Error updating counter:', e);
+      }
       
       // Generate unique invoice ID: user_id|INV-001 (prevents duplicates)
       const invoiceNumber = 'INV-' + String(currentCounter).padStart(3, '0');
       const invNum = currentUser.id + '|' + invoiceNumber; // Unique ID for database
       const invDate = new Date().toISOString().split('T')[0];
       
-      console.log('Generated invoice:', invoiceNumber, 'stored as:', invNum);
+      console.log('🔢 Generated invoice:', invoiceNumber, 'stored as:', invNum, 'counter:', currentCounter);
       
       // Make sure we have the full quote with all fields
       const quoteToConvert = quotes.find(x => x.id === id);
