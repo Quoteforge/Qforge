@@ -1931,6 +1931,7 @@ let isViewOnly = false; // Set to true when viewing invoice in read-only mode
 // QUOTE TEMPLATES (10 Professional Designs)
 // ══════════════════════════════════════
 const QUOTE_TEMPLATES = [
+  { id: 'professional-bw', name: 'Professional B&W', primary: '#000000', secondary: '#333333', accent: '#666666', bg: '#f5f5f5' },
   { id: 'modern-blue', name: 'Modern Blue', primary: '#2563eb', secondary: '#1e40af', accent: '#3b82f6', bg: '#f0f9ff' },
   { id: 'corporate-green', name: 'Corporate Green', primary: '#059669', secondary: '#047857', accent: '#10b981', bg: '#f0fdf4' },
   { id: 'creative-red', name: 'Creative Red', primary: '#dc2626', secondary: '#b91c1c', accent: '#ef4444', bg: '#fef2f2' },
@@ -1943,7 +1944,7 @@ const QUOTE_TEMPLATES = [
   { id: 'minimalist-gray', name: 'Minimalist Gray', primary: '#374151', secondary: '#1f2937', accent: '#6b7280', bg: '#f9fafb' }
 ];
 
-let selectedTemplate = QUOTE_TEMPLATES[0]; // Default to Modern Blue
+let selectedTemplate = QUOTE_TEMPLATES[0]; // Default to Professional B&W
 
 function openTemplateSelector() {
   const modal = document.getElementById('templateModal');
@@ -1980,10 +1981,25 @@ function closeTemplateSelector() {
   if (modal) modal.classList.remove('show');
 }
 
+function getTemplate(templateId) {
+  return QUOTE_TEMPLATES.find(t => t.id === templateId) || QUOTE_TEMPLATES[0];
+}
+
 function selectTemplate(templateId) {
   selectedTemplate = QUOTE_TEMPLATES.find(t => t.id === templateId) || QUOTE_TEMPLATES[0];
   closeTemplateSelector();
   showToast(`✨ Template: ${selectedTemplate.name}`, 'success');
+  
+  // Save preference to user's profile
+  if (currentUser?.id) {
+    sb.from('profiles').update({ preferred_template_id: templateId }).eq('id', currentUser.id)
+      .then(() => {
+        currentUser.preferredTemplateId = templateId; // Update local copy
+        console.log('Template preference saved');
+      })
+      .catch(err => console.log('Failed to save template preference:', err));
+  }
+  
   updateBuilderPreview(); // Refresh to show new colors
 }
 
@@ -2414,8 +2430,12 @@ async function loadAndLoginUser(authUser) {
       industry: profile?.industry || 'other',
       logo: profile?.logo || null,
       plan: profile?.plan || 'trial',
-      createdAt: authUser.created_at || null
+      createdAt: authUser.created_at || null,
+      preferredTemplateId: profile?.preferred_template_id || 'modern-blue' // Load user's template choice
     };
+    
+    // Set selected template to user's preference
+    selectedTemplate = getTemplate(currentUser.preferredTemplateId) || QUOTE_TEMPLATES[0];
 
     // Grant lifetime free access to specific emails
     if (LIFETIME_FREE_EMAILS.includes(authUser.email)) {
@@ -2810,6 +2830,7 @@ async function convertToInvoice(el, id) {
         vat_registered: true,
         quote_ref: quoteToConvert.id,
         updated_at: new Date().toISOString(),
+        template_id: quoteToConvert.template_id || 'professional-bw', // COPY TEMPLATE FROM QUOTE!
         vehicle_model: quoteToConvert.vehicle_model || null,
         vehicle_reg_no: quoteToConvert.vehicle_reg_no || null,
         vehicle_vin: quoteToConvert.vehicle_vin || null,
