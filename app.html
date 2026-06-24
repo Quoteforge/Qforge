@@ -3855,7 +3855,7 @@ function printInvoicePDF(inv) {
     startY: y,
     head: [['DESCRIPTION', 'QTY', 'UNIT PRICE', 'AMOUNT']],
     body: items,
-    margin: { left: 15, right: 15, top: 2, bottom: 2 }, // Proper margins to center table
+    margin: { left: 0, right: 0, top: 2, bottom: 2 }, // Full width like totals
     styles: { fontSize:8.5, cellPadding:4, textColor:dark, lineColor:borderGrey, lineWidth:0.2 },
     headStyles: { fillColor:dark, textColor:white, fontStyle:'bold', fontSize:7.5, cellPadding:5 },
     columnStyles: {
@@ -7466,7 +7466,7 @@ function printQuote() {
     startY: y,
     head: [['DESCRIPTION', 'QTY', 'UNIT PRICE', 'AMOUNT']],
     body: items,
-    margin: { left: 15, right: 15, top: 2, bottom: 2 }, // Proper margins to center table
+    margin: { left: 0, right: 0, top: 2, bottom: 2 }, // Full width like totals
     tableWidth: pageW,
     styles: {
       fontSize: 8.5,
