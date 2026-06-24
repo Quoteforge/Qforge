@@ -17,7 +17,7 @@ body{background:var(--bg);font-family:'Plus Jakarta Sans',sans-serif;font-weight
 
 .topbar{background:var(--dark);padding:14px 24px;display:flex;align-items:center;justify-content:space-between;}
 .logo{font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:1.1rem;color:#fff;letter-spacing:-0.5px;display:flex;align-items:center;gap:6px;}
-.logo-box{background:#E63946;width:32px;height:32px;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:1rem;color:#fff;font-weight:900;flex-shrink:0;}
+.logo-box{background:var(--orange);width:32px;height:32px;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:1rem;color:#fff;font-weight:900;flex-shrink:0;}
 .logo span{color:var(--orange);}
 .topbar-note{font-size:0.75rem;color:#888;}
 
@@ -164,7 +164,7 @@ body{background:var(--bg);font-family:'Plus Jakarta Sans',sans-serif;font-weight
   .doc-header > div:first-child { display:flex !important; align-items:flex-start !important; gap:6px !important; flex:1; }
   .doc-header > div:last-child { text-align:right; display:flex; flex-direction:column; align-items:flex-end; gap:0; }
   .doc-quote-label { font-size:0.45rem; color:#666; text-align:right; margin:0; line-height:1; }
-  .doc-quote-number { text-align:right; font-size:0.75rem; letter-spacing:0.4px; font-weight:700; font-family:'DM Sans',sans-serif; margin:0; line-height:1.1; color:#E63946; }
+  .doc-quote-number { text-align:right; font-size:0.75rem; letter-spacing:0.4px; font-weight:700; font-family:'DM Sans',sans-serif; margin:0; line-height:1.1; color:var(--orange); }
   .doc-quote-date, .doc-quote-valid { text-align:right; font-size:0.54rem; margin:0; line-height:1; }
   .doc-company { font-size:0.74rem !important; font-weight:700; line-height:1.05; margin:0; }
   .doc-logo { max-height:50px !important; max-width:75px !important; margin:0; flex-shrink:0; }
@@ -176,7 +176,7 @@ body{background:var(--bg);font-family:'Plus Jakarta Sans',sans-serif;font-weight
   .doc-info-label { font-size:0.51rem; margin-bottom:2px; font-weight:700; color:#555; text-transform:uppercase; }
   .doc-client-name { font-size:0.78rem; font-weight:700; }
   .doc-client-detail { font-size:0.64rem; line-height:1.25; }
-  .doc-scope { padding:6px 6px; font-size:0.70rem; line-height:1.4; border-left:2px solid #E63946; }
+  .doc-scope { padding:6px 6px; font-size:0.70rem; line-height:1.4; border-left:2px solid var(--orange); }
   .items-table { table-layout:fixed; width:100%; }
   .items-table th:nth-child(3), .items-table td:nth-child(3) { display:none; }
   .items-table th:nth-child(1), .items-table td:nth-child(1) { width:50%; padding-left:6px; }
@@ -390,7 +390,7 @@ function renderInvoice() {
     <div class="invoice-doc">
 
       <!-- HEADER -->
-      <div class="doc-header" style="display:flex!important;flex-direction:row!important;justify-content:space-between!important;align-items:center!important;background:#fff;border-bottom:3px solid #E63946;padding:10px 14px;gap:8px;">
+      <div class="doc-header" style="display:flex!important;flex-direction:row!important;justify-content:space-between!important;align-items:center!important;background:#fff;border-bottom:3px solid var(--orange);padding:10px 14px;gap:8px;">
         <div style="flex-shrink:0;display:flex;align-items:center;">
           ${profile?.logo
             ? '<img src="'+profile.logo+'" style="max-height:48px;max-width:100px;object-fit:contain;display:block;">'
@@ -398,7 +398,7 @@ function renderInvoice() {
         </div>
         <div style="flex:1;text-align:right;">
           <div style="font-family:Syne,sans-serif;font-size:0.48rem;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;color:#999;margin-bottom:2px;">Tax Invoice</div>
-          <div style="font-family:'Bebas Neue',sans-serif;font-size:1.2rem;color:#E63946;letter-spacing:1px;">${esc(invoice.id)}</div>
+          <div style="font-family:'Bebas Neue',sans-serif;font-size:1.2rem;color:var(--orange);letter-spacing:1px;">${esc(invoice.id)}</div>
           <div style="font-size:0.58rem;color:#555;margin-top:3px;">Date: ${new Date(invoice.date||Date.now()).toLocaleDateString('en-ZA',{day:'numeric',month:'long',year:'numeric'})}</div>
           <div class="doc-invoice-due ${dueStatus.cls}" style="font-size:0.58rem;margin-top:1px;">${dueStatus.text}</div>
         </div>
@@ -468,7 +468,7 @@ function renderInvoice() {
             ${profile.branch_code ? '<div class="banking-detail"><strong>Branch Code:</strong> ' + esc(profile.branch_code) + '</div>' : ''}
           </div>
         ` : '<div class="banking-detail" style="color:#999;font-size:0.6rem;margin-top:4px;">Banking details not provided. Please contact ' + esc(profile?.company||'us') + ' directly.</div>'}
-        <div class="banking-detail" style="margin-top:4px;color:#E63946;font-size:0.62rem;">Or pay instantly below using the Pay button.</div>
+        <div class="banking-detail" style="margin-top:4px;color:var(--orange);font-size:0.62rem;">Or pay instantly below using the Pay button.</div>
       </div>
 
       <!-- FOOTER -->
