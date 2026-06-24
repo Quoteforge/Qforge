@@ -203,13 +203,15 @@ async function loadQuote() {
     const { data, error } = await sb.from('quotes').select('*').eq('id', qid).single();
     if (error || !data) { showError('Quote not found. The link may be incorrect or expired.'); return; }
     quote = data;
+    console.log('Loaded quote/invoice:', { id: quote.id, type: quote.type, template_id: quote.template_id }); // Debug
     if (quote.user_id) {
       const { data: pd } = await sb.from('profiles').select('*').eq('id', quote.user_id).single();
       profile = pd || {};
     } else { profile = {}; }
     
     // Apply template colors if available
-    const templateId = quote.template_id || 'modern-blue';
+    const templateId = quote.template_id || 'professional-bw'; // Use correct default
+    console.log('Applying template:', templateId); // Debug
     applyTemplateColors(templateId);
     
     if (!quote.viewed_at) {

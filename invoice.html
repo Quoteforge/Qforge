@@ -287,6 +287,31 @@ function getDueStatus() {
   return {cls:'due-ok', text:'Due '+getDueDateStr()};
 }
 
+// Invoice Templates
+const INVOICE_TEMPLATES = [
+  { id: 'professional-bw', primary: '#000000', secondary: '#333333' },
+  { id: 'modern-blue', primary: '#2563eb', secondary: '#1e40af' },
+  { id: 'corporate-green', primary: '#059669', secondary: '#047857' },
+  { id: 'creative-red', primary: '#dc2626', secondary: '#b91c1c' },
+  { id: 'elegant-purple', primary: '#7c3aed', secondary: '#6d28d9' },
+  { id: 'energetic-orange', primary: '#ea580c', secondary: '#c2410c' },
+  { id: 'calm-teal', primary: '#0891b2', secondary: '#0e7490' },
+  { id: 'premium-gold', primary: '#b45309', secondary: '#92400e' },
+  { id: 'fresh-lime', primary: '#65a30d', secondary: '#4f7206' },
+  { id: 'bold-navy', primary: '#1e3a8a', secondary: '#1e40af' },
+  { id: 'minimalist-gray', primary: '#374151', secondary: '#1f2937' }
+];
+
+function getInvoiceTemplate(tid) {
+  return INVOICE_TEMPLATES.find(t => t.id === tid) || INVOICE_TEMPLATES[0];
+}
+
+function applyInvoiceTemplate(tid) {
+  const t = getInvoiceTemplate(tid);
+  document.documentElement.style.setProperty('--orange', t.primary);
+  document.documentElement.style.setProperty('--orange-dark', t.secondary);
+}
+
 async function loadInvoice() {
   const iid = getInvoiceId();
   if (!iid) { showError('No invoice ID found in this link.'); return; }
@@ -300,6 +325,11 @@ async function loadInvoice() {
 
   invoice = data;
   profile = data.profiles;
+  
+  // Apply template colors based on invoice's saved template
+  const templateId = invoice.template_id || 'professional-bw';
+  applyInvoiceTemplate(templateId);
+  console.log('Invoice template:', templateId); // Debug
 
   // Mark as viewed
   if (invoice.status === 'invoice' || invoice.status === 'invoiced') {
