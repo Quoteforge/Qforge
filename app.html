@@ -3726,7 +3726,7 @@ function viewInvoice(id) {
   
   // Show invoice in view mode (don't allow editing)
   isViewOnly = true; // Set read-only flag
-  editingQuoteId = null; // Don't set editing mode
+  editingQuoteId = id; // SET THIS! So save knows to update, not create
   showToast('📄 Viewing Invoice (Read-Only)', 'info');
   
   // Load into builder
