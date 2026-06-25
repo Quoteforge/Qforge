@@ -8805,81 +8805,117 @@ function renderQuoteBuilder() {
   }
   
   return `
-  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; max-width: 1400px;">
-    <!-- LEFT: FORM -->
-    <div>
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-        <h2>${isEditing ? 'Edit Quote' : 'New Quote'}</h2>
-        <button class="btn btn-ghost" onclick="goTo('quotes-v2')">← Back</button>
-      </div>
+  <div style="max-width: 1400px; margin: 0 auto;">
+    <!-- HEADER -->
+    <div style="background: white; padding: 20px; border-bottom: 3px solid #E63946; margin-bottom: 20px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center;">
+      <div><h1 style="font-size: 1.8rem; color: #1a1a1a;">${isEditing ? 'Edit Quote' : 'New Quote'}</h1></div>
+      <button class="btn btn-ghost" onclick="goTo('quotes-v2')" style="background: white; color: #E63946; border: 2px solid #E63946; padding: 10px 20px;">← Back</button>
+    </div>
 
-      <!-- CLIENT SECTION -->
-      <div style="margin-bottom: 24px;">
-        <h3 style="font-size: 0.9rem; text-transform: uppercase; color: var(--muted); margin-bottom: 12px; font-weight: 600;">Client Details</h3>
-        <div style="display: flex; flex-direction: column; gap: 12px;">
-          <input type="text" id="qb_clientName" placeholder="Client Name *" value="${isEditing ? quote.client_name : ''}" style="padding: 10px; border: 1px solid var(--border); border-radius: 6px;">
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
-            <input type="tel" id="qb_clientPhone" placeholder="Phone" value="${isEditing ? quote.client_phone : ''}" style="padding: 10px; border: 1px solid var(--border); border-radius: 6px;">
-            <input type="email" id="qb_clientEmail" placeholder="Email" value="${isEditing ? quote.client_email : ''}" style="padding: 10px; border: 1px solid var(--border); border-radius: 6px;">
+    <!-- BUILDER CONTAINER -->
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+      <!-- LEFT: FORM -->
+      <div>
+        <!-- CLIENT DETAILS -->
+        <div style="background: white; padding: 20px; border-radius: 8px; border: 1px solid #ddd; margin-bottom: 20px;">
+          <div style="font-size: 0.75rem; font-weight: 700; color: #E63946; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 12px;">Client Details</div>
+          <div style="margin-bottom: 12px;">
+            <label style="font-size: 0.85rem; font-weight: 600; color: #333; display: block; margin-bottom: 4px;">Client Name *</label>
+            <input type="text" id="qb_clientName" placeholder="e.g. ABC Property" value="${isEditing ? quote.client_name : ''}" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 0.9rem;">
           </div>
-          <input type="text" id="qb_clientAddress" placeholder="Address" value="${isEditing ? quote.client_address : ''}" style="padding: 10px; border: 1px solid var(--border); border-radius: 6px;">
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+            <div style="margin-bottom: 12px;">
+              <label style="font-size: 0.85rem; font-weight: 600; color: #333; display: block; margin-bottom: 4px;">Phone</label>
+              <input type="tel" id="qb_clientPhone" placeholder="011 000 0000" value="${isEditing ? quote.client_phone : ''}" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 0.9rem;">
+            </div>
+            <div style="margin-bottom: 12px;">
+              <label style="font-size: 0.85rem; font-weight: 600; color: #333; display: block; margin-bottom: 4px;">Email</label>
+              <input type="email" id="qb_clientEmail" placeholder="contact@company.co.za" value="${isEditing ? quote.client_email : ''}" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 0.9rem;">
+            </div>
+          </div>
+          <div style="margin-bottom: 12px;">
+            <label style="font-size: 0.85rem; font-weight: 600; color: #333; display: block; margin-bottom: 4px;">Street Address</label>
+            <input type="text" id="qb_clientAddress" placeholder="123 Main Road, Unit 4" value="${isEditing ? quote.client_address : ''}" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 0.9rem;">
+          </div>
         </div>
-      </div>
 
-      <!-- QUOTE SETTINGS -->
-      <div style="margin-bottom: 24px;">
-        <h3 style="font-size: 0.9rem; text-transform: uppercase; color: var(--muted); margin-bottom: 12px; font-weight: 600;">Quote Settings</h3>
-        <div style="display: flex; flex-direction: column; gap: 12px;">
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+        <!-- QUOTE SETTINGS -->
+        <div style="background: white; padding: 20px; border-radius: 8px; border: 1px solid #ddd; margin-bottom: 20px;">
+          <div style="font-size: 0.75rem; font-weight: 700; color: #E63946; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 12px;">Quote Settings</div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px;">
             <div>
-              <label style="font-size: 0.8rem; color: var(--muted); display: block; margin-bottom: 4px;">Quote Number</label>
-              <input type="text" id="qb_quoteNumber" readonly style="padding: 10px; border: 1px solid var(--border); border-radius: 6px; background: #f5f5f5;">
+              <label style="font-size: 0.85rem; font-weight: 600; color: #333; display: block; margin-bottom: 4px;">Quote Number</label>
+              <input type="text" id="qb_quoteNumber" readonly style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; background: #f5f5f5;">
             </div>
             <div>
-              <label style="font-size: 0.8rem; color: var(--muted); display: block; margin-bottom: 4px;">Quote Date</label>
-              <input type="date" id="qb_quoteDate" style="padding: 10px; border: 1px solid var(--border); border-radius: 6px;">
+              <label style="font-size: 0.85rem; font-weight: 600; color: #333; display: block; margin-bottom: 4px;">Quote Date</label>
+              <input type="date" id="qb_quoteDate" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px;">
             </div>
           </div>
           <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
             <div>
-              <label style="font-size: 0.8rem; color: var(--muted); display: block; margin-bottom: 4px;">Valid For (Days)</label>
-              <input type="number" id="qb_validDays" value="${isEditing ? quote.valid_days : '14'}" style="padding: 10px; border: 1px solid var(--border); border-radius: 6px;">
+              <label style="font-size: 0.85rem; font-weight: 600; color: #333; display: block; margin-bottom: 4px;">Valid For (Days)</label>
+              <input type="number" id="qb_validDays" value="${isEditing ? quote.valid_days : '14'}" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px;">
             </div>
             <div>
-              <label style="font-size: 0.8rem; color: var(--muted); display: block; margin-bottom: 4px;">VAT</label>
-              <select id="qb_vatStatus" style="padding: 10px; border: 1px solid var(--border); border-radius: 6px;">
+              <label style="font-size: 0.85rem; font-weight: 600; color: #333; display: block; margin-bottom: 4px;">VAT</label>
+              <select id="qb_vatStatus" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px;">
                 <option value="no">No VAT</option>
                 <option value="yes" ${isEditing && quote.vat_percent === 15 ? 'selected' : ''}>15% VAT</option>
               </select>
             </div>
           </div>
         </div>
+
+        <!-- LINE ITEMS -->
+        <div style="background: white; padding: 20px; border-radius: 8px; border: 1px solid #ddd; margin-bottom: 20px;">
+          <div style="font-size: 0.75rem; font-weight: 700; color: #E63946; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 12px;">Line Items</div>
+          <div id="qb_itemsList" style="margin-bottom: 12px;"></div>
+          <button class="btn" style="width: 100%; background: white; color: #E63946; border: 2px solid #E63946; padding: 10px;" onclick="addQuoteItem()">+ Add Item</button>
+        </div>
+
+        <!-- NOTES -->
+        <div style="background: white; padding: 20px; border-radius: 8px; border: 1px solid #ddd; margin-bottom: 20px;">
+          <div style="font-size: 0.75rem; font-weight: 700; color: #E63946; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 12px;">Notes & Terms</div>
+          <textarea id="qb_notes" rows="3" placeholder="e.g. Payment terms, warranty..." style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-family: inherit;">${isEditing ? quote.notes : ''}</textarea>
+        </div>
+
+        <!-- ACTION BUTTONS -->
+        <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 20px;">
+          <button class="btn" style="background: #E63946; color: white; padding: 12px;" onclick="saveQuoteV2()">💾 Save</button>
+          <button class="btn" style="background: white; color: #E63946; border: 2px solid #E63946;" onclick="downloadQuotePDF()">📥 PDF</button>
+          <button class="btn" style="background: white; color: #2ecc71; border: 2px solid #2ecc71;" onclick="shareQuoteWhatsApp()">💬 WhatsApp</button>
+          <button class="btn" style="background: white; color: #666; border: 2px solid #ddd;" onclick="goTo('quotes-v2')">Cancel</button>
+        </div>
       </div>
 
-      <!-- LINE ITEMS -->
-      <div style="margin-bottom: 24px;">
-        <h3 style="font-size: 0.9rem; text-transform: uppercase; color: var(--muted); margin-bottom: 12px; font-weight: 600;">Line Items</h3>
-        <div id="qb_itemsList" style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px;"></div>
-        <button class="btn btn-ghost" style="width: 100%;" onclick="addQuoteItem()">+ Add Item</button>
-      </div>
-
-      <!-- NOTES -->
-      <div style="margin-bottom: 24px;">
-        <label style="font-size: 0.8rem; color: var(--muted); display: block; margin-bottom: 6px;">Notes / Terms</label>
-        <textarea id="qb_notes" rows="3" placeholder="e.g. Payment terms, warranty..." style="padding: 10px; border: 1px solid var(--border); border-radius: 6px; width: 100%; font-family: inherit;">${isEditing ? quote.notes : ''}</textarea>
-      </div>
-
-      <!-- ACTIONS -->
-      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
-        <button class="btn btn-red" style="color: white; padding: 12px;" onclick="saveQuoteV2()">💾 Save Quote</button>
-        <button class="btn btn-ghost" onclick="goTo('quotes-v2')">Cancel</button>
-      </div>
+      <!-- RIGHT: PREVIEW -->
+      <div id="qb_preview" style="background: white; padding: 20px; border-radius: 8px; border: 1px solid #ddd; max-height: 100vh; overflow-y: auto; position: sticky; top: 20px;"></div>
     </div>
-
-    <!-- RIGHT: PREVIEW -->
-    <div id="qb_preview" style="position: sticky; top: 20px;"></div>
   </div>
   `;
+}
+
+function downloadQuotePDF() {
+  const clientName = document.getElementById('qb_clientName')?.value || 'Client';
+  const quoteNum = document.getElementById('qb_quoteNumber')?.value || 'Quote';
+  showToast('Downloading PDF...', 'success');
+  // TODO: Implement jsPDF generation
+}
+
+function shareQuoteWhatsApp() {
+  const phone = document.getElementById('qb_clientPhone')?.value?.replace(/[^0-9]/g, '');
+  const quoteNum = document.getElementById('qb_quoteNumber')?.value;
+  
+  if (!phone) {
+    showToast('Please enter a phone number', 'error');
+    return;
+  }
+  
+  const message = `Hi, I've prepared quote ${quoteNum} for you. Please review and let me know if you have any questions.`;
+  const url = `https://wa.me/27${phone.slice(-9)}?text=${encodeURIComponent(message)}`;
+  window.open(url, '_blank');
+  showToast('Opening WhatsApp...', 'success');
 }
 
 function initQuoteBuilder() {
