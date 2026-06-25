@@ -1866,6 +1866,17 @@ h1, h2, h3 {
       <button class="sidebar-link" id="nav-invoices" onclick="goTo('invoices')">
         <span class="icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg></span> Invoices
       </button>
+
+      <div style="border-top:1px solid rgba(255,255,255,0.1);margin:12px 0;padding-top:12px;">
+        <div style="font-size:0.65rem;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:rgba(255,255,255,0.5);padding:0 12px;margin-bottom:8px;">New System v2</div>
+        <button class="sidebar-link" id="nav-quotes-v2" onclick="goTo('quotes-v2')">
+          <span class="icon">📋</span> Quotes v2
+        </button>
+        <button class="sidebar-link" id="nav-invoices-v2" onclick="goTo('invoices-v2')">
+          <span class="icon">📄</span> Invoices v2
+        </button>
+      </div>
+
       <button class="sidebar-link" id="nav-clients" onclick="goTo('clients')">
         <span class="icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span> Clients
       </button>       <button class="sidebar-link" id="nav-stats" onclick="goTo('stats')">
@@ -2584,15 +2595,17 @@ function goTo(page) {
   isViewOnly = false; // Reset view-only mode when navigating
   currentPage = page;
   updateNotificationBadge();
-  ['dashboard','quotes','builder','invoices','clients','stats','products','profile','admin','expenses','jobcards','pandl'].forEach(p => {
+  ['dashboard','quotes','builder','invoices','clients','stats','products','profile','admin','expenses','jobcards','pandl','quotes-v2','invoices-v2'].forEach(p => {
     const el = document.getElementById('nav-'+p);
     if (el) el.classList.toggle('active', p===page);
   });
   const mc = document.getElementById('mainContent');
   if (page==='dashboard') mc.innerHTML = renderDashboard();
   else if (page==='quotes') mc.innerHTML = renderQuotes();
+  else if (page==='quotes-v2') { mc.innerHTML = renderQuotesV2(); setTimeout(initQuotesV2, 100); }
   else if (page==='builder') { mc.innerHTML = renderBuilder(); initBuilder(); }
   else if (page==='invoices') mc.innerHTML = renderInvoices();
+  else if (page==='invoices-v2') { mc.innerHTML = renderInvoicesV2(); setTimeout(initInvoicesV2, 100); }
   else if (page==='clients') mc.innerHTML = renderClients();
   else if (page==='client-detail') mc.innerHTML = renderClientDetail(currentClientId);
   else if (page==='stats') mc.innerHTML = renderStats();
@@ -8642,6 +8655,567 @@ fetch('/manifest.json')
   .then(r => r.json())
   .then(m => console.log('✅ Manifest loaded:', m.name))
   .catch(e => console.error('❌ Manifest error:', e));
+
+// ═══════════════════════════════════════════════════════════════
+// QFORGE V2 - QUOTES & INVOICES SYSTEM
+// ═══════════════════════════════════════════════════════════════
+
+// V2 GLOBAL STATE
+let quotesV2 = [];
+let invoicesV2 = [];
+let editingQuoteV2Id = null;
+let editingInvoiceV2Id = null;
+let v2Items = [];
+
+// ───────────────────────────────────────────────────────────────
+// LOAD V2 DATA FROM SUPABASE
+// ───────────────────────────────────────────────────────────────
+async function loadQuotesV2() {
+  if (!currentUser?.id) return;
+  try {
+    const { data, error } = await sb
+      .from('quotes_v2')
+      .select('*')
+      .eq('user_id', currentUser.id)
+      .order('created_at', { ascending: false });
+    
+    if (error) throw error;
+    quotesV2 = (data || []).map(q => ({
+      ...q,
+      items: q.items || [],
+      client_id: q.client_id || null
+    }));
+    console.log('✅ Loaded', quotesV2.length, 'quotes v2');
+  } catch (error) {
+    console.error('❌ Error loading quotes v2:', error);
+    quotesV2 = [];
+  }
+}
+
+async function loadInvoicesV2() {
+  if (!currentUser?.id) return;
+  try {
+    const { data, error } = await sb
+      .from('invoices_v2')
+      .select('*')
+      .eq('user_id', currentUser.id)
+      .order('created_at', { ascending: false });
+    
+    if (error) throw error;
+    invoicesV2 = (data || []).map(inv => ({
+      ...inv,
+      items: inv.items || [],
+      client_id: inv.client_id || null
+    }));
+    console.log('✅ Loaded', invoicesV2.length, 'invoices v2');
+  } catch (error) {
+    console.error('❌ Error loading invoices v2:', error);
+    invoicesV2 = [];
+  }
+}
+
+// ───────────────────────────────────────────────────────────────
+// QUOTES V2 - LIST PAGE
+// ───────────────────────────────────────────────────────────────
+function renderQuotesV2() {
+  return `
+  <div class="page-header">
+    <div>
+      <h2>Quotes v2</h2>
+      <div style="font-size:0.82rem;color:var(--muted);margin-top:3px;">${quotesV2.length} quotes</div>
+    </div>
+    <div style="display:flex;gap:10px;flex-wrap:nowrap;">
+      <button class="btn btn-red" style="color:#fff;" onclick="startNewQuoteV2()">+ New Quote</button>
+    </div>
+  </div>
+
+  <div style="overflow-x:auto;margin-bottom:20px;">
+    <table style="width:100%;border-collapse:collapse;">
+      <thead>
+        <tr style="background:#f5f5f5;border-bottom:2px solid #ddd;">
+          <th style="padding:12px;text-align:left;font-weight:600;color:#333;">Quote #</th>
+          <th style="padding:12px;text-align:left;font-weight:600;color:#333;">Client</th>
+          <th style="padding:12px;text-align:left;font-weight:600;color:#333;">Date</th>
+          <th style="padding:12px;text-align:right;font-weight:600;color:#333;">Amount</th>
+          <th style="padding:12px;text-align:center;font-weight:600;color:#333;">Status</th>
+          <th style="padding:12px;text-align:right;font-weight:600;color:#333;">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${quotesV2.length === 0 ? `
+          <tr>
+            <td colspan="6" style="text-align:center;padding:40px;color:#999;">
+              No quotes yet. <button class="btn btn-red" style="color:#fff;margin-top:12px;" onclick="startNewQuoteV2()">Create First Quote</button>
+            </td>
+          </tr>
+        ` : quotesV2.map(q => `
+          <tr style="border-bottom:1px solid #eee;">
+            <td style="padding:12px;"><strong>${esc(q.quote_number || 'N/A')}</strong></td>
+            <td style="padding:12px;">${esc(q.client_name || 'Unknown')}</td>
+            <td style="padding:12px;">${formatDate(q.quote_date)}</td>
+            <td style="padding:12px;text-align:right;"><strong>R${(q.total_amount || 0).toLocaleString('en-ZA')}</strong></td>
+            <td style="padding:12px;text-align:center;"><span style="background:#E63946;color:#fff;padding:4px 8px;border-radius:4px;font-size:0.75rem;font-weight:600;">${esc(q.status || 'draft')}</span></td>
+            <td style="padding:12px;text-align:right;">
+              <button class="btn btn-sm btn-ghost" onclick="editQuoteV2('${q.id}')" style="font-size:0.8rem;padding:4px 8px;margin-right:4px;">Edit</button>
+              <button class="btn btn-sm btn-ghost" onclick="downloadQuotePDFv2('${q.id}')" style="font-size:0.8rem;padding:4px 8px;margin-right:4px;">PDF</button>
+              <button class="btn btn-sm btn-ghost" onclick="convertQuoteToInvoiceV2('${q.id}')" style="font-size:0.8rem;padding:4px 8px;color:#E63946;">→ Invoice</button>
+            </td>
+          </tr>
+        `).join('')}
+      </tbody>
+    </table>
+  </div>
+  `;
+}
+
+function initQuotesV2() {
+  loadQuotesV2();
+}
+
+// ───────────────────────────────────────────────────────────────
+// INVOICES V2 - LIST PAGE
+// ───────────────────────────────────────────────────────────────
+function renderInvoicesV2() {
+  return `
+  <div class="page-header">
+    <div>
+      <h2>Invoices v2</h2>
+      <div style="font-size:0.82rem;color:var(--muted);margin-top:3px;">${invoicesV2.length} invoices</div>
+    </div>
+    <div style="display:flex;gap:10px;flex-wrap:nowrap;">
+      <button class="btn btn-red" style="color:#fff;" onclick="startNewInvoiceV2()">+ New Invoice</button>
+    </div>
+  </div>
+
+  <div style="overflow-x:auto;margin-bottom:20px;">
+    <table style="width:100%;border-collapse:collapse;">
+      <thead>
+        <tr style="background:#f5f5f5;border-bottom:2px solid #ddd;">
+          <th style="padding:12px;text-align:left;font-weight:600;color:#333;">Invoice #</th>
+          <th style="padding:12px;text-align:left;font-weight:600;color:#333;">Client</th>
+          <th style="padding:12px;text-align:left;font-weight:600;color:#333;">Date</th>
+          <th style="padding:12px;text-align:right;font-weight:600;color:#333;">Amount</th>
+          <th style="padding:12px;text-align:center;font-weight:600;color:#333;">Status</th>
+          <th style="padding:12px;text-align:right;font-weight:600;color:#333;">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${invoicesV2.length === 0 ? `
+          <tr>
+            <td colspan="6" style="text-align:center;padding:40px;color:#999;">
+              No invoices yet. <button class="btn btn-red" style="color:#fff;margin-top:12px;" onclick="startNewInvoiceV2()">Create First Invoice</button>
+            </td>
+          </tr>
+        ` : invoicesV2.map(inv => `
+          <tr style="border-bottom:1px solid #eee;">
+            <td style="padding:12px;"><strong>${esc(inv.invoice_number || 'N/A')}</strong></td>
+            <td style="padding:12px;">${esc(inv.client_name || 'Unknown')}</td>
+            <td style="padding:12px;">${formatDate(inv.invoice_date)}</td>
+            <td style="padding:12px;text-align:right;"><strong>R${(inv.total_amount || 0).toLocaleString('en-ZA')}</strong></td>
+            <td style="padding:12px;text-align:center;"><span style="background:${inv.status === 'paid' ? '#2ecc71' : inv.status === 'partial' ? '#E8B84B' : '#E63946'};color:#fff;padding:4px 8px;border-radius:4px;font-size:0.75rem;font-weight:600;">${esc(inv.status || 'unpaid')}</span></td>
+            <td style="padding:12px;text-align:right;">
+              <button class="btn btn-sm btn-ghost" onclick="editInvoiceV2('${inv.id}')" style="font-size:0.8rem;padding:4px 8px;margin-right:4px;">Edit</button>
+              <button class="btn btn-sm btn-ghost" onclick="downloadInvoicePDFv2('${inv.id}')" style="font-size:0.8rem;padding:4px 8px;">PDF</button>
+            </td>
+          </tr>
+        `).join('')}
+      </tbody>
+    </table>
+  </div>
+  `;
+}
+
+function initInvoicesV2() {
+  loadInvoicesV2();
+}
+
+// ───────────────────────────────────────────────────────────────
+// QUOTE V2 - BUILDER FUNCTIONS
+// ───────────────────────────────────────────────────────────────
+function startNewQuoteV2() {
+  editingQuoteV2Id = null;
+  v2Items = [];
+  showToast('Quote builder coming soon - UI to be built', 'info');
+}
+
+function editQuoteV2(quoteId) {
+  const quote = quotesV2.find(q => q.id === quoteId);
+  if (!quote) return showToast('Quote not found', 'error');
+  
+  editingQuoteV2Id = quoteId;
+  v2Items = quote.items || [];
+  showToast('Quote editor coming soon - UI to be built', 'info');
+}
+
+// ───────────────────────────────────────────────────────────────
+// INVOICE V2 - BUILDER FUNCTIONS
+// ───────────────────────────────────────────────────────────────
+function startNewInvoiceV2() {
+  editingInvoiceV2Id = null;
+  v2Items = [];
+  showToast('Invoice builder coming soon - UI to be built', 'info');
+}
+
+function editInvoiceV2(invoiceId) {
+  const invoice = invoicesV2.find(inv => inv.id === invoiceId);
+  if (!invoice) return showToast('Invoice not found', 'error');
+  
+  editingInvoiceV2Id = invoiceId;
+  v2Items = invoice.items || [];
+  showToast('Invoice editor coming soon - UI to be built', 'info');
+}
+
+// ───────────────────────────────────────────────────────────────
+// CONVERT QUOTE → INVOICE
+// ───────────────────────────────────────────────────────────────
+async function convertQuoteToInvoiceV2(quoteId) {
+  const quote = quotesV2.find(q => q.id === quoteId);
+  if (!quote) return showToast('Quote not found', 'error');
+  
+  // Get next invoice number
+  let nextInvoiceNum = 'INV-001';
+  if (currentUser?.invoice_prefix && currentUser?.invoice_next_number) {
+    nextInvoiceNum = currentUser.invoice_prefix + '-' + String(currentUser.invoice_next_number).padStart(3, '0');
+  }
+  
+  try {
+    // Create invoice with quote reference
+    const { data, error } = await sb
+      .from('invoices_v2')
+      .insert([{
+        user_id: currentUser.id,
+        invoice_number: nextInvoiceNum,
+        quote_id: quoteId,
+        client_id: quote.client_id,
+        client_name: quote.client_name,
+        client_email: quote.client_email,
+        client_phone: quote.client_phone,
+        client_address: quote.client_address,
+        items: quote.items,
+        subtotal: quote.subtotal || 0,
+        vat_percent: quote.vat_percent || 0,
+        vat_amount: quote.vat_amount || 0,
+        total_amount: quote.total_amount || 0,
+        invoice_date: new Date().toISOString().split('T')[0],
+        due_date: new Date(Date.now() + 30*24*60*60*1000).toISOString().split('T')[0],
+        notes: quote.notes || '',
+        status: 'unpaid'
+      }])
+      .select()
+      .single();
+    
+    if (error) throw error;
+    
+    // Update invoice number in profiles
+    await sb
+      .from('profiles')
+      .update({ invoice_next_number: (currentUser.invoice_next_number || 0) + 1 })
+      .eq('id', currentUser.id);
+    
+    // Update quote status to invoiced
+    await sb
+      .from('quotes_v2')
+      .update({ status: 'invoiced', converted_to_invoice_id: data.id })
+      .eq('id', quoteId);
+    
+    showToast(`✅ Invoice ${nextInvoiceNum} created from quote!`, 'success');
+    loadQuotesV2();
+    loadInvoicesV2();
+    goTo('invoices-v2');
+  } catch (error) {
+    console.error('❌ Conversion error:', error);
+    showToast('Error converting quote to invoice', 'error');
+  }
+}
+
+// ───────────────────────────────────────────────────────────────
+// PDF GENERATION
+// ───────────────────────────────────────────────────────────────
+function downloadQuotePDFv2(quoteId) {
+  const quote = quotesV2.find(q => q.id === quoteId);
+  if (!quote) return showToast('Quote not found', 'error');
+  generateQuotePDFv2(quote);
+}
+
+function downloadInvoicePDFv2(invoiceId) {
+  const invoice = invoicesV2.find(inv => inv.id === invoiceId);
+  if (!invoice) return showToast('Invoice not found', 'error');
+  generateInvoicePDFv2(invoice);
+}
+
+function generateQuotePDFv2(quote) {
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+  const pageW = 210;
+  const pageH = 297;
+  const margin = 15;
+  const dark = [26, 26, 26];
+  const orange = [230, 57, 70];
+  const white = [255, 255, 255];
+  const borderGrey = [220, 220, 220];
+  let y = margin;
+
+  // Header
+  doc.setFillColor(...dark);
+  doc.rect(0, 0, pageW, 38, 'F');
+  doc.setFillColor(...orange);
+  doc.rect(0, 38, pageW, 1.5, 'F');
+
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(16);
+  doc.setTextColor(...white);
+  doc.text(currentUser?.company || 'Your Company', margin, 14);
+
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(8);
+  doc.setTextColor(180, 180, 180);
+  doc.text('QUOTATION', pageW - margin, 10, { align: 'right' });
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(10);
+  doc.setTextColor(...orange);
+  doc.text(quote.quote_number || 'QTE', pageW - margin, 18, { align: 'right' });
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(7.5);
+  doc.setTextColor(160, 160, 160);
+  doc.text('Date: ' + (quote.quote_date || new Date().toLocaleDateString('en-ZA')), pageW - margin, 24, { align: 'right' });
+
+  y = 46;
+
+  // Client info
+  doc.setFillColor(250, 249, 247);
+  doc.rect(0, y, pageW, 24, 'F');
+  doc.setDrawColor(...borderGrey);
+  doc.setLineWidth(0.3);
+  doc.line(0, y+24, pageW, y+24);
+
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(6);
+  doc.setTextColor(170, 170, 170);
+  doc.text('QUOTED FOR', margin, y+6);
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(10);
+  doc.setTextColor(...dark);
+  doc.text(quote.client_name || 'Client', margin, y+12);
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(7.5);
+  doc.setTextColor(100, 100, 100);
+  let cy = y+17;
+  if (quote.client_phone) { doc.text(quote.client_phone, margin, cy); cy += 4; }
+  if (quote.client_address) { doc.text(quote.client_address, margin, cy); }
+  y += 28;
+
+  // Items table
+  const items = (quote.items||[]).map(item => [
+    item.description || item.name || 'Item',
+    String(item.qty||1),
+    'R ' + parseFloat(item.price||0).toFixed(2),
+    'R ' + ((item.qty||1)*(item.price||0)).toFixed(2)
+  ]);
+
+  doc.autoTable({
+    startY: y,
+    head: [['DESCRIPTION', 'QTY', 'UNIT PRICE', 'AMOUNT']],
+    body: items,
+    margin: { left: 0, right: 0, top: 2, bottom: 2 },
+    styles: { fontSize:8.5, cellPadding:4, textColor:dark, lineColor:borderGrey, lineWidth:0.2 },
+    headStyles: { fillColor:dark, textColor:white, fontStyle:'bold', fontSize:7.5, cellPadding:5 },
+    columnStyles: {
+      1:{halign:'center'},
+      2:{halign:'right'}, 3:{halign:'right',fontStyle:'bold'}
+    },
+    alternateRowStyles: { fillColor:[252,252,252] }
+  });
+
+  y = doc.lastAutoTable.finalY + 4;
+
+  // Totals
+  const subtotal = quote.subtotal || 0;
+  const vat = quote.vat_amount || 0;
+  const total = quote.total_amount || 0;
+  const fmt = n => 'R ' + n.toLocaleString('en-ZA',{minimumFractionDigits:2,maximumFractionDigits:2});
+  
+  doc.setFillColor(254, 240, 240);
+  doc.rect(0, y-2, pageW, 28, 'F');
+  
+  const totalsX = pageW - 85;
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(8.5);
+  doc.setTextColor(100, 100, 100);
+  doc.text('Subtotal', totalsX+4, y+5.5);
+  doc.text(fmt(subtotal), pageW-2, y+5.5, {align:'right'});
+  y += 8;
+
+  if (vat > 0) {
+    doc.text('VAT @ 15%', totalsX+4, y+5.5);
+    doc.text(fmt(vat), pageW-2, y+5.5, {align:'right'});
+    y += 8;
+  }
+
+  doc.setFillColor(...dark);
+  doc.rect(totalsX, y, 85, 10, 'F');
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(10);
+  doc.setTextColor(...white);
+  doc.text('TOTAL DUE', totalsX+6, y+7);
+  doc.text(fmt(total), pageW-2, y+7, {align:'right'});
+
+  // Footer
+  y = pageH - 30;
+  doc.setFillColor(26, 26, 26);
+  doc.rect(0, y, pageW, 30, 'F');
+  doc.setFillColor(...orange);
+  doc.rect(0, y, pageW, 1.5, 'F');
+  doc.setFont('helvetica', 'italic');
+  doc.setFontSize(8);
+  doc.setTextColor(180, 180, 180);
+  doc.text('Thank you for the opportunity. Valid for '+quote.valid_days+' days.', margin, y+8);
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(7.5);
+  doc.setTextColor(130, 130, 130);
+  doc.text('Powered by QForge | myquoteforge.co.za', pageW/2, y+24, {align:'center'});
+
+  const fileName = quote.quote_number + '-' + (quote.client_name||'Quote').replace(/[^a-z0-9]/gi,'-') + '.pdf';
+  doc.save(fileName);
+  showToast('Quote PDF downloaded!', 'success');
+}
+
+function generateInvoicePDFv2(invoice) {
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+  const pageW = 210;
+  const pageH = 297;
+  const margin = 15;
+  const dark = [26, 26, 26];
+  const orange = [230, 57, 70];
+  const white = [255, 255, 255];
+  const borderGrey = [220, 220, 220];
+  let y = margin;
+
+  // Header - same as quote
+  doc.setFillColor(...dark);
+  doc.rect(0, 0, pageW, 38, 'F');
+  doc.setFillColor(...orange);
+  doc.rect(0, 38, pageW, 1.5, 'F');
+
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(16);
+  doc.setTextColor(...white);
+  doc.text(currentUser?.company || 'Your Company', margin, 14);
+
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(8);
+  doc.setTextColor(180, 180, 180);
+  doc.text('INVOICE', pageW - margin, 10, { align: 'right' });
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(10);
+  doc.setTextColor(...orange);
+  doc.text(invoice.invoice_number || 'INV', pageW - margin, 18, { align: 'right' });
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(7.5);
+  doc.setTextColor(160, 160, 160);
+  doc.text('Date: ' + (invoice.invoice_date || new Date().toLocaleDateString('en-ZA')), pageW - margin, 24, { align: 'right' });
+  doc.text('Due: ' + (invoice.due_date || new Date().toLocaleDateString('en-ZA')), pageW - margin, 29, { align: 'right' });
+
+  y = 46;
+
+  // Client info
+  doc.setFillColor(250, 249, 247);
+  doc.rect(0, y, pageW, 24, 'F');
+  doc.setDrawColor(...borderGrey);
+  doc.setLineWidth(0.3);
+  doc.line(0, y+24, pageW, y+24);
+
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(6);
+  doc.setTextColor(170, 170, 170);
+  doc.text('INVOICE TO', margin, y+6);
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(10);
+  doc.setTextColor(...dark);
+  doc.text(invoice.client_name || 'Client', margin, y+12);
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(7.5);
+  doc.setTextColor(100, 100, 100);
+  let cy = y+17;
+  if (invoice.client_phone) { doc.text(invoice.client_phone, margin, cy); cy += 4; }
+  if (invoice.client_address) { doc.text(invoice.client_address, margin, cy); }
+  y += 28;
+
+  // Items table
+  const items = (invoice.items||[]).map(item => [
+    item.description || item.name || 'Item',
+    String(item.qty||1),
+    'R ' + parseFloat(item.price||0).toFixed(2),
+    'R ' + ((item.qty||1)*(item.price||0)).toFixed(2)
+  ]);
+
+  doc.autoTable({
+    startY: y,
+    head: [['DESCRIPTION', 'QTY', 'UNIT PRICE', 'AMOUNT']],
+    body: items,
+    margin: { left: 0, right: 0, top: 2, bottom: 2 },
+    styles: { fontSize:8.5, cellPadding:4, textColor:dark, lineColor:borderGrey, lineWidth:0.2 },
+    headStyles: { fillColor:dark, textColor:white, fontStyle:'bold', fontSize:7.5, cellPadding:5 },
+    columnStyles: {
+      1:{halign:'center'},
+      2:{halign:'right'}, 3:{halign:'right',fontStyle:'bold'}
+    },
+    alternateRowStyles: { fillColor:[252,252,252] }
+  });
+
+  y = doc.lastAutoTable.finalY + 4;
+
+  // Totals - SAME DESIGN
+  const subtotal = invoice.subtotal || 0;
+  const vat = invoice.vat_amount || 0;
+  const total = invoice.total_amount || 0;
+  const fmt = n => 'R ' + n.toLocaleString('en-ZA',{minimumFractionDigits:2,maximumFractionDigits:2});
+  
+  doc.setFillColor(254, 240, 240);
+  doc.rect(0, y-2, pageW, 28, 'F');
+  
+  const totalsX = pageW - 85;
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(8.5);
+  doc.setTextColor(100, 100, 100);
+  doc.text('Subtotal', totalsX+4, y+5.5);
+  doc.text(fmt(subtotal), pageW-2, y+5.5, {align:'right'});
+  y += 8;
+
+  if (vat > 0) {
+    doc.text('VAT @ 15%', totalsX+4, y+5.5);
+    doc.text(fmt(vat), pageW-2, y+5.5, {align:'right'});
+    y += 8;
+  }
+
+  doc.setFillColor(...dark);
+  doc.rect(totalsX, y, 85, 10, 'F');
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(10);
+  doc.setTextColor(...white);
+  doc.text('TOTAL DUE', totalsX+6, y+7);
+  doc.text(fmt(total), pageW-2, y+7, {align:'right'});
+
+  // Footer
+  y = pageH - 30;
+  doc.setFillColor(26, 26, 26);
+  doc.rect(0, y, pageW, 30, 'F');
+  doc.setFillColor(...orange);
+  doc.rect(0, y, pageW, 1.5, 'F');
+  doc.setFont('helvetica', 'italic');
+  doc.setFontSize(8);
+  doc.setTextColor(180, 180, 180);
+  doc.text('Payment due by '+invoice.due_date+'. Thank you for your business.', margin, y+8);
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(7.5);
+  doc.setTextColor(130, 130, 130);
+  doc.text('Powered by QForge | myquoteforge.co.za', pageW/2, y+24, {align:'center'});
+
+  const fileName = invoice.invoice_number + '-' + (invoice.client_name||'Invoice').replace(/[^a-z0-9]/gi,'-') + '.pdf';
+  doc.save(fileName);
+  showToast('Invoice PDF downloaded!', 'success');
+}
+
 </script>
 </body>
 </html>
