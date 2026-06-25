@@ -16,6 +16,16 @@
 <script>
 console.log('%c🎉 QForge v2.0 CLEAN VERSION - New Quote/Invoice System', 'color: #E63946; font-size: 16px; font-weight: bold;');
 console.log('This is the NEW clean app.html without old builders');
+
+// UNREGISTER ALL SERVICE WORKERS (prevents caching old version)
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.getRegistrations().then(registrations => {
+    registrations.forEach(registration => {
+      console.log('🔥 Unregistering old Service Worker');
+      registration.unregister();
+    });
+  });
+}
 </script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -8549,7 +8559,9 @@ function hideLoadingScreen(showAuth) {
 <script>
 let deferredPrompt = null;
 
-// Register Service Worker for offline support
+// SERVICE WORKER DISABLED - was caching old app.html
+// TODO: Re-enable after app is stable
+/*
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('/service-worker.js', { scope: '/' })
@@ -8583,7 +8595,7 @@ if ('serviceWorker' in navigator) {
       }
     }
   });
-}
+*/
 
 // PWA Install Prompt Handler
 window.addEventListener('beforeinstallprompt', (e) => {
