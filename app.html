@@ -8706,6 +8706,10 @@ async function loadInvoicesV2() {
   }
 }
 
+// V2 Navigation - Quote Builder
+let editingQuoteId = null;
+let quoteBuilderItems = [];
+
 // Render V2 Quotes List
 function renderQuotesV2() {
   return `
@@ -8788,10 +8792,6 @@ function renderInvoicesV2() {
   `}
   `;
 }
-
-// V2 Navigation
-let editingQuoteId = null;
-let quoteBuilderItems = [];
 
 function initQuotesV2() {
   loadQuotesV2();
