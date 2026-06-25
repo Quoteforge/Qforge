@@ -2594,9 +2594,11 @@ function goTo(page) {
   if (page==='dashboard') mc.innerHTML = renderDashboard();
   else if (page==='quotes') mc.innerHTML = renderQuotes();
   else if (page==='quotes-v2') { mc.innerHTML = renderQuotesV2(); setTimeout(initQuotesV2, 100); }
+  else if (page==='quotes-v2-builder') { mc.innerHTML = renderQuoteBuilder(); setTimeout(updateQuotePreview, 100); }
   else if (page==='builder') { mc.innerHTML = renderBuilder(); initBuilder(); }
   else if (page==='invoices') mc.innerHTML = renderInvoices();
   else if (page==='invoices-v2') { mc.innerHTML = renderInvoicesV2(); setTimeout(initInvoicesV2, 100); }
+  else if (page==='invoices-v2-builder') { mc.innerHTML = renderInvoiceBuilder(); setTimeout(updateInvoicePreview, 100); }
   else if (page==='clients') mc.innerHTML = renderClients();
   else if (page==='client-detail') mc.innerHTML = renderClientDetail(currentClientId);
   else if (page==='stats') mc.innerHTML = renderStats();
@@ -9205,6 +9207,401 @@ function generateInvoicePDFv2(invoice) {
   const fileName = invoice.invoice_number + '-' + (invoice.client_name||'Invoice').replace(/[^a-z0-9]/gi,'-') + '.pdf';
   doc.save(fileName);
   showToast('Invoice PDF downloaded!', 'success');
+}
+
+// ════════════════════════════════════════════════════════════════════════════════
+// QFORGE V2 - QUOTE & INVOICE BUILDERS
+// ════════════════════════════════════════════════════════════════════════════════
+
+let quoteBuilderItems = [];
+let invoiceBuilderItems = [];
+
+// ─────────────────────────────────────────────────────────────────────────────
+// QUOTE V2 BUILDER
+// ─────────────────────────────────────────────────────────────────────────────
+
+function startNewQuoteV2() {
+  editingQuoteId = null;
+  quoteBuilderItems = [];
+  goTo('quotes-v2-builder');
+}
+
+function startNewInvoiceV2() {
+  editingInvoiceId = null;
+  invoiceBuilderItems = [];
+  goTo('invoices-v2-builder');
+}
+
+function renderQuoteBuilder() {
+  const quoteNum = currentUser?.quote_next_number ? (currentUser.quote_prefix || 'QF') + '-' + String(currentUser.quote_next_number).padStart(3, '0') : 'QF-001';
+  
+  return `
+  <div class="page-header">
+    <div><h2>Create Quote</h2></div>
+    <div style="display:flex;gap:8px;">
+      <button class="btn btn-ghost" onclick="goTo('quotes-v2')" style="color:#666;">Cancel</button>
+      <button class="btn btn-red" style="color:#fff;" onclick="saveQuoteV2()">💾 Save Quote</button>
+    </div>
+  </div>
+
+  <div class="builder-layout">
+    <div style="flex:1;overflow-y:auto;padding-right:16px;">
+      
+      <div style="background:#fff;border:1px solid #ddd;border-radius:8px;padding:20px;margin-bottom:20px;">
+        <h3 style="margin:0 0 16px 0;color:#333;">Client Details</h3>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">
+          <input type="text" id="qb_clientName" placeholder="Client Name" style="padding:10px;border:1px solid #ddd;border-radius:4px;" />
+          <input type="email" id="qb_clientEmail" placeholder="Email" style="padding:10px;border:1px solid #ddd;border-radius:4px;" />
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">
+          <input type="tel" id="qb_clientPhone" placeholder="Phone" style="padding:10px;border:1px solid #ddd;border-radius:4px;" />
+          <input type="text" id="qb_clientAddress" placeholder="Address" style="padding:10px;border:1px solid #ddd;border-radius:4px;" />
+        </div>
+      </div>
+
+      <div style="background:#fff;border:1px solid #ddd;border-radius:8px;padding:20px;margin-bottom:20px;">
+        <h3 style="margin:0 0 16px 0;color:#333;">Quote Settings</h3>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">
+          <div>
+            <label style="display:block;font-size:0.85rem;color:#666;margin-bottom:4px;">Quote Number</label>
+            <input type="text" id="qb_quoteNumber" value="${quoteNum}" readonly style="padding:10px;border:1px solid #ddd;border-radius:4px;background:#f9f9f9;" />
+          </div>
+          <div>
+            <label style="display:block;font-size:0.85rem;color:#666;margin-bottom:4px;">Quote Date</label>
+            <input type="date" id="qb_quoteDate" value="${new Date().toISOString().split('T')[0]}" style="padding:10px;border:1px solid #ddd;border-radius:4px;" />
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">
+          <div>
+            <label style="display:block;font-size:0.85rem;color:#666;margin-bottom:4px;">Valid Days</label>
+            <input type="number" id="qb_validDays" value="14" min="1" max="90" style="padding:10px;border:1px solid #ddd;border-radius:4px;" />
+          </div>
+          <div>
+            <label style="display:block;font-size:0.85rem;color:#666;margin-bottom:4px;">VAT</label>
+            <select id="qb_vatPercent" style="padding:10px;border:1px solid #ddd;border-radius:4px;">
+              <option value="no">No VAT</option>
+              <option value="yes" selected>VAT @ 15%</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div style="background:#fff;border:1px solid #ddd;border-radius:8px;padding:20px;margin-bottom:20px;">
+        <h3 style="margin:0 0 16px 0;color:#333;">Line Items</h3>
+        <div id="qb_items" style="margin-bottom:12px;">
+          ${quoteBuilderItems.length === 0 ? '<p style="color:#999;text-align:center;padding:20px;">No items yet</p>' : quoteBuilderItems.map((item, i) => `
+            <div style="display:grid;grid-template-columns:1fr 80px 100px 100px 40px;gap:8px;margin-bottom:8px;align-items:center;">
+              <input type="text" value="${item.name||''}" placeholder="Description" onchange="quoteBuilderItems[${i}].name=this.value;updateQuotePreview()" style="padding:8px;border:1px solid #ddd;border-radius:4px;" />
+              <input type="number" value="${item.qty||1}" placeholder="Qty" min="1" onchange="quoteBuilderItems[${i}].qty=parseFloat(this.value);updateQuotePreview()" style="padding:8px;border:1px solid #ddd;border-radius:4px;" />
+              <input type="number" value="${item.price||0}" placeholder="Price" min="0" step="0.01" onchange="quoteBuilderItems[${i}].price=parseFloat(this.value);updateQuotePreview()" style="padding:8px;border:1px solid #ddd;border-radius:4px;" />
+              <div style="text-align:right;font-weight:600;">R${((item.qty||1)*(item.price||0)).toLocaleString('en-ZA',{minimumFractionDigits:2,maximumFractionDigits:2})}</div>
+              <button class="btn btn-sm" onclick="quoteBuilderItems.splice(${i},1);renderQuoteBuilder();updateQuotePreview()" style="background:#ffebee;color:#E63946;border:none;padding:4px 8px;border-radius:4px;cursor:pointer;">✕</button>
+            </div>
+          `).join('')}
+        </div>
+        <button class="btn btn-ghost" onclick="quoteBuilderItems.push({name:'',qty:1,price:0});renderQuoteBuilder();updateQuotePreview()" style="width:100%;padding:10px;color:#E63946;border:1px dashed #E63946;">+ Add Item</button>
+      </div>
+
+      <div style="background:#fff;border:1px solid #ddd;border-radius:8px;padding:20px;margin-bottom:20px;">
+        <h3 style="margin:0 0 16px 0;color:#333;">Notes & Terms</h3>
+        <textarea id="qb_notes" placeholder="Add any notes or terms..." style="padding:10px;border:1px solid #ddd;border-radius:4px;width:100%;min-height:80px;font-family:inherit;"></textarea>
+      </div>
+
+    </div>
+
+    <div style="flex:0 0 320px;background:#f9f9f9;border:1px solid #ddd;border-radius:8px;padding:16px;height:fit-content;position:sticky;top:80px;">
+      <h3 style="margin:0 0 16px 0;color:#333;font-size:1.1rem;">Preview</h3>
+      <div id="qb_preview" style="border:1px solid #ddd;border-radius:4px;background:#fff;padding:12px;font-size:0.85rem;line-height:1.6;">
+        ${renderQuotePreview()}
+      </div>
+    </div>
+  </div>
+  `;
+}
+
+function renderQuotePreview() {
+  const subtotal = quoteBuilderItems.reduce((s, item) => s + ((item.qty||1)*(item.price||0)), 0);
+  const vat = document.getElementById('qb_vatPercent')?.value === 'yes' ? (subtotal * 15 / 100) : 0;
+  const total = subtotal + vat;
+  const fmt = n => 'R ' + n.toLocaleString('en-ZA', {minimumFractionDigits:2, maximumFractionDigits:2});
+  
+  return `
+    <div style="border-bottom:1px solid #ddd;padding-bottom:12px;margin-bottom:12px;">
+      <div style="font-weight:600;margin-bottom:4px;">${document.getElementById('qb_clientName')?.value || 'Client Name'}</div>
+      <div style="font-size:0.8rem;color:#666;">Quote: ${document.getElementById('qb_quoteNumber')?.value || 'QF-001'}</div>
+      <div style="font-size:0.8rem;color:#666;">Date: ${document.getElementById('qb_quoteDate')?.value || 'Today'}</div>
+    </div>
+    <div style="border-bottom:1px solid #ddd;padding-bottom:12px;margin-bottom:12px;">
+      ${quoteBuilderItems.map(item => `
+        <div style="display:flex;justify-content:space-between;margin-bottom:4px;font-size:0.8rem;">
+          <div>${item.name || 'Item'}</div>
+          <div>${fmt((item.qty||1)*(item.price||0))}</div>
+        </div>
+      `).join('')}
+    </div>
+    <div style="border-bottom:1px solid #ddd;padding-bottom:12px;margin-bottom:12px;">
+      <div style="display:flex;justify-content:space-between;margin-bottom:4px;">
+        <div>Subtotal</div>
+        <div>${fmt(subtotal)}</div>
+      </div>
+      ${vat > 0 ? `
+        <div style="display:flex;justify-content:space-between;">
+          <div>VAT @ 15%</div>
+          <div>${fmt(vat)}</div>
+        </div>
+      ` : ''}
+    </div>
+    <div style="background:#E63946;color:#fff;padding:8px;border-radius:4px;text-align:center;font-weight:600;">
+      TOTAL: ${fmt(total)}
+    </div>
+  `;
+}
+
+function updateQuotePreview() {
+  const preview = document.getElementById('qb_preview');
+  if (preview) preview.innerHTML = renderQuotePreview();
+}
+
+async function saveQuoteV2() {
+  const clientName = document.getElementById('qb_clientName')?.value?.trim();
+  const clientEmail = document.getElementById('qb_clientEmail')?.value?.trim();
+  const clientPhone = document.getElementById('qb_clientPhone')?.value?.trim();
+  const clientAddress = document.getElementById('qb_clientAddress')?.value?.trim();
+  const quoteNumber = document.getElementById('qb_quoteNumber')?.value;
+  const quoteDate = document.getElementById('qb_quoteDate')?.value;
+  const validDays = parseInt(document.getElementById('qb_validDays')?.value || '14');
+  const notes = document.getElementById('qb_notes')?.value?.trim();
+  const vatPercent = document.getElementById('qb_vatPercent')?.value === 'yes' ? 15 : 0;
+
+  if (!clientName || !quoteNumber || !quoteBuilderItems.length) {
+    return showToast('Fill in client name, quote number, and add items', 'error');
+  }
+
+  const subtotal = quoteBuilderItems.reduce((s, item) => s + ((item.qty||1)*(item.price||0)), 0);
+  const vatAmount = (subtotal * vatPercent) / 100;
+  const totalAmount = subtotal + vatAmount;
+
+  try {
+    const { error } = await sb.from('quotes_v2').insert([{
+      user_id: currentUser.id,
+      quote_number: quoteNumber,
+      client_name: clientName,
+      client_email: clientEmail,
+      client_phone: clientPhone,
+      client_address: clientAddress,
+      quote_date: quoteDate,
+      valid_days: validDays,
+      items: quoteBuilderItems,
+      subtotal,
+      vat_percent: vatPercent,
+      vat_amount: vatAmount,
+      total_amount: totalAmount,
+      notes,
+      status: 'draft'
+    }]);
+
+    if (error) throw error;
+
+    // Update quote number in profile
+    await sb.from('profiles').update({
+      quote_next_number: (currentUser.quote_next_number || 0) + 1
+    }).eq('id', currentUser.id);
+
+    showToast(`✅ Quote ${quoteNumber} created!`, 'success');
+    loadQuotesV2();
+    goTo('quotes-v2');
+  } catch (error) {
+    console.error('Save error:', error);
+    showToast('Error saving quote', 'error');
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// INVOICE V2 BUILDER
+// ─────────────────────────────────────────────────────────────────────────────
+
+function renderInvoiceBuilder() {
+  const invoiceNum = currentUser?.invoice_next_number ? (currentUser.invoice_prefix || 'INV') + '-' + String(currentUser.invoice_next_number).padStart(3, '0') : 'INV-001';
+  
+  return `
+  <div class="page-header">
+    <div><h2>Create Invoice</h2></div>
+    <div style="display:flex;gap:8px;">
+      <button class="btn btn-ghost" onclick="goTo('invoices-v2')" style="color:#666;">Cancel</button>
+      <button class="btn btn-red" style="color:#fff;" onclick="saveInvoiceV2()">💾 Save Invoice</button>
+    </div>
+  </div>
+
+  <div class="builder-layout">
+    <div style="flex:1;overflow-y:auto;padding-right:16px;">
+      
+      <div style="background:#fff;border:1px solid #ddd;border-radius:8px;padding:20px;margin-bottom:20px;">
+        <h3 style="margin:0 0 16px 0;color:#333;">Client Details</h3>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">
+          <input type="text" id="ib_clientName" placeholder="Client Name" style="padding:10px;border:1px solid #ddd;border-radius:4px;" />
+          <input type="email" id="ib_clientEmail" placeholder="Email" style="padding:10px;border:1px solid #ddd;border-radius:4px;" />
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">
+          <input type="tel" id="ib_clientPhone" placeholder="Phone" style="padding:10px;border:1px solid #ddd;border-radius:4px;" />
+          <input type="text" id="ib_clientAddress" placeholder="Address" style="padding:10px;border:1px solid #ddd;border-radius:4px;" />
+        </div>
+      </div>
+
+      <div style="background:#fff;border:1px solid #ddd;border-radius:8px;padding:20px;margin-bottom:20px;">
+        <h3 style="margin:0 0 16px 0;color:#333;">Invoice Settings</h3>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">
+          <div>
+            <label style="display:block;font-size:0.85rem;color:#666;margin-bottom:4px;">Invoice Number</label>
+            <input type="text" id="ib_invoiceNumber" value="${invoiceNum}" readonly style="padding:10px;border:1px solid #ddd;border-radius:4px;background:#f9f9f9;" />
+          </div>
+          <div>
+            <label style="display:block;font-size:0.85rem;color:#666;margin-bottom:4px;">Invoice Date</label>
+            <input type="date" id="ib_invoiceDate" value="${new Date().toISOString().split('T')[0]}" style="padding:10px;border:1px solid #ddd;border-radius:4px;" />
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">
+          <div>
+            <label style="display:block;font-size:0.85rem;color:#666;margin-bottom:4px;">Due Date</label>
+            <input type="date" id="ib_dueDate" value="${new Date(Date.now() + 30*24*60*60*1000).toISOString().split('T')[0]}" style="padding:10px;border:1px solid #ddd;border-radius:4px;" />
+          </div>
+          <div>
+            <label style="display:block;font-size:0.85rem;color:#666;margin-bottom:4px;">VAT</label>
+            <select id="ib_vatPercent" style="padding:10px;border:1px solid #ddd;border-radius:4px;">
+              <option value="no">No VAT</option>
+              <option value="yes" selected>VAT @ 15%</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div style="background:#fff;border:1px solid #ddd;border-radius:8px;padding:20px;margin-bottom:20px;">
+        <h3 style="margin:0 0 16px 0;color:#333;">Line Items</h3>
+        <div id="ib_items" style="margin-bottom:12px;">
+          ${invoiceBuilderItems.length === 0 ? '<p style="color:#999;text-align:center;padding:20px;">No items yet</p>' : invoiceBuilderItems.map((item, i) => `
+            <div style="display:grid;grid-template-columns:1fr 80px 100px 100px 40px;gap:8px;margin-bottom:8px;align-items:center;">
+              <input type="text" value="${item.name||''}" placeholder="Description" onchange="invoiceBuilderItems[${i}].name=this.value;updateInvoicePreview()" style="padding:8px;border:1px solid #ddd;border-radius:4px;" />
+              <input type="number" value="${item.qty||1}" placeholder="Qty" min="1" onchange="invoiceBuilderItems[${i}].qty=parseFloat(this.value);updateInvoicePreview()" style="padding:8px;border:1px solid #ddd;border-radius:4px;" />
+              <input type="number" value="${item.price||0}" placeholder="Price" min="0" step="0.01" onchange="invoiceBuilderItems[${i}].price=parseFloat(this.value);updateInvoicePreview()" style="padding:8px;border:1px solid #ddd;border-radius:4px;" />
+              <div style="text-align:right;font-weight:600;">R${((item.qty||1)*(item.price||0)).toLocaleString('en-ZA',{minimumFractionDigits:2,maximumFractionDigits:2})}</div>
+              <button class="btn btn-sm" onclick="invoiceBuilderItems.splice(${i},1);renderInvoiceBuilder();updateInvoicePreview()" style="background:#ffebee;color:#E63946;border:none;padding:4px 8px;border-radius:4px;cursor:pointer;">✕</button>
+            </div>
+          `).join('')}
+        </div>
+        <button class="btn btn-ghost" onclick="invoiceBuilderItems.push({name:'',qty:1,price:0});renderInvoiceBuilder();updateInvoicePreview()" style="width:100%;padding:10px;color:#E63946;border:1px dashed #E63946;">+ Add Item</button>
+      </div>
+
+      <div style="background:#fff;border:1px solid #ddd;border-radius:8px;padding:20px;margin-bottom:20px;">
+        <h3 style="margin:0 0 16px 0;color:#333;">Payment Terms</h3>
+        <textarea id="ib_notes" placeholder="Add any payment terms..." style="padding:10px;border:1px solid #ddd;border-radius:4px;width:100%;min-height:80px;font-family:inherit;"></textarea>
+      </div>
+
+    </div>
+
+    <div style="flex:0 0 320px;background:#f9f9f9;border:1px solid #ddd;border-radius:8px;padding:16px;height:fit-content;position:sticky;top:80px;">
+      <h3 style="margin:0 0 16px 0;color:#333;font-size:1.1rem;">Preview</h3>
+      <div id="ib_preview" style="border:1px solid #ddd;border-radius:4px;background:#fff;padding:12px;font-size:0.85rem;line-height:1.6;">
+        ${renderInvoicePreview()}
+      </div>
+    </div>
+  </div>
+  `;
+}
+
+function renderInvoicePreview() {
+  const subtotal = invoiceBuilderItems.reduce((s, item) => s + ((item.qty||1)*(item.price||0)), 0);
+  const vat = document.getElementById('ib_vatPercent')?.value === 'yes' ? (subtotal * 15 / 100) : 0;
+  const total = subtotal + vat;
+  const fmt = n => 'R ' + n.toLocaleString('en-ZA', {minimumFractionDigits:2, maximumFractionDigits:2});
+  
+  return `
+    <div style="border-bottom:1px solid #ddd;padding-bottom:12px;margin-bottom:12px;">
+      <div style="font-weight:600;margin-bottom:4px;">${document.getElementById('ib_clientName')?.value || 'Client Name'}</div>
+      <div style="font-size:0.8rem;color:#666;">Invoice: ${document.getElementById('ib_invoiceNumber')?.value || 'INV-001'}</div>
+      <div style="font-size:0.8rem;color:#666;">Due: ${document.getElementById('ib_dueDate')?.value || 'Today'}</div>
+    </div>
+    <div style="border-bottom:1px solid #ddd;padding-bottom:12px;margin-bottom:12px;">
+      ${invoiceBuilderItems.map(item => `
+        <div style="display:flex;justify-content:space-between;margin-bottom:4px;font-size:0.8rem;">
+          <div>${item.name || 'Item'}</div>
+          <div>${fmt((item.qty||1)*(item.price||0))}</div>
+        </div>
+      `).join('')}
+    </div>
+    <div style="border-bottom:1px solid #ddd;padding-bottom:12px;margin-bottom:12px;">
+      <div style="display:flex;justify-content:space-between;margin-bottom:4px;">
+        <div>Subtotal</div>
+        <div>${fmt(subtotal)}</div>
+      </div>
+      ${vat > 0 ? `
+        <div style="display:flex;justify-content:space-between;">
+          <div>VAT @ 15%</div>
+          <div>${fmt(vat)}</div>
+        </div>
+      ` : ''}
+    </div>
+    <div style="background:#E63946;color:#fff;padding:8px;border-radius:4px;text-align:center;font-weight:600;">
+      TOTAL: ${fmt(total)}
+    </div>
+  `;
+}
+
+function updateInvoicePreview() {
+  const preview = document.getElementById('ib_preview');
+  if (preview) preview.innerHTML = renderInvoicePreview();
+}
+
+async function saveInvoiceV2() {
+  const clientName = document.getElementById('ib_clientName')?.value?.trim();
+  const clientEmail = document.getElementById('ib_clientEmail')?.value?.trim();
+  const clientPhone = document.getElementById('ib_clientPhone')?.value?.trim();
+  const clientAddress = document.getElementById('ib_clientAddress')?.value?.trim();
+  const invoiceNumber = document.getElementById('ib_invoiceNumber')?.value;
+  const invoiceDate = document.getElementById('ib_invoiceDate')?.value;
+  const dueDate = document.getElementById('ib_dueDate')?.value;
+  const notes = document.getElementById('ib_notes')?.value?.trim();
+  const vatPercent = document.getElementById('ib_vatPercent')?.value === 'yes' ? 15 : 0;
+
+  if (!clientName || !invoiceNumber || !invoiceBuilderItems.length) {
+    return showToast('Fill in client name, invoice number, and add items', 'error');
+  }
+
+  const subtotal = invoiceBuilderItems.reduce((s, item) => s + ((item.qty||1)*(item.price||0)), 0);
+  const vatAmount = (subtotal * vatPercent) / 100;
+  const totalAmount = subtotal + vatAmount;
+
+  try {
+    const { error } = await sb.from('invoices_v2').insert([{
+      user_id: currentUser.id,
+      invoice_number: invoiceNumber,
+      client_name: clientName,
+      client_email: clientEmail,
+      client_phone: clientPhone,
+      client_address: clientAddress,
+      invoice_date: invoiceDate,
+      due_date: dueDate,
+      items: invoiceBuilderItems,
+      subtotal,
+      vat_percent: vatPercent,
+      vat_amount: vatAmount,
+      total_amount: totalAmount,
+      notes,
+      status: 'unpaid'
+    }]);
+
+    if (error) throw error;
+
+    // Update invoice number in profile
+    await sb.from('profiles').update({
+      invoice_next_number: (currentUser.invoice_next_number || 0) + 1
+    }).eq('id', currentUser.id);
+
+    showToast(`✅ Invoice ${invoiceNumber} created!`, 'success');
+    loadInvoicesV2();
+    goTo('invoices-v2');
+  } catch (error) {
+    console.error('Save error:', error);
+    showToast('Error saving invoice', 'error');
+  }
 }
 
 </script>
