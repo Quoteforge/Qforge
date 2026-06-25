@@ -8698,221 +8698,219 @@ async function loadInvoicesV2() {
     invoicesV2 = (data || []).map(inv => ({
       ...inv,
       items: inv.items || [],
-      client_id: inv.client_id || null
-    }));
-    console.log('✅ Loaded', invoicesV2.length, 'invoices v2');
-  } catch (error) {
-    console.error('❌ Error loading invoices v2:', error);
-    invoicesV2 = [];
-  }
-}
+// ════════════════════════════════════════════════════════════════════════════════════
+// QUOTE BUILDER V2 - COMPLETE WITH ALL FEATURES
+// ════════════════════════════════════════════════════════════════════════════════════
 
-// V2 Navigation - Quote Builder
 let quoteBuilderItems = [];
-
-// Render V2 Quotes List
-function renderQuotesV2() {
-  return `
-  <div class="page-header">
-    <div>
-      <h2>Quotes</h2>
-      <div style="font-size:0.82rem;color:var(--muted);margin-top:3px;">${quotesV2.length} quote${quotesV2.length!==1?'s':''}</div>
-    </div>
-    <button class="btn btn-red" style="color:#fff;" onclick="startNewQuoteV2()">+ New Quote</button>
-  </div>
-  
-  ${quotesV2.length === 0 ? `
-    <div class="quotes-table-wrap">
-      <div class="empty-state">
-        <div class="empty-icon">📄</div>
-        <h3>No quotes yet</h3>
-        <p>Create your first quote and start converting clients</p>
-        <button class="btn btn-red" style="color:#fff;" onclick="startNewQuoteV2()">+ Create First Quote</button>
-      </div>
-    </div>
-  ` : `
-    <div class="quotes-table-wrap">
-      ${quotesV2.map(q => `
-        <div class="qt-row" style="padding: 16px; border-bottom: 1px solid var(--border); display: grid; grid-template-columns: 2fr 1fr 1fr 1fr 100px; gap: 12px; align-items: center;">
-          <div>
-            <div class="qt-client" style="font-weight: 600;">${q.client_name}</div>
-            <div class="qt-num" style="font-size: 0.8rem; color: var(--muted);">${q.quote_number}</div>
-          </div>
-          <div style="font-size: 0.9rem; color: var(--muted);">${new Date(q.quote_date).toLocaleDateString('en-ZA')}</div>
-          <div><span class="status-badge" style="padding: 4px 8px; border-radius: 4px; font-size: 0.8rem; background: ${q.status === 'draft' ? 'rgba(230,57,70,0.1)' : 'rgba(46,204,113,0.1)'}; color: ${q.status === 'draft' ? '#E63946' : '#2ecc71'};">${q.status}</span></div>
-          <div style="text-align: right; font-weight: 600;">R${(q.total_amount || 0).toLocaleString('en-ZA', {minimumFractionDigits: 2})}</div>
-          <div style="display: flex; gap: 6px;">
-            <button class="btn btn-ghost btn-sm" onclick="editQuoteV2('${q.id}')" style="padding: 4px 8px; font-size: 0.8rem;">✏️</button>
-            <button class="btn btn-ghost btn-sm" onclick="convertQuoteToInvoiceV2('${q.id}')" style="padding: 4px 8px; font-size: 0.8rem;">→</button>
-          </div>
-        </div>
-      `).join('')}
-    </div>
-  `}
-  `;
-}
-
-function initQuotesV2() {
-  loadQuotesV2();
-}
+let editingQuoteId = null;
 
 function renderQuoteBuilder() {
   const quote = editingQuoteId ? quotesV2.find(q => q.id === editingQuoteId) : null;
   const isEditing = !!quote;
-  
-  if (isEditing) {
-    quoteBuilderItems = quote.items || [];
-  }
+  if (isEditing) quoteBuilderItems = quote.items || [];
   
   return `
-  <div style="max-width: 1400px; margin: 0 auto;">
-    <!-- HEADER -->
-    <div style="background: white; padding: 20px; border-bottom: 3px solid #E63946; margin-bottom: 20px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center;">
-      <div><h1 style="font-size: 1.8rem; color: #1a1a1a;">${isEditing ? 'Edit Quote' : 'New Quote'}</h1></div>
-      <button class="btn btn-ghost" onclick="goTo('quotes-v2')" style="background: white; color: #E63946; border: 2px solid #E63946; padding: 10px 20px;">← Back</button>
-    </div>
+  <div class="builder-layout">
+    <div class="builder-left">
+      <div class="page-header" style="margin-bottom: 20px;">
+        <h2>${isEditing ? 'Edit Quote' : 'New Quote'}</h2>
+        <button class="btn btn-ghost" onclick="goTo('quotes-v2')">← Back</button>
+      </div>
 
-    <!-- BUILDER CONTAINER -->
-    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
-      <!-- LEFT: FORM -->
-      <div>
-        <!-- CLIENT DETAILS -->
-        <div style="background: white; padding: 20px; border-radius: 8px; border: 1px solid #ddd; margin-bottom: 20px;">
-          <div style="font-size: 0.75rem; font-weight: 700; color: #E63946; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 12px;">Client Details</div>
-          <div style="margin-bottom: 12px;">
-            <label style="font-size: 0.85rem; font-weight: 600; color: #333; display: block; margin-bottom: 4px;">Client Name *</label>
-            <input type="text" id="qb_clientName" placeholder="e.g. ABC Property" value="${isEditing ? quote.client_name : ''}" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 0.9rem;">
-          </div>
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
-            <div style="margin-bottom: 12px;">
-              <label style="font-size: 0.85rem; font-weight: 600; color: #333; display: block; margin-bottom: 4px;">Phone</label>
-              <input type="tel" id="qb_clientPhone" placeholder="011 000 0000" value="${isEditing ? quote.client_phone : ''}" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 0.9rem;">
-            </div>
-            <div style="margin-bottom: 12px;">
-              <label style="font-size: 0.85rem; font-weight: 600; color: #333; display: block; margin-bottom: 4px;">Email</label>
-              <input type="email" id="qb_clientEmail" placeholder="contact@company.co.za" value="${isEditing ? quote.client_email : ''}" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 0.9rem;">
-            </div>
-          </div>
-          <div style="margin-bottom: 12px;">
-            <label style="font-size: 0.85rem; font-weight: 600; color: #333; display: block; margin-bottom: 4px;">Street Address</label>
-            <input type="text" id="qb_clientAddress" placeholder="123 Main Road, Unit 4" value="${isEditing ? quote.client_address : ''}" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 0.9rem;">
-          </div>
+      <!-- CLIENT DETAILS -->
+      <div class="section-label">Client Details</div>
+      <div class="form-group">
+        <label>Client Name *</label>
+        <input type="text" id="qb_clientName" placeholder="e.g. ABC Property Management" value="${isEditing ? quote.client_name : ''}">
+      </div>
+      <div class="input-row">
+        <div class="form-group">
+          <label>Phone</label>
+          <input type="tel" id="qb_clientPhone" placeholder="011 000 0000" value="${isEditing ? quote.client_phone : ''}">
         </div>
-
-        <!-- QUOTE SETTINGS -->
-        <div style="background: white; padding: 20px; border-radius: 8px; border: 1px solid #ddd; margin-bottom: 20px;">
-          <div style="font-size: 0.75rem; font-weight: 700; color: #E63946; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 12px;">Quote Settings</div>
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px;">
-            <div>
-              <label style="font-size: 0.85rem; font-weight: 600; color: #333; display: block; margin-bottom: 4px;">Quote Number</label>
-              <input type="text" id="qb_quoteNumber" readonly style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; background: #f5f5f5;">
-            </div>
-            <div>
-              <label style="font-size: 0.85rem; font-weight: 600; color: #333; display: block; margin-bottom: 4px;">Quote Date</label>
-              <input type="date" id="qb_quoteDate" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px;">
-            </div>
-          </div>
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
-            <div>
-              <label style="font-size: 0.85rem; font-weight: 600; color: #333; display: block; margin-bottom: 4px;">Valid For (Days)</label>
-              <input type="number" id="qb_validDays" value="${isEditing ? quote.valid_days : '14'}" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px;">
-            </div>
-            <div>
-              <label style="font-size: 0.85rem; font-weight: 600; color: #333; display: block; margin-bottom: 4px;">VAT</label>
-              <select id="qb_vatStatus" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px;">
-                <option value="no">No VAT</option>
-                <option value="yes" ${isEditing && quote.vat_percent === 15 ? 'selected' : ''}>15% VAT</option>
-              </select>
-            </div>
-          </div>
+        <div class="form-group">
+          <label>Email</label>
+          <input type="email" id="qb_clientEmail" placeholder="contact@company.co.za" value="${isEditing ? quote.client_email : ''}">
         </div>
+      </div>
+      <div class="form-group">
+        <label>Address</label>
+        <input type="text" id="qb_clientAddress" placeholder="123 Main Road, Unit 4" value="${isEditing ? quote.client_address : ''}">
+      </div>
 
-        <!-- LINE ITEMS -->
-        <div style="background: white; padding: 20px; border-radius: 8px; border: 1px solid #ddd; margin-bottom: 20px;">
-          <div style="font-size: 0.75rem; font-weight: 700; color: #E63946; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 12px;">Line Items</div>
-          <div id="qb_itemsList" style="margin-bottom: 12px;"></div>
-          <button class="btn" style="width: 100%; background: white; color: #E63946; border: 2px solid #E63946; padding: 10px;" onclick="addQuoteItem()">+ Add Item</button>
+      <!-- QUOTE SETTINGS -->
+      <div class="section-label" style="margin-top: 20px;">Quote Settings</div>
+      <div class="input-row">
+        <div class="form-group">
+          <label>Quote Number</label>
+          <input type="text" id="qb_quoteNumber" placeholder="QUA-001" readonly>
         </div>
-
-        <!-- NOTES -->
-        <div style="background: white; padding: 20px; border-radius: 8px; border: 1px solid #ddd; margin-bottom: 20px;">
-          <div style="font-size: 0.75rem; font-weight: 700; color: #E63946; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 12px;">Notes & Terms</div>
-          <textarea id="qb_notes" rows="3" placeholder="e.g. Payment terms, warranty..." style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-family: inherit;">${isEditing ? quote.notes : ''}</textarea>
+        <div class="form-group">
+          <label>Quote Date</label>
+          <input type="date" id="qb_quoteDate">
         </div>
-
-        <!-- ACTION BUTTONS -->
-        <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 20px;">
-          <button class="btn" style="background: #E63946; color: white; padding: 12px;" onclick="saveQuoteV2()">💾 Save</button>
-          <button class="btn" style="background: white; color: #E63946; border: 2px solid #E63946;" onclick="downloadQuotePDF()">📥 PDF</button>
-          <button class="btn" style="background: white; color: #2ecc71; border: 2px solid #2ecc71;" onclick="shareQuoteWhatsApp()">💬 WhatsApp</button>
-          <button class="btn" style="background: white; color: #666; border: 2px solid #ddd;" onclick="goTo('quotes-v2')">Cancel</button>
+      </div>
+      <div class="input-row">
+        <div class="form-group">
+          <label>Valid For (Days)</label>
+          <input type="number" id="qb_validDays" value="${isEditing ? quote.valid_days : 14}" min="1">
+        </div>
+        <div class="form-group">
+          <label>VAT Status</label>
+          <select id="qb_vatStatus">
+            <option value="no">Not VAT Registered</option>
+            <option value="yes" ${isEditing && quote.vat_percent === 15 ? 'selected' : ''}>VAT @ 15%</option>
+          </select>
         </div>
       </div>
 
-      <!-- RIGHT: PREVIEW -->
-      <div id="qb_preview" style="background: white; padding: 20px; border-radius: 8px; border: 1px solid #ddd; max-height: 100vh; overflow-y: auto; position: sticky; top: 20px;"></div>
+      <!-- COMPANY DETAILS -->
+      <div class="input-row">
+        <div class="form-group">
+          <label>Company Reg No.</label>
+          <input type="text" id="qb_companyRegNo" placeholder="e.g. 2020/123456/07" value="${isEditing ? quote.company_reg_no || '' : ''}">
+        </div>
+        <div class="form-group">
+          <label>VAT Reg No.</label>
+          <input type="text" id="qb_vatRegNo" placeholder="e.g. 4123456789" value="${isEditing ? quote.vat_reg_no || '' : ''}">
+        </div>
+      </div>
+
+      <!-- DEPOSIT SETTINGS -->
+      <div class="form-group">
+        <label>Deposit Required (%)</label>
+        <div style="display: flex; gap: 10px; align-items: center;">
+          <input type="range" id="qb_depositPercent" min="0" max="100" value="0" style="flex: 1;">
+          <span id="qb_depositDisplay" style="min-width: 40px; text-align: center; font-weight: bold;">0%</span>
+        </div>
+      </div>
+
+      <!-- NOTES/TERMS -->
+      <div class="form-group">
+        <label>Notes / Terms</label>
+        <textarea id="qb_notes" rows="2" placeholder="e.g. Payment terms, conditions...">${isEditing ? quote.notes : ''}</textarea>
+      </div>
+
+      <!-- LINE ITEMS -->
+      <div class="section-label" style="margin-top: 20px;">Line Items</div>
+      <div id="qb_itemsList"></div>
+      <button class="btn btn-ghost" style="width: 100%; margin-bottom: 20px;" onclick="addQuoteItem()">+ Add Item</button>
+
+      <!-- QUICK ADD -->
+      <div id="qb_quickAdd" style="margin-bottom: 20px;"></div>
+
+      <!-- TOTALS -->
+      <div class="section-label" style="margin-top: 20px;">Totals</div>
+      <div style="background: #f9f9f9; padding: 12px; border-radius: 6px; margin-bottom: 20px;">
+        <div style="display: flex; justify-content: space-between; margin: 6px 0; font-size: 0.9rem;">
+          <span>Subtotal:</span>
+          <span id="qb_subtotal">R0.00</span>
+        </div>
+        <div style="display: flex; justify-content: space-between; margin: 6px 0; font-size: 0.9rem;">
+          <span>Deposit (${document.getElementById('qb_depositPercent')?.value || 0}%):</span>
+          <span id="qb_deposit">R0.00</span>
+        </div>
+        <div style="display: flex; justify-content: space-between; margin: 6px 0; font-size: 0.9rem;">
+          <span>VAT:</span>
+          <span id="qb_vat">R0.00</span>
+        </div>
+        <div style="display: flex; justify-content: space-between; margin: 6px 0; font-size: 1.1rem; font-weight: 700; border-top: 1px solid #ddd; padding-top: 8px; color: #E63946;">
+          <span>Total Due:</span>
+          <span id="qb_total">R0.00</span>
+        </div>
+      </div>
+
+      <!-- ACTIONS -->
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px;">
+        <button class="btn btn-red" style="color: white;" onclick="saveQuoteV2()">💾 Save Quote</button>
+        <button class="btn btn-ghost" onclick="goTo('quotes-v2')">Cancel</button>
+      </div>
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+        <button class="btn btn-ghost" onclick="downloadQuotePDF()">📥 PDF</button>
+        <button class="btn btn-ghost" onclick="shareQuoteWhatsApp()">💬 WhatsApp</button>
+      </div>
     </div>
+
+    <!-- PREVIEW -->
+    <div class="builder-right" id="qb_preview"></div>
   </div>
   `;
 }
 
-function downloadQuotePDF() {
-  const clientName = document.getElementById('qb_clientName')?.value || 'Client';
-  const quoteNum = document.getElementById('qb_quoteNumber')?.value || 'Quote';
-  showToast('Downloading PDF...', 'success');
-  // TODO: Implement jsPDF generation
-}
-
-function shareQuoteWhatsApp() {
-  const phone = document.getElementById('qb_clientPhone')?.value?.replace(/[^0-9]/g, '');
-  const quoteNum = document.getElementById('qb_quoteNumber')?.value;
-  
-  if (!phone) {
-    showToast('Please enter a phone number', 'error');
-    return;
-  }
-  
-  const message = `Hi, I've prepared quote ${quoteNum} for you. Please review and let me know if you have any questions.`;
-  const url = `https://wa.me/27${phone.slice(-9)}?text=${encodeURIComponent(message)}`;
-  window.open(url, '_blank');
-  showToast('Opening WhatsApp...', 'success');
-}
-
 function initQuoteBuilder() {
-  // Set quote number
-  if (!editingQuoteId) {
+  const isEditing = !!editingQuoteId;
+  const quote = isEditing ? quotesV2.find(q => q.id === editingQuoteId) : null;
+
+  if (!isEditing) {
     const nextNum = (currentUser?.quote_prefix || 'QUA') + '-' + String(currentUser?.quote_next_number || 1).padStart(3, '0');
     document.getElementById('qb_quoteNumber').value = nextNum;
+    document.getElementById('qb_quoteDate').value = new Date().toISOString().split('T')[0];
   } else {
-    const quote = quotesV2.find(q => q.id === editingQuoteId);
     document.getElementById('qb_quoteNumber').value = quote.quote_number;
+    document.getElementById('qb_quoteDate').value = quote.quote_date;
   }
-  
-  // Set today's date
-  if (!editingQuoteId) {
-    const today = new Date().toISOString().split('T')[0];
-    document.getElementById('qb_quoteDate').value = today;
-  }
-  
-  renderQuoteBuilderItems();
-  
-  // Listen to changes
-  ['qb_clientName', 'qb_clientPhone', 'qb_clientEmail', 'qb_clientAddress', 'qb_quoteDate', 'qb_validDays', 'qb_vatStatus', 'qb_notes'].forEach(id => {
+
+  renderQuickAddButtons('qb_quickAdd', 'quote');
+  renderQuoteItems();
+
+  ['qb_clientName', 'qb_clientPhone', 'qb_clientEmail', 'qb_clientAddress', 'qb_quoteDate', 'qb_validDays', 'qb_vatStatus', 'qb_notes', 'qb_depositPercent', 'qb_companyRegNo', 'qb_vatRegNo'].forEach(id => {
     const el = document.getElementById(id);
-    if (el) el.addEventListener('change', updateQuotePreview);
+    if (el) {
+      el.addEventListener('change', updateQuotePreview);
+      if (id === 'qb_depositPercent') el.addEventListener('input', (e) => {
+        document.getElementById('qb_depositDisplay').textContent = e.target.value + '%';
+        updateQuotePreview();
+      });
+    }
   });
-  
+
   updateQuotePreview();
+}
+
+function renderQuickAddButtons(containerId, type) {
+  const container = document.getElementById(containerId);
+  if (!currentUser?.industry) { container.innerHTML = ''; return; }
+  
+  const industryKey = currentUser.industry.toLowerCase();
+  const templates = INDUSTRY_TEMPLATES[industryKey] || [];
+  if (templates.length === 0) { container.innerHTML = ''; return; }
+
+  container.innerHTML = `
+    <div class="section-label">Quick Add (${INDUSTRY_LABELS[industryKey] || 'Your Industry'})</div>
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(80px, 1fr)); gap: 8px; margin-bottom: 20px;">
+      ${templates.slice(0, 6).map((t, i) => `
+        <button class="pill" onclick="addItemFromTemplate('${type}', ${i})" style="padding: 8px; font-size: 0.75rem; text-align: center;">
+          ${t.name}
+        </button>
+      `).join('')}
+    </div>
+  `;
 }
 
 function addQuoteItem() {
   quoteBuilderItems.push({ id: Date.now(), description: '', qty: 1, price: 0 });
-  renderQuoteBuilderItems();
+  renderQuoteItems();
+}
+
+function addItemFromTemplate(type, index) {
+  const industryKey = currentUser.industry.toLowerCase();
+  const templates = INDUSTRY_TEMPLATES[industryKey] || [];
+  const template = templates[index];
+  if (!template) return;
+
+  if (type === 'quote') {
+    quoteBuilderItems.push({ id: Date.now(), description: template.name, qty: template.qty || 1, price: template.price || 0 });
+    renderQuoteItems();
+  } else {
+    invoiceBuilderItems.push({ id: Date.now(), description: template.name, qty: template.qty || 1, price: template.price || 0 });
+    renderInvoiceItems();
+  }
 }
 
 function removeQuoteItem(id) {
   quoteBuilderItems = quoteBuilderItems.filter(i => i.id !== id);
-  renderQuoteBuilderItems();
+  renderQuoteItems();
 }
 
 function updateQuoteItem(id, field, value) {
@@ -8921,21 +8919,21 @@ function updateQuoteItem(id, field, value) {
     if (field === 'qty') item.qty = parseInt(value) || 1;
     else if (field === 'price') item.price = parseFloat(value) || 0;
     else item[field] = value;
+    renderQuoteItems();
   }
-  renderQuoteBuilderItems();
 }
 
-function renderQuoteBuilderItems() {
+function renderQuoteItems() {
   const list = document.getElementById('qb_itemsList');
   if (!list) return;
   
   list.innerHTML = quoteBuilderItems.map(item => `
-    <div style="display: grid; grid-template-columns: 2fr 80px 120px 100px 40px; gap: 8px; align-items: center;">
-      <input type="text" placeholder="Description" value="${item.description}" onchange="updateQuoteItem(${item.id}, 'description', this.value)" style="padding: 8px; border: 1px solid var(--border); border-radius: 4px;">
-      <input type="number" placeholder="Qty" value="${item.qty}" onchange="updateQuoteItem(${item.id}, 'qty', this.value)" style="padding: 8px; border: 1px solid var(--border); border-radius: 4px;">
-      <input type="number" placeholder="Price" value="${item.price}" onchange="updateQuoteItem(${item.id}, 'price', this.value)" step="0.01" style="padding: 8px; border: 1px solid var(--border); border-radius: 4px;">
-      <input type="text" value="R${((item.qty || 1) * (item.price || 0)).toLocaleString('en-ZA', {minimumFractionDigits: 2})}" readonly style="padding: 8px; background: #f5f5f5; border-radius: 4px; text-align: right;">
-      <button class="btn" style="padding: 8px; background: #e74c3c; color: white; border: none; border-radius: 4px; cursor: pointer;" onclick="removeQuoteItem(${item.id})">✕</button>
+    <div style="display: grid; grid-template-columns: 2fr 1fr 1fr 1fr auto; gap: 8px; align-items: flex-end; margin-bottom: 8px;">
+      <input type="text" placeholder="Description" value="${item.description || ''}" onchange="updateQuoteItem(${item.id}, 'description', this.value)" style="padding: 8px;">
+      <input type="number" placeholder="Qty" value="${item.qty || 1}" onchange="updateQuoteItem(${item.id}, 'qty', this.value)" style="padding: 8px;">
+      <input type="number" placeholder="Price" value="${item.price || 0}" onchange="updateQuoteItem(${item.id}, 'price', this.value)" step="0.01" style="padding: 8px;">
+      <input type="text" value="R${((item.qty || 1) * (item.price || 0)).toLocaleString('en-ZA')}" readonly style="padding: 8px; background: #f0f0f0;">
+      <button class="btn" style="padding: 8px 12px; background: #e74c3c; color: white; width: auto;" onclick="removeQuoteItem(${item.id})">×</button>
     </div>
   `).join('');
   
@@ -8950,78 +8948,81 @@ function updateQuotePreview() {
   const quoteDate = document.getElementById('qb_quoteDate')?.value || new Date().toISOString().split('T')[0];
   const validDays = document.getElementById('qb_validDays')?.value || '14';
   const vatStatus = document.getElementById('qb_vatStatus')?.value === 'yes';
-  
+  const depositPercent = parseFloat(document.getElementById('qb_depositPercent')?.value || 0);
+  const companyRegNo = document.getElementById('qb_companyRegNo')?.value || '';
+  const vatRegNo = document.getElementById('qb_vatRegNo')?.value || '';
+
   const subtotal = quoteBuilderItems.reduce((s, i) => s + ((i.qty || 1) * (i.price || 0)), 0);
+  const deposit = (subtotal * depositPercent) / 100;
   const vat = vatStatus ? (subtotal * 0.15) : 0;
   const total = subtotal + vat;
-  
+
   const fmt = n => 'R' + n.toLocaleString('en-ZA', {minimumFractionDigits: 2, maximumFractionDigits: 2});
-  
+
+  document.getElementById('qb_subtotal').textContent = fmt(subtotal);
+  document.getElementById('qb_deposit').textContent = fmt(deposit);
+  document.getElementById('qb_vat').textContent = fmt(vat);
+  document.getElementById('qb_total').textContent = fmt(total);
+
   const dateStr = new Date(quoteDate).toLocaleDateString('en-ZA', {day: 'numeric', month: 'long', year: 'numeric'});
-  
-  const itemsHtml = quoteBuilderItems.length === 0 ? '<tr><td colspan="4" style="text-align: center; padding: 20px; color: #999;">No items added</td></tr>' : quoteBuilderItems.map(i => `
+  const itemsHtml = quoteBuilderItems.length === 0 ? '<tr><td colspan="4" style="text-align: center; padding: 20px; color: #999;">No items added yet</td></tr>' : quoteBuilderItems.map(i => `
     <tr style="border-bottom: 1px solid #eee;">
-      <td style="padding: 12px;">${i.description || 'Item'}</td>
-      <td style="padding: 12px; text-align: center;">${i.qty || 1}</td>
-      <td style="padding: 12px; text-align: right;">${fmt(i.price || 0)}</td>
-      <td style="padding: 12px; text-align: right; font-weight: bold;">${fmt((i.qty || 1) * (i.price || 0))}</td>
+      <td style="padding: 10px;">${i.description || 'Item'}</td>
+      <td style="padding: 10px; text-align: center;">${i.qty || 1}</td>
+      <td style="padding: 10px; text-align: right;">${fmt(parseFloat(i.price || 0))}</td>
+      <td style="padding: 10px; text-align: right; font-weight: bold;">${fmt((i.qty || 1) * (i.price || 0))}</td>
     </tr>
   `).join('');
-  
+
   document.getElementById('qb_preview').innerHTML = `
-    <div style="background: white; padding: 20px; border-radius: 8px; border: 1px solid var(--border); box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
-      <div style="background: #1a1a1a; color: white; padding: 16px; margin: -20px -20px 16px; border-radius: 8px 8px 0 0; display: flex; justify-content: space-between;">
+    <div style="background: white; padding: 20px; border-radius: 6px; border: 1px solid #ddd;">
+      <div style="background: #1a1a1a; color: white; padding: 20px; margin: -20px -20px 20px; border-radius: 6px 6px 0 0; display: flex; justify-content: space-between;">
         <div>
-          <div style="font-weight: bold; font-size: 1rem;">${currentUser?.company || 'Your Company'}</div>
-          <div style="font-size: 0.8rem; color: #999; margin-top: 2px;">Professional Services</div>
+          <div style="font-weight: bold; font-size: 1.2rem;">${currentUser?.company || 'Your Company'}</div>
+          <div style="font-size: 0.75rem; color: #999; margin-top: 4px;">${companyRegNo ? 'Reg: ' + companyRegNo : 'Professional Services'}</div>
+          <div style="font-size: 0.75rem; color: #999; margin-top: 2px;">${vatRegNo ? 'VAT: ' + vatRegNo : ''}</div>
         </div>
         <div style="text-align: right;">
           <div style="font-size: 0.7rem; color: #999;">QUOTATION</div>
           <div style="font-size: 1.2rem; color: #E63946; font-weight: bold;">${quoteNum}</div>
-          <div style="font-size: 0.75rem; color: #ccc; margin-top: 2px;">${dateStr}</div>
+          <div style="font-size: 0.75rem; color: #ccc; margin-top: 4px;">${dateStr}</div>
         </div>
       </div>
-      
-      <div style="background: #faf9f7; padding: 12px; margin-bottom: 12px; border-left: 3px solid #E63946;">
-        <div style="font-size: 0.7rem; color: #999; font-weight: bold; margin-bottom: 4px;">QUOTED FOR</div>
-        <div style="font-weight: 600;">${clientName}</div>
+
+      <div style="background: #faf9f7; padding: 12px; margin: 12px 0; border-left: 3px solid #E63946;">
+        <div style="font-size: 0.7rem; color: #999; font-weight: bold;">QUOTED FOR</div>
+        <div style="font-weight: bold;">${clientName}</div>
         ${clientPhone || clientAddress ? `<div style="font-size: 0.8rem; color: #666; margin-top: 4px;">${[clientPhone, clientAddress].filter(Boolean).join(' • ')}</div>` : ''}
       </div>
-      
-      <table style="width: 100%; border-collapse: collapse; margin-bottom: 12px; font-size: 0.85rem;">
+
+      <table style="width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 0.85rem;">
         <thead>
           <tr style="background: #1a1a1a; color: white;">
-            <th style="padding: 12px; text-align: left; font-weight: bold;">Description</th>
-            <th style="padding: 12px; text-align: center; font-weight: bold;">Qty</th>
-            <th style="padding: 12px; text-align: right; font-weight: bold;">Price</th>
-            <th style="padding: 12px; text-align: right; font-weight: bold;">Amount</th>
+            <th style="padding: 10px; text-align: left; font-weight: bold;">Description</th>
+            <th style="padding: 10px; text-align: center; font-weight: bold;">Qty</th>
+            <th style="padding: 10px; text-align: right; font-weight: bold;">Unit Price</th>
+            <th style="padding: 10px; text-align: right; font-weight: bold;">Amount</th>
           </tr>
         </thead>
-        <tbody>
-          ${itemsHtml}
-        </tbody>
+        <tbody>${itemsHtml}</tbody>
       </table>
-      
-      <div style="background: #FEF0F0; padding: 12px; border-radius: 4px; margin-bottom: 12px;">
-        <div style="display: flex; justify-content: space-between; margin-bottom: 4px; font-size: 0.9rem;">
+
+      <div style="background: #FEF0F0; padding: 12px; margin: 12px 0; border-radius: 4px;">
+        <div style="display: flex; justify-content: space-between; margin: 4px 0; font-size: 0.9rem;">
           <span>Subtotal:</span>
           <span>${fmt(subtotal)}</span>
         </div>
-        ${vat > 0 ? `
-          <div style="display: flex; justify-content: space-between; margin-bottom: 4px; font-size: 0.9rem;">
-            <span>VAT @ 15%:</span>
-            <span>${fmt(vat)}</span>
-          </div>
-        ` : ''}
-        <div style="display: flex; justify-content: space-between; border-top: 2px solid #E63946; padding-top: 8px; margin-top: 8px; font-weight: bold; font-size: 1rem; color: #1a1a1a;">
+        ${depositPercent > 0 ? `<div style="display: flex; justify-content: space-between; margin: 4px 0; font-size: 0.9rem;"><span>Deposit (${depositPercent}%):</span><span>${fmt(deposit)}</span></div>` : ''}
+        ${vat > 0 ? `<div style="display: flex; justify-content: space-between; margin: 4px 0; font-size: 0.9rem;"><span>VAT @ 15%:</span><span>${fmt(vat)}</span></div>` : ''}
+        <div style="display: flex; justify-content: space-between; margin: 8px 0 0 0; padding-top: 8px; border-top: 1px solid #E63946; font-weight: bold; font-size: 1.1rem; color: #1a1a1a;">
           <span>TOTAL DUE:</span>
-          <span style="color: #E63946;">${fmt(total)}</span>
+          <span>${fmt(total)}</span>
         </div>
       </div>
-      
-      <div style="text-align: center; font-size: 0.75rem; color: #999; padding: 8px; border-top: 1px solid #eee; margin-top: 8px;">
-        Thank you. Valid for ${validDays} days.<br>
-        Powered by QForge
+
+      <div style="text-align: center; padding: 12px; font-size: 0.75rem; color: #999; border-top: 1px solid #ddd; margin-top: 12px;">
+        Valid for ${validDays} days. Thank you for the opportunity.<br>
+        Powered by QForge | myquoteforge.co.za
       </div>
     </div>
   `;
@@ -9029,385 +9030,265 @@ function updateQuotePreview() {
 
 async function saveQuoteV2() {
   const clientName = document.getElementById('qb_clientName')?.value?.trim();
-  const clientPhone = document.getElementById('qb_clientPhone')?.value?.trim();
-  const clientEmail = document.getElementById('qb_clientEmail')?.value?.trim();
-  const clientAddress = document.getElementById('qb_clientAddress')?.value?.trim();
-  const quoteNumber = document.getElementById('qb_quoteNumber')?.value;
+  const quoteNumber = document.getElementById('qb_quoteNumber')?.value?.trim();
   const quoteDate = document.getElementById('qb_quoteDate')?.value;
   const validDays = parseInt(document.getElementById('qb_validDays')?.value) || 14;
-  const notes = document.getElementById('qb_notes')?.value?.trim();
   const vatStatus = document.getElementById('qb_vatStatus')?.value === 'yes';
-  
+  const depositPercent = parseFloat(document.getElementById('qb_depositPercent')?.value || 0);
+  const companyRegNo = document.getElementById('qb_companyRegNo')?.value?.trim();
+  const vatRegNo = document.getElementById('qb_vatRegNo')?.value?.trim();
+  const notes = document.getElementById('qb_notes')?.value?.trim();
+
   if (!clientName || quoteBuilderItems.length === 0) {
-    showToast('Please fill client name and add at least one item', 'error');
+    showToast('Please fill in client name and add at least one item', 'error');
     return;
   }
-  
+
   const subtotal = quoteBuilderItems.reduce((s, i) => s + ((i.qty || 1) * (i.price || 0)), 0);
-  const vat = vatStatus ? (subtotal * 0.15) : 0;
-  const total = subtotal + vat;
-  
+  const deposit = (subtotal * depositPercent) / 100;
+  const vatAmount = vatStatus ? (subtotal * 0.15) : 0;
+  const totalAmount = subtotal + vatAmount;
+
   try {
     if (editingQuoteId) {
-      // Update
-      const { error } = await sb
-        .from('quotes_v2')
-        .update({
-          client_name: clientName,
-          client_phone: clientPhone,
-          client_email: clientEmail,
-          client_address: clientAddress,
-          quote_date: quoteDate,
-          valid_days: validDays,
-          items: quoteBuilderItems,
-          subtotal,
-          vat_percent: vatStatus ? 15 : 0,
-          vat_amount: vat,
-          total_amount: total,
-          notes,
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', editingQuoteId);
-      
+      const { error } = await sb.from('quotes_v2').update({
+        client_name: clientName,
+        quote_date: quoteDate,
+        valid_days: validDays,
+        items: quoteBuilderItems,
+        subtotal,
+        deposit_percent: depositPercent,
+        deposit_amount: deposit,
+        vat_percent: vatStatus ? 15 : 0,
+        vat_amount: vatAmount,
+        total_amount: totalAmount,
+        company_reg_no: companyRegNo,
+        vat_reg_no: vatRegNo,
+        notes,
+        updated_at: new Date().toISOString()
+      }).eq('id', editingQuoteId);
       if (error) throw error;
       showToast('✅ Quote updated!', 'success');
+      editingQuoteId = null;
     } else {
-      // Create
-      const { error } = await sb
-        .from('quotes_v2')
-        .insert([{
-          user_id: currentUser.id,
-          quote_number: quoteNumber,
-          client_name: clientName,
-          client_phone: clientPhone,
-          client_email: clientEmail,
-          client_address: clientAddress,
-          items: quoteBuilderItems,
-          quote_date: quoteDate,
-          valid_days: validDays,
-          subtotal,
-          vat_percent: vatStatus ? 15 : 0,
-          vat_amount: vat,
-          total_amount: total,
-          notes,
-          status: 'draft'
-        }]);
-      
+      const { error } = await sb.from('quotes_v2').insert([{
+        user_id: currentUser.id,
+        quote_number: quoteNumber,
+        client_name: clientName,
+        quote_date: quoteDate,
+        valid_days: validDays,
+        items: quoteBuilderItems,
+        subtotal,
+        deposit_percent: depositPercent,
+        deposit_amount: deposit,
+        vat_percent: vatStatus ? 15 : 0,
+        vat_amount: vatAmount,
+        total_amount: totalAmount,
+        company_reg_no: companyRegNo,
+        vat_reg_no: vatRegNo,
+        notes,
+        status: 'draft'
+      }]);
       if (error) throw error;
-      
-      // Update counter
       const num = parseInt(quoteNumber.split('-')[1]) + 1;
-      await sb
-        .from('profiles')
-        .update({ quote_next_number: num })
-        .eq('id', currentUser.id);
-      
-      showToast(`✅ Quote ${quoteNumber} created!`, 'success');
+      await sb.from('profiles').update({ quote_next_number: num }).eq('id', currentUser.id);
+      showToast(`✅ Quote ${quoteNumber} saved!`, 'success');
     }
-    
-    editingQuoteId = null;
     quoteBuilderItems = [];
-    setTimeout(() => {
-      loadQuotesV2();
-      goTo('quotes-v2');
-    }, 1000);
+    setTimeout(() => { loadQuotesV2(); goTo('quotes-v2'); }, 1000);
   } catch (error) {
     console.error(error);
-    showToast('Error: ' + error.message, 'error');
+    showToast('Error saving quote: ' + error.message, 'error');
   }
 }
 
-function startNewQuoteV2() {
-  editingQuoteId = null;
-  quoteBuilderItems = [];
-  goTo('quotes-v2-builder');
+function downloadQuotePDF() {
+  showToast('PDF download - coming soon', 'info');
 }
 
-function editQuoteV2(quoteId) {
-  editingQuoteId = quoteId;
-  quoteBuilderItems = [];
-  goTo('quotes-v2-builder');
+function shareQuoteWhatsApp() {
+  const phone = document.getElementById('qb_clientPhone')?.value?.replace(/[^0-9]/g, '');
+  const quoteNum = document.getElementById('qb_quoteNumber')?.value;
+  if (!phone) { showToast('Please enter a phone number', 'error'); return; }
+  const message = `Hi, I've prepared quote ${quoteNum} for you.`;
+  window.open(`https://wa.me/27${phone.slice(-9)}?text=${encodeURIComponent(message)}`, '_blank');
+}
+
+// ════════════════════════════════════════════════════════════════════════════════════
+// INVOICE BUILDER V2 - COMPLETE WITH ALL FEATURES
+// ════════════════════════════════════════════════════════════════════════════════════
+
+let invoiceBuilderItems = [];
+let editingInvoiceId = null;
+
+function renderInvoiceBuilder() {
+  const invoice = editingInvoiceId ? invoicesV2.find(inv => inv.id === editingInvoiceId) : null;
+  const isEditing = !!invoice;
+  if (isEditing) invoiceBuilderItems = invoice.items || [];
+
+  return `
+  <div class="builder-layout">
+    <div class="builder-left">
+      <div class="page-header" style="margin-bottom: 20px;">
+        <h2>${isEditing ? 'Edit Invoice' : 'New Invoice'}</h2>
+        <button class="btn btn-ghost" onclick="goTo('invoices-v2')">← Back</button>
+      </div>
+
+      <!-- CLIENT DETAILS -->
+      <div class="section-label">Client Details</div>
+      <div class="form-group">
+        <label>Client Name *</label>
+        <input type="text" id="ib_clientName" placeholder="e.g. ABC Property Management" value="${isEditing ? invoice.client_name : ''}">
+      </div>
+      <div class="input-row">
+        <div class="form-group">
+          <label>Phone</label>
+          <input type="tel" id="ib_clientPhone" placeholder="011 000 0000" value="${isEditing ? invoice.client_phone : ''}">
+        </div>
+        <div class="form-group">
+          <label>Email</label>
+          <input type="email" id="ib_clientEmail" placeholder="contact@company.co.za" value="${isEditing ? invoice.client_email : ''}">
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Address</label>
+        <input type="text" id="ib_clientAddress" placeholder="123 Main Road, Unit 4" value="${isEditing ? invoice.client_address : ''}">
+      </div>
+
+      <!-- INVOICE SETTINGS -->
+      <div class="section-label" style="margin-top: 20px;">Invoice Settings</div>
+      <div class="input-row">
+        <div class="form-group">
+          <label>Invoice Number</label>
+          <input type="text" id="ib_invoiceNumber" placeholder="INV-001" readonly>
+        </div>
+        <div class="form-group">
+          <label>Invoice Date</label>
+          <input type="date" id="ib_invoiceDate">
+        </div>
+      </div>
+      <div class="input-row">
+        <div class="form-group">
+          <label>Due Date</label>
+          <input type="date" id="ib_dueDate">
+        </div>
+        <div class="form-group">
+          <label>Status</label>
+          <select id="ib_status">
+            <option value="unpaid">Unpaid</option>
+            <option value="partial">Partial</option>
+            <option value="paid">Paid</option>
+          </select>
+        </div>
+      </div>
+      <div class="input-row">
+        <div class="form-group">
+          <label>VAT Status</label>
+          <select id="ib_vatStatus">
+            <option value="no">Not VAT Registered</option>
+            <option value="yes" ${isEditing && invoice.vat_percent === 15 ? 'selected' : ''}>VAT @ 15%</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- COMPANY DETAILS -->
+      <div class="input-row">
+        <div class="form-group">
+          <label>Company Reg No.</label>
+          <input type="text" id="ib_companyRegNo" placeholder="e.g. 2020/123456/07" value="${isEditing ? invoice.company_reg_no || '' : ''}">
+        </div>
+        <div class="form-group">
+          <label>VAT Reg No.</label>
+          <input type="text" id="ib_vatRegNo" placeholder="e.g. 4123456789" value="${isEditing ? invoice.vat_reg_no || '' : ''}">
+        </div>
+      </div>
+
+      <!-- NOTES/TERMS -->
+      <div class="form-group">
+        <label>Notes / Payment Terms</label>
+        <textarea id="ib_notes" rows="2" placeholder="e.g. Payment due within 30 days...">${isEditing ? invoice.notes : ''}</textarea>
+      </div>
+
+      <!-- LINE ITEMS -->
+      <div class="section-label" style="margin-top: 20px;">Line Items</div>
+      <div id="ib_itemsList"></div>
+      <button class="btn btn-ghost" style="width: 100%; margin-bottom: 20px;" onclick="addInvoiceItem()">+ Add Item</button>
+
+      <!-- QUICK ADD -->
+      <div id="ib_quickAdd" style="margin-bottom: 20px;"></div>
+
+      <!-- TOTALS -->
+      <div class="section-label" style="margin-top: 20px;">Totals</div>
+      <div style="background: #f9f9f9; padding: 12px; border-radius: 6px; margin-bottom: 20px;">
+        <div style="display: flex; justify-content: space-between; margin: 6px 0; font-size: 0.9rem;">
+          <span>Subtotal:</span>
+          <span id="ib_subtotal">R0.00</span>
+        </div>
+        <div style="display: flex; justify-content: space-between; margin: 6px 0; font-size: 0.9rem;">
+          <span>VAT:</span>
+          <span id="ib_vat">R0.00</span>
+        </div>
+        <div style="display: flex; justify-content: space-between; margin: 6px 0; font-size: 1.1rem; font-weight: 700; border-top: 1px solid #ddd; padding-top: 8px; color: #E63946;">
+          <span>Total Due:</span>
+          <span id="ib_total">R0.00</span>
+        </div>
+      </div>
+
+      <!-- ACTIONS -->
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px;">
+        <button class="btn btn-red" style="color: white;" onclick="saveInvoiceV2()">💾 Save Invoice</button>
+        <button class="btn btn-ghost" onclick="goTo('invoices-v2')">Cancel</button>
+      </div>
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+        <button class="btn btn-ghost" onclick="downloadInvoicePDF()">📥 PDF</button>
+        <button class="btn btn-ghost" onclick="shareInvoiceWhatsApp()">💬 WhatsApp</button>
+      </div>
+    </div>
+
+    <!-- PREVIEW -->
+    <div class="builder-right" id="ib_preview"></div>
+  </div>
+  `;
 }
 
 function initInvoiceBuilder() {
   const isEditing = !!editingInvoiceId;
   const invoice = isEditing ? invoicesV2.find(inv => inv.id === editingInvoiceId) : null;
-  
-  // Set invoice number
+
   if (!isEditing) {
     const nextNum = (currentUser?.invoice_prefix || 'INV') + '-' + String(currentUser?.invoice_next_number || 1).padStart(3, '0');
     document.getElementById('ib_invoiceNumber').value = nextNum;
-  } else {
-    document.getElementById('ib_invoiceNumber').value = invoice.invoice_number;
-  }
-  
-  // Set dates
-  if (!isEditing) {
     const today = new Date();
     document.getElementById('ib_invoiceDate').valueAsDate = today;
     const dueDate = new Date(today);
     dueDate.setDate(dueDate.getDate() + 30);
     document.getElementById('ib_dueDate').valueAsDate = dueDate;
   } else {
+    document.getElementById('ib_invoiceNumber').value = invoice.invoice_number;
     document.getElementById('ib_invoiceDate').value = invoice.invoice_date;
     document.getElementById('ib_dueDate').value = invoice.due_date;
     document.getElementById('ib_status').value = invoice.status;
   }
-  
-  renderInvoiceBuilderItems();
-  
-  // Listen to changes
-  ['ib_clientName', 'ib_clientPhone', 'ib_clientEmail', 'ib_clientAddress', 'ib_invoiceDate', 'ib_dueDate', 'ib_status', 'ib_vatStatus', 'ib_notes'].forEach(id => {
+
+  renderQuickAddButtons('ib_quickAdd', 'invoice');
+  renderInvoiceItems();
+
+  ['ib_clientName', 'ib_clientPhone', 'ib_clientEmail', 'ib_clientAddress', 'ib_invoiceDate', 'ib_dueDate', 'ib_status', 'ib_vatStatus', 'ib_notes', 'ib_companyRegNo', 'ib_vatRegNo'].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.addEventListener('change', updateInvoicePreview);
   });
-  
+
   updateInvoicePreview();
-}
-
-function initInvoicesV2() {
-  loadInvoicesV2();
-}
-
-async function convertQuoteToInvoiceV2(quoteId) {
-  try {
-    const quote = quotesV2.find(q => q.id === quoteId);
-    if (!quote) {
-      showToast('Quote not found', 'error');
-      return;
-    }
-
-    // Get next invoice number
-    const nextNum = (currentUser?.invoice_prefix || 'INV') + '-' + String(currentUser?.invoice_next_number || 1).padStart(3, '0');
-
-    // Create invoice
-    const { error } = await sb
-      .from('invoices_v2')
-      .insert([{
-        user_id: currentUser.id,
-        invoice_number: nextNum,
-        quote_id: quoteId,
-        client_name: quote.client_name,
-        client_phone: quote.client_phone,
-        client_email: quote.client_email,
-        client_address: quote.client_address,
-        items: quote.items,
-        invoice_date: new Date().toISOString().split('T')[0],
-        due_date: new Date(Date.now() + 30*24*60*60*1000).toISOString().split('T')[0],
-        subtotal: quote.subtotal,
-        vat_percent: quote.vat_percent,
-        vat_amount: quote.vat_amount,
-        total_amount: quote.total_amount,
-        notes: quote.notes,
-        status: 'unpaid'
-      }]);
-
-    if (error) throw error;
-
-    // Update quote status
-    await sb
-      .from('quotes_v2')
-      .update({ status: 'invoiced' })
-      .eq('id', quoteId);
-
-    // Update invoice counter
-    const num = parseInt(nextNum.split('-')[1]) + 1;
-    await sb
-      .from('profiles')
-      .update({ invoice_next_number: num })
-      .eq('id', currentUser.id);
-
-    showToast(`✅ Invoice ${nextNum} created!`, 'success');
-    setTimeout(() => {
-      loadInvoicesV2();
-      goTo('invoices-v2');
-    }, 1000);
-  } catch (error) {
-    console.error(error);
-    showToast('Error: ' + error.message, 'error');
-  }
-}
-
-// V2 Navigation - Invoice Builder
-let editingInvoiceId = null;
-let invoiceBuilderItems = [];
-
-// Render V2 Invoice List
-function renderInvoicesV2() {
-  return `
-  <div class="page-header">
-    <div>
-      <h2>Invoices</h2>
-      <div style="font-size:0.82rem;color:var(--muted);margin-top:3px;">${invoicesV2.length} invoice${invoicesV2.length!==1?'s':''}</div>
-    </div>
-    <button class="btn btn-red" style="color:#fff;" onclick="startNewInvoiceV2()">+ New Invoice</button>
-  </div>
-  
-  ${invoicesV2.length === 0 ? `
-    <div class="quotes-table-wrap">
-      <div class="empty-state">
-        <div class="empty-icon">📋</div>
-        <h3>No invoices yet</h3>
-        <p>Create your first invoice or convert a quote</p>
-        <button class="btn btn-red" style="color:#fff;" onclick="startNewInvoiceV2()">+ Create First Invoice</button>
-      </div>
-    </div>
-  ` : `
-    <div class="quotes-table-wrap">
-      ${invoicesV2.map(inv => `
-        <div class="qt-row" style="padding: 16px; border-bottom: 1px solid var(--border); display: grid; grid-template-columns: 2fr 1fr 1fr 1fr 100px; gap: 12px; align-items: center;">
-          <div>
-            <div class="qt-client" style="font-weight: 600;">${inv.client_name}</div>
-            <div class="qt-num" style="font-size: 0.8rem; color: var(--muted);">${inv.invoice_number}</div>
-          </div>
-          <div style="font-size: 0.9rem; color: var(--muted);">${new Date(inv.invoice_date).toLocaleDateString('en-ZA')}</div>
-          <div><span class="status-badge" style="padding: 4px 8px; border-radius: 4px; font-size: 0.8rem; background: ${inv.status === 'paid' ? 'rgba(46,204,113,0.1)' : 'rgba(230,57,70,0.1)'}; color: ${inv.status === 'paid' ? '#2ecc71' : '#E63946'};">${inv.status}</span></div>
-          <div style="text-align: right; font-weight: 600;">R${(inv.total_amount || 0).toLocaleString('en-ZA', {minimumFractionDigits: 2})}</div>
-          <div style="display: flex; gap: 6px;">
-            <button class="btn btn-ghost btn-sm" onclick="editInvoiceV2('${inv.id}')" style="padding: 4px 8px; font-size: 0.8rem;">✏️</button>
-          </div>
-        </div>
-      `).join('')}
-    </div>
-  `}
-  `;
-}
-
-function renderInvoiceBuilder() {
-  const invoice = editingInvoiceId ? invoicesV2.find(inv => inv.id === editingInvoiceId) : null;
-  const isEditing = !!invoice;
-  
-  if (isEditing) {
-    invoiceBuilderItems = invoice.items || [];
-  }
-  
-  return `
-  <div style="max-width: 1400px; margin: 0 auto;">
-    <!-- HEADER -->
-    <div style="background: white; padding: 20px; border-bottom: 3px solid #E63946; margin-bottom: 20px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center;">
-      <div><h1 style="font-size: 1.8rem; color: #1a1a1a;">${isEditing ? 'Edit Invoice' : 'New Invoice'}</h1></div>
-      <button class="btn btn-ghost" onclick="goTo('invoices-v2')" style="background: white; color: #E63946; border: 2px solid #E63946; padding: 10px 20px;">← Back</button>
-    </div>
-
-    <!-- BUILDER CONTAINER -->
-    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
-      <!-- LEFT: FORM -->
-      <div>
-        <!-- CLIENT DETAILS -->
-        <div style="background: white; padding: 20px; border-radius: 8px; border: 1px solid #ddd; margin-bottom: 20px;">
-          <div style="font-size: 0.75rem; font-weight: 700; color: #E63946; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 12px;">Client Details</div>
-          <div style="margin-bottom: 12px;">
-            <label style="font-size: 0.85rem; font-weight: 600; color: #333; display: block; margin-bottom: 4px;">Client Name *</label>
-            <input type="text" id="ib_clientName" placeholder="e.g. ABC Property" value="${isEditing ? invoice.client_name : ''}" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 0.9rem;">
-          </div>
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
-            <div style="margin-bottom: 12px;">
-              <label style="font-size: 0.85rem; font-weight: 600; color: #333; display: block; margin-bottom: 4px;">Phone</label>
-              <input type="tel" id="ib_clientPhone" placeholder="011 000 0000" value="${isEditing ? invoice.client_phone : ''}" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 0.9rem;">
-            </div>
-            <div style="margin-bottom: 12px;">
-              <label style="font-size: 0.85rem; font-weight: 600; color: #333; display: block; margin-bottom: 4px;">Email</label>
-              <input type="email" id="ib_clientEmail" placeholder="contact@company.co.za" value="${isEditing ? invoice.client_email : ''}" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 0.9rem;">
-            </div>
-          </div>
-          <div style="margin-bottom: 12px;">
-            <label style="font-size: 0.85rem; font-weight: 600; color: #333; display: block; margin-bottom: 4px;">Street Address</label>
-            <input type="text" id="ib_clientAddress" placeholder="123 Main Road, Unit 4" value="${isEditing ? invoice.client_address : ''}" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 0.9rem;">
-          </div>
-        </div>
-
-        <!-- INVOICE SETTINGS -->
-        <div style="background: white; padding: 20px; border-radius: 8px; border: 1px solid #ddd; margin-bottom: 20px;">
-          <div style="font-size: 0.75rem; font-weight: 700; color: #E63946; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 12px;">Invoice Settings</div>
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px;">
-            <div>
-              <label style="font-size: 0.85rem; font-weight: 600; color: #333; display: block; margin-bottom: 4px;">Invoice Number</label>
-              <input type="text" id="ib_invoiceNumber" readonly style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; background: #f5f5f5;">
-            </div>
-            <div>
-              <label style="font-size: 0.85rem; font-weight: 600; color: #333; display: block; margin-bottom: 4px;">Invoice Date</label>
-              <input type="date" id="ib_invoiceDate" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px;">
-            </div>
-          </div>
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px;">
-            <div>
-              <label style="font-size: 0.85rem; font-weight: 600; color: #333; display: block; margin-bottom: 4px;">Due Date</label>
-              <input type="date" id="ib_dueDate" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px;">
-            </div>
-            <div>
-              <label style="font-size: 0.85rem; font-weight: 600; color: #333; display: block; margin-bottom: 4px;">Status</label>
-              <select id="ib_status" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px;">
-                <option value="unpaid">Unpaid</option>
-                <option value="partial">Partial</option>
-                <option value="paid">Paid</option>
-              </select>
-            </div>
-          </div>
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px;">
-            <div>
-              <label style="font-size: 0.85rem; font-weight: 600; color: #333; display: block; margin-bottom: 4px;">VAT</label>
-              <select id="ib_vatStatus" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px;">
-                <option value="no">No VAT</option>
-                <option value="yes" ${isEditing && invoice.vat_percent === 15 ? 'selected' : ''}>15% VAT</option>
-              </select>
-            </div>
-          </div>
-          <div style="margin-bottom: 12px;">
-            <label style="font-size: 0.85rem; font-weight: 600; color: #333; display: block; margin-bottom: 4px;">Notes / Payment Terms</label>
-            <textarea id="ib_notes" rows="2" placeholder="e.g. Payment due within 30 days..." style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-family: inherit;">${isEditing ? invoice.notes : ''}</textarea>
-          </div>
-        </div>
-
-        <!-- LINE ITEMS -->
-        <div style="background: white; padding: 20px; border-radius: 8px; border: 1px solid #ddd; margin-bottom: 20px;">
-          <div style="font-size: 0.75rem; font-weight: 700; color: #E63946; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 12px;">Line Items</div>
-          <div id="ib_itemsList" style="margin-bottom: 12px;"></div>
-          <button class="btn" style="width: 100%; background: white; color: #E63946; border: 2px solid #E63946; padding: 10px;" onclick="addInvoiceItem()">+ Add Item</button>
-        </div>
-
-        <!-- TOTALS -->
-        <div style="background: white; padding: 20px; border-radius: 8px; border: 1px solid #ddd; margin-bottom: 20px;">
-          <div style="font-size: 0.75rem; font-weight: 700; color: #E63946; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 12px;">Totals</div>
-          <div style="background: white; padding: 12px; border: 1px solid #ddd; border-radius: 6px;">
-            <div style="display: flex; justify-content: space-between; margin: 4px 0;">
-              <span>Subtotal:</span>
-              <span id="ib_subtotal">R0.00</span>
-            </div>
-            <div style="display: flex; justify-content: space-between; margin: 4px 0;">
-              <span>VAT:</span>
-              <span id="ib_vat">R0.00</span>
-            </div>
-            <div style="display: flex; justify-content: space-between; font-weight: bold; border-top: 1px solid #ddd; padding-top: 8px; margin-top: 8px;">
-              <span>Total Due:</span>
-              <span id="ib_total" style="color: #E63946;">R0.00</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- ACTION BUTTONS -->
-        <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 20px;">
-          <button class="btn" style="background: #E63946; color: white; padding: 12px;" onclick="saveInvoiceV2()">💾 Save</button>
-          <button class="btn" style="background: white; color: #E63946; border: 2px solid #E63946;" onclick="downloadInvoicePDF()">📥 PDF</button>
-          <button class="btn" style="background: white; color: #2ecc71; border: 2px solid #2ecc71;" onclick="shareInvoiceWhatsApp()">💬 WhatsApp</button>
-          <button class="btn" style="background: white; color: #666; border: 2px solid #ddd;" onclick="goTo('invoices-v2')">Cancel</button>
-        </div>
-      </div>
-
-      <!-- RIGHT: PREVIEW -->
-      <div id="ib_preview" style="background: white; padding: 20px; border-radius: 8px; border: 1px solid #ddd; max-height: 100vh; overflow-y: auto; position: sticky; top: 20px;"></div>
-    </div>
-  </div>
-  `;
 }
 
 function addInvoiceItem() {
   invoiceBuilderItems.push({ id: Date.now(), description: '', qty: 1, price: 0 });
-  renderInvoiceBuilderItems();
+  renderInvoiceItems();
 }
 
 function removeInvoiceItem(id) {
   invoiceBuilderItems = invoiceBuilderItems.filter(i => i.id !== id);
-  renderInvoiceBuilderItems();
+  renderInvoiceItems();
 }
 
 function updateInvoiceItem(id, field, value) {
@@ -9416,24 +9297,24 @@ function updateInvoiceItem(id, field, value) {
     if (field === 'qty') item.qty = parseInt(value) || 1;
     else if (field === 'price') item.price = parseFloat(value) || 0;
     else item[field] = value;
+    renderInvoiceItems();
   }
-  renderInvoiceBuilderItems();
 }
 
-function renderInvoiceBuilderItems() {
+function renderInvoiceItems() {
   const list = document.getElementById('ib_itemsList');
   if (!list) return;
-  
+
   list.innerHTML = invoiceBuilderItems.map(item => `
-    <div style="display: grid; grid-template-columns: 2fr 80px 120px 100px 40px; gap: 8px; align-items: center; margin-bottom: 12px; padding: 12px; background: #f9f9f9; border-radius: 6px;">
-      <input type="text" placeholder="Description" value="${item.description}" onchange="updateInvoiceItem(${item.id}, 'description', this.value)" style="padding: 8px; border: 1px solid #ddd; border-radius: 4px; font-size: 0.85rem;">
-      <input type="number" placeholder="Qty" value="${item.qty}" onchange="updateInvoiceItem(${item.id}, 'qty', this.value)" style="padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
-      <input type="number" placeholder="Price" value="${item.price}" onchange="updateInvoiceItem(${item.id}, 'price', this.value)" step="0.01" style="padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
-      <input type="text" value="R${((item.qty || 1) * (item.price || 0)).toLocaleString('en-ZA', {minimumFractionDigits: 2})}" readonly style="padding: 8px; background: #f0f0f0; border-radius: 4px; text-align: right; font-size: 0.85rem;">
-      <button class="btn" style="padding: 8px; background: #e74c3c; color: white; border: none; border-radius: 4px; cursor: pointer; width: 100%;" onclick="removeInvoiceItem(${item.id})">✕</button>
+    <div style="display: grid; grid-template-columns: 2fr 1fr 1fr 1fr auto; gap: 8px; align-items: flex-end; margin-bottom: 8px;">
+      <input type="text" placeholder="Description" value="${item.description || ''}" onchange="updateInvoiceItem(${item.id}, 'description', this.value)" style="padding: 8px;">
+      <input type="number" placeholder="Qty" value="${item.qty || 1}" onchange="updateInvoiceItem(${item.id}, 'qty', this.value)" style="padding: 8px;">
+      <input type="number" placeholder="Price" value="${item.price || 0}" onchange="updateInvoiceItem(${item.id}, 'price', this.value)" step="0.01" style="padding: 8px;">
+      <input type="text" value="R${((item.qty || 1) * (item.price || 0)).toLocaleString('en-ZA')}" readonly style="padding: 8px; background: #f0f0f0;">
+      <button class="btn" style="padding: 8px 12px; background: #e74c3c; color: white; width: auto;" onclick="removeInvoiceItem(${item.id})">×</button>
     </div>
   `).join('');
-  
+
   updateInvoicePreview();
 }
 
@@ -9446,83 +9327,80 @@ function updateInvoicePreview() {
   const dueDate = document.getElementById('ib_dueDate')?.value || new Date(Date.now() + 30*24*60*60*1000).toISOString().split('T')[0];
   const status = document.getElementById('ib_status')?.value || 'unpaid';
   const vatStatus = document.getElementById('ib_vatStatus')?.value === 'yes';
-  
+  const companyRegNo = document.getElementById('ib_companyRegNo')?.value || '';
+  const vatRegNo = document.getElementById('ib_vatRegNo')?.value || '';
+
   const subtotal = invoiceBuilderItems.reduce((s, i) => s + ((i.qty || 1) * (i.price || 0)), 0);
   const vat = vatStatus ? (subtotal * 0.15) : 0;
   const total = subtotal + vat;
-  
+
   const fmt = n => 'R' + n.toLocaleString('en-ZA', {minimumFractionDigits: 2, maximumFractionDigits: 2});
-  
+
+  document.getElementById('ib_subtotal').textContent = fmt(subtotal);
+  document.getElementById('ib_vat').textContent = fmt(vat);
+  document.getElementById('ib_total').textContent = fmt(total);
+
   const invDateStr = new Date(invoiceDate).toLocaleDateString('en-ZA', {day: 'numeric', month: 'long', year: 'numeric'});
   const dueDateStr = new Date(dueDate).toLocaleDateString('en-ZA', {day: 'numeric', month: 'long', year: 'numeric'});
-  
-  const itemsHtml = invoiceBuilderItems.length === 0 ? '<tr><td colspan="4" style="text-align: center; padding: 20px; color: #999;">No items added</td></tr>' : invoiceBuilderItems.map(i => `
+  const statusColor = { unpaid: '#e74c3c', partial: '#f39c12', paid: '#27ae60' }[status] || '#333';
+  const itemsHtml = invoiceBuilderItems.length === 0 ? '<tr><td colspan="4" style="text-align: center; padding: 20px; color: #999;">No items added yet</td></tr>' : invoiceBuilderItems.map(i => `
     <tr style="border-bottom: 1px solid #eee;">
-      <td style="padding: 12px;">${i.description || 'Item'}</td>
-      <td style="padding: 12px; text-align: center;">${i.qty || 1}</td>
-      <td style="padding: 12px; text-align: right;">${fmt(i.price || 0)}</td>
-      <td style="padding: 12px; text-align: right; font-weight: bold;">${fmt((i.qty || 1) * (i.price || 0))}</td>
+      <td style="padding: 10px;">${i.description || 'Item'}</td>
+      <td style="padding: 10px; text-align: center;">${i.qty || 1}</td>
+      <td style="padding: 10px; text-align: right;">${fmt(parseFloat(i.price || 0))}</td>
+      <td style="padding: 10px; text-align: right; font-weight: bold;">${fmt((i.qty || 1) * (i.price || 0))}</td>
     </tr>
   `).join('');
-  
+
   document.getElementById('ib_preview').innerHTML = `
-    <div style="background: white; padding: 20px; border-radius: 8px; border: 1px solid #ddd;">
-      <div style="background: #1a1a1a; color: white; padding: 16px; margin: -20px -20px 16px; border-radius: 8px 8px 0 0; display: flex; justify-content: space-between;">
+    <div style="background: white; padding: 20px; border-radius: 6px; border: 1px solid #ddd;">
+      <div style="background: #1a1a1a; color: white; padding: 20px; margin: -20px -20px 20px; border-radius: 6px 6px 0 0; display: flex; justify-content: space-between;">
         <div>
-          <div style="font-weight: bold; font-size: 1rem;">${currentUser?.company || 'Your Company'}</div>
-          <div style="font-size: 0.8rem; color: #999; margin-top: 2px;">Professional Services</div>
+          <div style="font-weight: bold; font-size: 1.2rem;">${currentUser?.company || 'Your Company'}</div>
+          <div style="font-size: 0.75rem; color: #999; margin-top: 4px;">${companyRegNo ? 'Reg: ' + companyRegNo : 'Professional Services'}</div>
+          <div style="font-size: 0.75rem; color: #999; margin-top: 2px;">${vatRegNo ? 'VAT: ' + vatRegNo : ''}</div>
         </div>
         <div style="text-align: right;">
           <div style="font-size: 0.7rem; color: #999;">INVOICE</div>
           <div style="font-size: 1.2rem; color: #E63946; font-weight: bold;">${invoiceNum}</div>
-          <div style="font-size: 0.75rem; color: #ccc; margin-top: 2px;">${invDateStr}</div>
+          <div style="font-size: 0.75rem; color: #ccc; margin-top: 4px;">Date: ${invDateStr}<br>Due: ${dueDateStr}</div>
+          <div style="font-size: 0.7rem; margin-top: 6px; padding: 4px 8px; background: ${statusColor}; color: white; border-radius: 4px; font-weight: bold;">${status.toUpperCase()}</div>
         </div>
       </div>
-      
-      <div style="background: #faf9f7; padding: 12px; margin-bottom: 12px; border-left: 3px solid #E63946;">
-        <div style="font-size: 0.7rem; color: #999; font-weight: bold; margin-bottom: 4px;">INVOICE TO</div>
-        <div style="font-weight: 600;">${clientName}</div>
+
+      <div style="background: #faf9f7; padding: 12px; margin: 12px 0; border-left: 3px solid #E63946;">
+        <div style="font-size: 0.7rem; color: #999; font-weight: bold;">INVOICE TO</div>
+        <div style="font-weight: bold;">${clientName}</div>
         ${clientPhone || clientAddress ? `<div style="font-size: 0.8rem; color: #666; margin-top: 4px;">${[clientPhone, clientAddress].filter(Boolean).join(' • ')}</div>` : ''}
       </div>
-      
-      <table style="width: 100%; border-collapse: collapse; margin-bottom: 12px; font-size: 0.85rem;">
+
+      <table style="width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 0.85rem;">
         <thead>
           <tr style="background: #1a1a1a; color: white;">
-            <th style="padding: 12px; text-align: left; font-weight: bold;">Description</th>
-            <th style="padding: 12px; text-align: center; font-weight: bold;">Qty</th>
-            <th style="padding: 12px; text-align: right; font-weight: bold;">Price</th>
-            <th style="padding: 12px; text-align: right; font-weight: bold;">Amount</th>
+            <th style="padding: 10px; text-align: left; font-weight: bold;">Description</th>
+            <th style="padding: 10px; text-align: center; font-weight: bold;">Qty</th>
+            <th style="padding: 10px; text-align: right; font-weight: bold;">Unit Price</th>
+            <th style="padding: 10px; text-align: right; font-weight: bold;">Amount</th>
           </tr>
         </thead>
-        <tbody>
-          ${itemsHtml}
-        </tbody>
+        <tbody>${itemsHtml}</tbody>
       </table>
-      
-      <div style="background: #FEF0F0; padding: 12px; border-radius: 4px; margin-bottom: 12px;">
-        <div style="display: flex; justify-content: space-between; margin-bottom: 4px; font-size: 0.9rem;">
+
+      <div style="background: #FEF0F0; padding: 12px; margin: 12px 0; border-radius: 4px;">
+        <div style="display: flex; justify-content: space-between; margin: 4px 0; font-size: 0.9rem;">
           <span>Subtotal:</span>
           <span>${fmt(subtotal)}</span>
         </div>
-        ${vat > 0 ? `
-          <div style="display: flex; justify-content: space-between; margin-bottom: 4px; font-size: 0.9rem;">
-            <span>VAT @ 15%:</span>
-            <span>${fmt(vat)}</span>
-          </div>
-        ` : ''}
-        <div style="display: flex; justify-content: space-between; border-top: 2px solid #E63946; padding-top: 8px; margin-top: 8px; font-weight: bold; font-size: 1rem; color: #1a1a1a;">
+        ${vat > 0 ? `<div style="display: flex; justify-content: space-between; margin: 4px 0; font-size: 0.9rem;"><span>VAT @ 15%:</span><span>${fmt(vat)}</span></div>` : ''}
+        <div style="display: flex; justify-content: space-between; margin: 8px 0 0 0; padding-top: 8px; border-top: 1px solid #E63946; font-weight: bold; font-size: 1.1rem; color: #1a1a1a;">
           <span>TOTAL DUE:</span>
-          <span style="color: #E63946;">${fmt(total)}</span>
-        </div>
-        <div style="display: flex; justify-content: space-between; margin-top: 8px; padding-top: 8px; border-top: 1px solid #E63946; font-size: 0.9rem;">
-          <span>Due: <strong>${dueDateStr}</strong></span>
-          <span style="padding: 4px 8px; background: ${status === 'paid' ? '#2ecc71' : '#e74c3c'}; color: white; border-radius: 4px; font-size: 0.8rem;">${status.toUpperCase()}</span>
+          <span>${fmt(total)}</span>
         </div>
       </div>
-      
-      <div style="text-align: center; font-size: 0.75rem; color: #999; padding: 8px; border-top: 1px solid #eee; margin-top: 8px;">
-        Thank you for your business.<br>
-        Powered by QForge
+
+      <div style="text-align: center; padding: 12px; font-size: 0.75rem; color: #999; border-top: 1px solid #ddd; margin-top: 12px;">
+        Payment due ${dueDateStr}. Thank you for your business.<br>
+        Powered by QForge | myquoteforge.co.za
       </div>
     </div>
   `;
@@ -9530,190 +9408,105 @@ function updateInvoicePreview() {
 
 async function saveInvoiceV2() {
   const clientName = document.getElementById('ib_clientName')?.value?.trim();
-  const clientPhone = document.getElementById('ib_clientPhone')?.value?.trim();
-  const clientEmail = document.getElementById('ib_clientEmail')?.value?.trim();
-  const clientAddress = document.getElementById('ib_clientAddress')?.value?.trim();
-  const invoiceNumber = document.getElementById('ib_invoiceNumber')?.value;
+  const invoiceNumber = document.getElementById('ib_invoiceNumber')?.value?.trim();
   const invoiceDate = document.getElementById('ib_invoiceDate')?.value;
   const dueDate = document.getElementById('ib_dueDate')?.value;
   const status = document.getElementById('ib_status')?.value;
-  const notes = document.getElementById('ib_notes')?.value?.trim();
   const vatStatus = document.getElementById('ib_vatStatus')?.value === 'yes';
-  
+  const companyRegNo = document.getElementById('ib_companyRegNo')?.value?.trim();
+  const vatRegNo = document.getElementById('ib_vatRegNo')?.value?.trim();
+  const notes = document.getElementById('ib_notes')?.value?.trim();
+
   if (!clientName || invoiceBuilderItems.length === 0) {
-    showToast('Please fill client name and add at least one item', 'error');
+    showToast('Please fill in client name and add at least one item', 'error');
     return;
   }
-  
+
   const subtotal = invoiceBuilderItems.reduce((s, i) => s + ((i.qty || 1) * (i.price || 0)), 0);
-  const vat = vatStatus ? (subtotal * 0.15) : 0;
-  const total = subtotal + vat;
-  
+  const vatAmount = vatStatus ? (subtotal * 0.15) : 0;
+  const totalAmount = subtotal + vatAmount;
+
   try {
     if (editingInvoiceId) {
-      // Update
-      const { error } = await sb
-        .from('invoices_v2')
-        .update({
-          client_name: clientName,
-          client_phone: clientPhone,
-          client_email: clientEmail,
-          client_address: clientAddress,
-          invoice_date: invoiceDate,
-          due_date: dueDate,
-          items: invoiceBuilderItems,
-          subtotal,
-          vat_percent: vatStatus ? 15 : 0,
-          vat_amount: vat,
-          total_amount: total,
-          notes,
-          status,
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', editingInvoiceId);
-      
+      const { error } = await sb.from('invoices_v2').update({
+        client_name: clientName,
+        invoice_date: invoiceDate,
+        due_date: dueDate,
+        status,
+        items: invoiceBuilderItems,
+        subtotal,
+        vat_percent: vatStatus ? 15 : 0,
+        vat_amount: vatAmount,
+        total_amount: totalAmount,
+        company_reg_no: companyRegNo,
+        vat_reg_no: vatRegNo,
+        notes,
+        updated_at: new Date().toISOString()
+      }).eq('id', editingInvoiceId);
       if (error) throw error;
       showToast('✅ Invoice updated!', 'success');
+      editingInvoiceId = null;
     } else {
-      // Create
-      const { error } = await sb
-        .from('invoices_v2')
-        .insert([{
-          user_id: currentUser.id,
-          invoice_number: invoiceNumber,
-          client_name: clientName,
-          client_phone: clientPhone,
-          client_email: clientEmail,
-          client_address: clientAddress,
-          items: invoiceBuilderItems,
-          invoice_date: invoiceDate,
-          due_date: dueDate,
-          subtotal,
-          vat_percent: vatStatus ? 15 : 0,
-          vat_amount: vat,
-          total_amount: total,
-          notes,
-          status
-        }]);
-      
+      const { error } = await sb.from('invoices_v2').insert([{
+        user_id: currentUser.id,
+        invoice_number: invoiceNumber,
+        client_name: clientName,
+        invoice_date: invoiceDate,
+        due_date: dueDate,
+        status,
+        items: invoiceBuilderItems,
+        subtotal,
+        vat_percent: vatStatus ? 15 : 0,
+        vat_amount: vatAmount,
+        total_amount: totalAmount,
+        company_reg_no: companyRegNo,
+        vat_reg_no: vatRegNo,
+        notes
+      }]);
       if (error) throw error;
-      
-      // Update counter
       const num = parseInt(invoiceNumber.split('-')[1]) + 1;
-      await sb
-        .from('profiles')
-        .update({ invoice_next_number: num })
-        .eq('id', currentUser.id);
-      
-      showToast(`✅ Invoice ${invoiceNumber} created!`, 'success');
+      await sb.from('profiles').update({ invoice_next_number: num }).eq('id', currentUser.id);
+      showToast(`✅ Invoice ${invoiceNumber} saved!`, 'success');
     }
-    
-    editingInvoiceId = null;
     invoiceBuilderItems = [];
-    setTimeout(() => {
-      loadInvoicesV2();
-      goTo('invoices-v2');
-    }, 1000);
+    setTimeout(() => { loadInvoicesV2(); goTo('invoices-v2'); }, 1000);
   } catch (error) {
     console.error(error);
-    showToast('Error: ' + error.message, 'error');
+    showToast('Error saving invoice: ' + error.message, 'error');
   }
 }
 
 function downloadInvoicePDF() {
-  showToast('Downloading PDF...', 'success');
-  // TODO: Implement jsPDF generation
+  showToast('PDF download - coming soon', 'info');
 }
 
 function shareInvoiceWhatsApp() {
   const phone = document.getElementById('ib_clientPhone')?.value?.replace(/[^0-9]/g, '');
   const invoiceNum = document.getElementById('ib_invoiceNumber')?.value;
   const dueDate = document.getElementById('ib_dueDate')?.value;
-  
-  if (!phone) {
-    showToast('Please enter a phone number', 'error');
-    return;
-  }
-  
-  const message = `Hi, invoice ${invoiceNum} is ready. Due: ${dueDate}. View it here: [link]`;
-  const url = `https://wa.me/27${phone.slice(-9)}?text=${encodeURIComponent(message)}`;
-  window.open(url, '_blank');
-  showToast('Opening WhatsApp...', 'success');
+  if (!phone) { showToast('Please enter a phone number', 'error'); return; }
+  const message = `Hi, invoice ${invoiceNum} is due ${dueDate}.`;
+  window.open(`https://wa.me/27${phone.slice(-9)}?text=${encodeURIComponent(message)}`, '_blank');
 }
 
-function startNewInvoiceV2() {
-  editingInvoiceId = null;
-  invoiceBuilderItems = [];
-  goTo('invoices-v2-builder');
-}
-
-function editInvoiceV2(invoiceId) {
-  editingInvoiceId = invoiceId;
-  invoiceBuilderItems = [];
-  goTo('invoices-v2-builder');
-}
-
-
-  const quote = quotesV2.find(q => q.id === quoteId);
-  if (!quote) {
-    showToast('Quote not found', 'error');
-    return;
-  }
-  
-  try {
-    // Get next invoice number
-    const nextInvNum = (currentUser?.invoice_prefix || 'INV') + '-' + String(currentUser?.invoice_next_number || 1).padStart(3, '0');
-    
-    // Create invoice
-    const { error } = await sb
-      .from('invoices_v2')
-      .insert([{
-        user_id: currentUser.id,
-        invoice_number: nextInvNum,
-        quote_id: quoteId,
-        client_name: quote.client_name,
-        client_email: quote.client_email,
-        client_phone: quote.client_phone,
-        client_address: quote.client_address,
-        items: quote.items,
-        invoice_date: new Date().toISOString().split('T')[0],
-        due_date: new Date(Date.now() + 30*24*60*60*1000).toISOString().split('T')[0],
-        subtotal: quote.subtotal,
-        vat_percent: quote.vat_percent,
-        vat_amount: quote.vat_amount,
-        total_amount: quote.total_amount,
-        notes: quote.notes,
-        status: 'unpaid'
-      }]);
-    
-    if (error) throw error;
-    
-    // Update quote status
-    await sb
-      .from('quotes_v2')
-      .update({ status: 'invoiced', converted_to_invoice_id: null })
-      .eq('id', quoteId);
-    
-    // Update profile counter
-    const num = parseInt(nextInvNum.split('-')[1]) + 1;
-    await sb
-      .from('profiles')
-      .update({ invoice_next_number: num })
-      .eq('id', currentUser.id);
-    
-    showToast(`✅ Invoice ${nextInvNum} created!`, 'success');
-    setTimeout(() => {
-      loadQuotesV2();
-      loadInvoicesV2();
-      goTo('invoices');
-    }, 1000);
-  } catch (error) {
-    console.error(error);
-    showToast('Error converting quote: ' + error.message, 'error');
+// Update goTo() to handle new builder routes
+const originalGoTo = window.goTo;
+function goTo(page) {
+  if (page === 'quotes-builder') {
+    editingQuoteId = null;
+    mc.innerHTML = renderQuoteBuilder();
+    setTimeout(initQuoteBuilder, 100);
+  } else if (page === 'invoices-builder') {
+    editingInvoiceId = null;
+    mc.innerHTML = renderInvoiceBuilder();
+    setTimeout(initInvoiceBuilder, 100);
+  } else {
+    originalGoTo(page);
   }
 }
 
+// Wait for DOM then init
+setTimeout(init, 500);
 </script>
 </body>
 </html>
-
