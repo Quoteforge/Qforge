@@ -12,21 +12,7 @@
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect fill='%23E63946' width='192' height='192' rx='45'/><text x='96' y='110' font-size='100' fill='white' text-anchor='middle' font-family='Plus Jakarta Sans' font-weight='900'>Q</text></svg>">
 <link rel="manifest" href="/manifest.json">
 <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'><rect fill='%23E63946' width='180' height='180' rx='40'/><text x='90' y='105' font-size='90' fill='white' text-anchor='middle' font-family='Plus Jakarta Sans' font-weight='900'>Q</text></svg>">
-<title>QForge - Login - V2.0 NEW</title>
-<script>
-console.log('%c🎉 QForge v2.0 CLEAN VERSION - New Quote/Invoice System', 'color: #E63946; font-size: 16px; font-weight: bold;');
-console.log('This is the NEW clean app.html without old builders');
-
-// UNREGISTER ALL SERVICE WORKERS (prevents caching old version)
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.getRegistrations().then(registrations => {
-    registrations.forEach(registration => {
-      console.log('🔥 Unregistering old Service Worker');
-      registration.unregister();
-    });
-  });
-}
-</script>
+<title>QForge - Login</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
@@ -1871,12 +1857,26 @@ h1, h2, h3 {
       <button class="sidebar-link active" id="nav-dashboard" onclick="goTo('dashboard')">
         <span class="icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg></span> Dashboard
       </button>
-      <button class="sidebar-link" id="nav-quotes" onclick="goTo('quotes-v2'); initQuotesV2();">
-        <span class="icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg></span> Quotes
+      <button class="sidebar-link" id="nav-quotes" onclick="goTo('quotes')">
+        <span class="icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg></span> My Quotes
       </button>
-      <button class="sidebar-link" id="nav-invoices" onclick="goTo('invoices-v2'); initInvoicesV2();">
+      <button class="sidebar-link" id="nav-new" onclick="goTo('builder')">
+        <span class="icon">➕</span> New Quote
+      </button>
+      <button class="sidebar-link" id="nav-invoices" onclick="goTo('invoices')">
         <span class="icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg></span> Invoices
       </button>
+
+      <div style="border-top:1px solid rgba(255,255,255,0.1);margin:12px 0;padding-top:12px;">
+        <div style="font-size:0.65rem;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:rgba(255,255,255,0.5);padding:0 12px;margin-bottom:8px;">New System v2</div>
+        <button class="sidebar-link" id="nav-quotes-v2" onclick="goTo('quotes-v2')">
+          <span class="icon">📋</span> Quotes v2
+        </button>
+        <button class="sidebar-link" id="nav-invoices-v2" onclick="goTo('invoices-v2')">
+          <span class="icon">📄</span> Invoices v2
+        </button>
+      </div>
+
       <button class="sidebar-link" id="nav-clients" onclick="goTo('clients')">
         <span class="icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span> Clients
       </button>       <button class="sidebar-link" id="nav-stats" onclick="goTo('stats')">
@@ -2595,19 +2595,17 @@ function goTo(page) {
   isViewOnly = false; // Reset view-only mode when navigating
   currentPage = page;
   updateNotificationBadge();
-  ['dashboard','quotes','builder','invoices','clients','stats','products','profile','admin','expenses','jobcards','pandl','quotes-v2','invoices-v2','quotes-v2-builder','invoices-v2-builder'].forEach(p => {
+  ['dashboard','quotes','builder','invoices','clients','stats','products','profile','admin','expenses','jobcards','pandl','quotes-v2','invoices-v2'].forEach(p => {
     const el = document.getElementById('nav-'+p);
     if (el) el.classList.toggle('active', p===page);
   });
   const mc = document.getElementById('mainContent');
   if (page==='dashboard') mc.innerHTML = renderDashboard();
   else if (page==='quotes') mc.innerHTML = renderQuotes();
-  else if (page==='quotes-v2') mc.innerHTML = renderQuotesV2();
-  else if (page==='quotes-v2-builder') { mc.innerHTML = renderQuoteBuilder(); setTimeout(initQuoteBuilder, 100); }
+  else if (page==='quotes-v2') { mc.innerHTML = renderQuotesV2(); setTimeout(initQuotesV2, 100); }
   else if (page==='builder') { mc.innerHTML = renderBuilder(); initBuilder(); }
   else if (page==='invoices') mc.innerHTML = renderInvoices();
-  else if (page==='invoices-v2') mc.innerHTML = renderInvoicesV2();
-  else if (page==='invoices-v2-builder') { mc.innerHTML = renderInvoiceBuilder(); setTimeout(initInvoiceBuilder, 100); }
+  else if (page==='invoices-v2') { mc.innerHTML = renderInvoicesV2(); setTimeout(initInvoicesV2, 100); }
   else if (page==='clients') mc.innerHTML = renderClients();
   else if (page==='client-detail') mc.innerHTML = renderClientDetail(currentClientId);
   else if (page==='stats') mc.innerHTML = renderStats();
@@ -8563,9 +8561,7 @@ function hideLoadingScreen(showAuth) {
 <script>
 let deferredPrompt = null;
 
-// SERVICE WORKER DISABLED - was caching old app.html
-// TODO: Re-enable after app is stable
-/*
+// Register Service Worker for offline support
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('/service-worker.js', { scope: '/' })
@@ -8599,7 +8595,7 @@ if ('serviceWorker' in navigator) {
       }
     }
   });
-*/
+}
 
 // PWA Install Prompt Handler
 window.addEventListener('beforeinstallprompt', (e) => {
@@ -8654,15 +8650,26 @@ window.addEventListener('appinstalled', () => {
   if (installBtn) installBtn.style.display = 'none';
 });
 
+// Debug: Check if manifest is accessible
+fetch('/manifest.json')
+  .then(r => r.json())
+  .then(m => console.log('✅ Manifest loaded:', m.name))
+  .catch(e => console.error('❌ Manifest error:', e));
+
 // ═══════════════════════════════════════════════════════════════
-// QFORGE V2 - NEW QUOTE & INVOICE SYSTEM
+// QFORGE V2 - QUOTES & INVOICES SYSTEM
 // ═══════════════════════════════════════════════════════════════
 
-// V2 Global State
+// V2 GLOBAL STATE
 let quotesV2 = [];
 let invoicesV2 = [];
+let editingQuoteV2Id = null;
+let editingInvoiceV2Id = null;
+let v2Items = [];
 
-// Load V2 Data from Supabase
+// ───────────────────────────────────────────────────────────────
+// LOAD V2 DATA FROM SUPABASE
+// ───────────────────────────────────────────────────────────────
 async function loadQuotesV2() {
   if (!currentUser?.id) return;
   try {
@@ -8698,815 +8705,517 @@ async function loadInvoicesV2() {
     invoicesV2 = (data || []).map(inv => ({
       ...inv,
       items: inv.items || [],
-// ════════════════════════════════════════════════════════════════════════════════════
-// QUOTE BUILDER V2 - COMPLETE WITH ALL FEATURES
-// ════════════════════════════════════════════════════════════════════════════════════
+      client_id: inv.client_id || null
+    }));
+    console.log('✅ Loaded', invoicesV2.length, 'invoices v2');
+  } catch (error) {
+    console.error('❌ Error loading invoices v2:', error);
+    invoicesV2 = [];
+  }
+}
 
-let quoteBuilderItems = [];
-let editingQuoteId = null;
-
-function renderQuoteBuilder() {
-  const quote = editingQuoteId ? quotesV2.find(q => q.id === editingQuoteId) : null;
-  const isEditing = !!quote;
-  if (isEditing) quoteBuilderItems = quote.items || [];
-  
+// ───────────────────────────────────────────────────────────────
+// QUOTES V2 - LIST PAGE
+// ───────────────────────────────────────────────────────────────
+function renderQuotesV2() {
   return `
-  <div class="builder-layout">
-    <div class="builder-left">
-      <div class="page-header" style="margin-bottom: 20px;">
-        <h2>${isEditing ? 'Edit Quote' : 'New Quote'}</h2>
-        <button class="btn btn-ghost" onclick="goTo('quotes-v2')">← Back</button>
-      </div>
-
-      <!-- CLIENT DETAILS -->
-      <div class="section-label">Client Details</div>
-      <div class="form-group">
-        <label>Client Name *</label>
-        <input type="text" id="qb_clientName" placeholder="e.g. ABC Property Management" value="${isEditing ? quote.client_name : ''}">
-      </div>
-      <div class="input-row">
-        <div class="form-group">
-          <label>Phone</label>
-          <input type="tel" id="qb_clientPhone" placeholder="011 000 0000" value="${isEditing ? quote.client_phone : ''}">
-        </div>
-        <div class="form-group">
-          <label>Email</label>
-          <input type="email" id="qb_clientEmail" placeholder="contact@company.co.za" value="${isEditing ? quote.client_email : ''}">
-        </div>
-      </div>
-      <div class="form-group">
-        <label>Address</label>
-        <input type="text" id="qb_clientAddress" placeholder="123 Main Road, Unit 4" value="${isEditing ? quote.client_address : ''}">
-      </div>
-
-      <!-- QUOTE SETTINGS -->
-      <div class="section-label" style="margin-top: 20px;">Quote Settings</div>
-      <div class="input-row">
-        <div class="form-group">
-          <label>Quote Number</label>
-          <input type="text" id="qb_quoteNumber" placeholder="QUA-001" readonly>
-        </div>
-        <div class="form-group">
-          <label>Quote Date</label>
-          <input type="date" id="qb_quoteDate">
-        </div>
-      </div>
-      <div class="input-row">
-        <div class="form-group">
-          <label>Valid For (Days)</label>
-          <input type="number" id="qb_validDays" value="${isEditing ? quote.valid_days : 14}" min="1">
-        </div>
-        <div class="form-group">
-          <label>VAT Status</label>
-          <select id="qb_vatStatus">
-            <option value="no">Not VAT Registered</option>
-            <option value="yes" ${isEditing && quote.vat_percent === 15 ? 'selected' : ''}>VAT @ 15%</option>
-          </select>
-        </div>
-      </div>
-
-      <!-- COMPANY DETAILS -->
-      <div class="input-row">
-        <div class="form-group">
-          <label>Company Reg No.</label>
-          <input type="text" id="qb_companyRegNo" placeholder="e.g. 2020/123456/07" value="${isEditing ? quote.company_reg_no || '' : ''}">
-        </div>
-        <div class="form-group">
-          <label>VAT Reg No.</label>
-          <input type="text" id="qb_vatRegNo" placeholder="e.g. 4123456789" value="${isEditing ? quote.vat_reg_no || '' : ''}">
-        </div>
-      </div>
-
-      <!-- DEPOSIT SETTINGS -->
-      <div class="form-group">
-        <label>Deposit Required (%)</label>
-        <div style="display: flex; gap: 10px; align-items: center;">
-          <input type="range" id="qb_depositPercent" min="0" max="100" value="0" style="flex: 1;">
-          <span id="qb_depositDisplay" style="min-width: 40px; text-align: center; font-weight: bold;">0%</span>
-        </div>
-      </div>
-
-      <!-- NOTES/TERMS -->
-      <div class="form-group">
-        <label>Notes / Terms</label>
-        <textarea id="qb_notes" rows="2" placeholder="e.g. Payment terms, conditions...">${isEditing ? quote.notes : ''}</textarea>
-      </div>
-
-      <!-- LINE ITEMS -->
-      <div class="section-label" style="margin-top: 20px;">Line Items</div>
-      <div id="qb_itemsList"></div>
-      <button class="btn btn-ghost" style="width: 100%; margin-bottom: 20px;" onclick="addQuoteItem()">+ Add Item</button>
-
-      <!-- QUICK ADD -->
-      <div id="qb_quickAdd" style="margin-bottom: 20px;"></div>
-
-      <!-- TOTALS -->
-      <div class="section-label" style="margin-top: 20px;">Totals</div>
-      <div style="background: #f9f9f9; padding: 12px; border-radius: 6px; margin-bottom: 20px;">
-        <div style="display: flex; justify-content: space-between; margin: 6px 0; font-size: 0.9rem;">
-          <span>Subtotal:</span>
-          <span id="qb_subtotal">R0.00</span>
-        </div>
-        <div style="display: flex; justify-content: space-between; margin: 6px 0; font-size: 0.9rem;">
-          <span>Deposit (${document.getElementById('qb_depositPercent')?.value || 0}%):</span>
-          <span id="qb_deposit">R0.00</span>
-        </div>
-        <div style="display: flex; justify-content: space-between; margin: 6px 0; font-size: 0.9rem;">
-          <span>VAT:</span>
-          <span id="qb_vat">R0.00</span>
-        </div>
-        <div style="display: flex; justify-content: space-between; margin: 6px 0; font-size: 1.1rem; font-weight: 700; border-top: 1px solid #ddd; padding-top: 8px; color: #E63946;">
-          <span>Total Due:</span>
-          <span id="qb_total">R0.00</span>
-        </div>
-      </div>
-
-      <!-- ACTIONS -->
-      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px;">
-        <button class="btn btn-red" style="color: white;" onclick="saveQuoteV2()">💾 Save Quote</button>
-        <button class="btn btn-ghost" onclick="goTo('quotes-v2')">Cancel</button>
-      </div>
-      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-        <button class="btn btn-ghost" onclick="downloadQuotePDF()">📥 PDF</button>
-        <button class="btn btn-ghost" onclick="shareQuoteWhatsApp()">💬 WhatsApp</button>
-      </div>
+  <div class="page-header">
+    <div>
+      <h2>Quotes v2</h2>
+      <div style="font-size:0.82rem;color:var(--muted);margin-top:3px;">${quotesV2.length} quotes</div>
     </div>
+    <div style="display:flex;gap:10px;flex-wrap:nowrap;">
+      <button class="btn btn-red" style="color:#fff;" onclick="startNewQuoteV2()">+ New Quote</button>
+    </div>
+  </div>
 
-    <!-- PREVIEW -->
-    <div class="builder-right" id="qb_preview"></div>
+  <div style="overflow-x:auto;margin-bottom:20px;">
+    <table style="width:100%;border-collapse:collapse;">
+      <thead>
+        <tr style="background:#f5f5f5;border-bottom:2px solid #ddd;">
+          <th style="padding:12px;text-align:left;font-weight:600;color:#333;">Quote #</th>
+          <th style="padding:12px;text-align:left;font-weight:600;color:#333;">Client</th>
+          <th style="padding:12px;text-align:left;font-weight:600;color:#333;">Date</th>
+          <th style="padding:12px;text-align:right;font-weight:600;color:#333;">Amount</th>
+          <th style="padding:12px;text-align:center;font-weight:600;color:#333;">Status</th>
+          <th style="padding:12px;text-align:right;font-weight:600;color:#333;">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${quotesV2.length === 0 ? `
+          <tr>
+            <td colspan="6" style="text-align:center;padding:40px;color:#999;">
+              No quotes yet. <button class="btn btn-red" style="color:#fff;margin-top:12px;" onclick="startNewQuoteV2()">Create First Quote</button>
+            </td>
+          </tr>
+        ` : quotesV2.map(q => `
+          <tr style="border-bottom:1px solid #eee;">
+            <td style="padding:12px;"><strong>${esc(q.quote_number || 'N/A')}</strong></td>
+            <td style="padding:12px;">${esc(q.client_name || 'Unknown')}</td>
+            <td style="padding:12px;">${formatDate(q.quote_date)}</td>
+            <td style="padding:12px;text-align:right;"><strong>R${(q.total_amount || 0).toLocaleString('en-ZA')}</strong></td>
+            <td style="padding:12px;text-align:center;"><span style="background:#E63946;color:#fff;padding:4px 8px;border-radius:4px;font-size:0.75rem;font-weight:600;">${esc(q.status || 'draft')}</span></td>
+            <td style="padding:12px;text-align:right;">
+              <button class="btn btn-sm btn-ghost" onclick="editQuoteV2('${q.id}')" style="font-size:0.8rem;padding:4px 8px;margin-right:4px;">Edit</button>
+              <button class="btn btn-sm btn-ghost" onclick="downloadQuotePDFv2('${q.id}')" style="font-size:0.8rem;padding:4px 8px;margin-right:4px;">PDF</button>
+              <button class="btn btn-sm btn-ghost" onclick="convertQuoteToInvoiceV2('${q.id}')" style="font-size:0.8rem;padding:4px 8px;color:#E63946;">→ Invoice</button>
+            </td>
+          </tr>
+        `).join('')}
+      </tbody>
+    </table>
   </div>
   `;
 }
 
-function initQuoteBuilder() {
-  const isEditing = !!editingQuoteId;
-  const quote = isEditing ? quotesV2.find(q => q.id === editingQuoteId) : null;
-
-  if (!isEditing) {
-    const nextNum = (currentUser?.quote_prefix || 'QUA') + '-' + String(currentUser?.quote_next_number || 1).padStart(3, '0');
-    document.getElementById('qb_quoteNumber').value = nextNum;
-    document.getElementById('qb_quoteDate').value = new Date().toISOString().split('T')[0];
-  } else {
-    document.getElementById('qb_quoteNumber').value = quote.quote_number;
-    document.getElementById('qb_quoteDate').value = quote.quote_date;
-  }
-
-  renderQuickAddButtons('qb_quickAdd', 'quote');
-  renderQuoteItems();
-
-  ['qb_clientName', 'qb_clientPhone', 'qb_clientEmail', 'qb_clientAddress', 'qb_quoteDate', 'qb_validDays', 'qb_vatStatus', 'qb_notes', 'qb_depositPercent', 'qb_companyRegNo', 'qb_vatRegNo'].forEach(id => {
-    const el = document.getElementById(id);
-    if (el) {
-      el.addEventListener('change', updateQuotePreview);
-      if (id === 'qb_depositPercent') el.addEventListener('input', (e) => {
-        document.getElementById('qb_depositDisplay').textContent = e.target.value + '%';
-        updateQuotePreview();
-      });
-    }
-  });
-
-  updateQuotePreview();
+function initQuotesV2() {
+  loadQuotesV2();
 }
 
-function renderQuickAddButtons(containerId, type) {
-  const container = document.getElementById(containerId);
-  if (!currentUser?.industry) { container.innerHTML = ''; return; }
-  
-  const industryKey = currentUser.industry.toLowerCase();
-  const templates = INDUSTRY_TEMPLATES[industryKey] || [];
-  if (templates.length === 0) { container.innerHTML = ''; return; }
-
-  container.innerHTML = `
-    <div class="section-label">Quick Add (${INDUSTRY_LABELS[industryKey] || 'Your Industry'})</div>
-    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(80px, 1fr)); gap: 8px; margin-bottom: 20px;">
-      ${templates.slice(0, 6).map((t, i) => `
-        <button class="pill" onclick="addItemFromTemplate('${type}', ${i})" style="padding: 8px; font-size: 0.75rem; text-align: center;">
-          ${t.name}
-        </button>
-      `).join('')}
-    </div>
-  `;
-}
-
-function addQuoteItem() {
-  quoteBuilderItems.push({ id: Date.now(), description: '', qty: 1, price: 0 });
-  renderQuoteItems();
-}
-
-function addItemFromTemplate(type, index) {
-  const industryKey = currentUser.industry.toLowerCase();
-  const templates = INDUSTRY_TEMPLATES[industryKey] || [];
-  const template = templates[index];
-  if (!template) return;
-
-  if (type === 'quote') {
-    quoteBuilderItems.push({ id: Date.now(), description: template.name, qty: template.qty || 1, price: template.price || 0 });
-    renderQuoteItems();
-  } else {
-    invoiceBuilderItems.push({ id: Date.now(), description: template.name, qty: template.qty || 1, price: template.price || 0 });
-    renderInvoiceItems();
-  }
-}
-
-function removeQuoteItem(id) {
-  quoteBuilderItems = quoteBuilderItems.filter(i => i.id !== id);
-  renderQuoteItems();
-}
-
-function updateQuoteItem(id, field, value) {
-  const item = quoteBuilderItems.find(i => i.id === id);
-  if (item) {
-    if (field === 'qty') item.qty = parseInt(value) || 1;
-    else if (field === 'price') item.price = parseFloat(value) || 0;
-    else item[field] = value;
-    renderQuoteItems();
-  }
-}
-
-function renderQuoteItems() {
-  const list = document.getElementById('qb_itemsList');
-  if (!list) return;
-  
-  list.innerHTML = quoteBuilderItems.map(item => `
-    <div style="display: grid; grid-template-columns: 2fr 1fr 1fr 1fr auto; gap: 8px; align-items: flex-end; margin-bottom: 8px;">
-      <input type="text" placeholder="Description" value="${item.description || ''}" onchange="updateQuoteItem(${item.id}, 'description', this.value)" style="padding: 8px;">
-      <input type="number" placeholder="Qty" value="${item.qty || 1}" onchange="updateQuoteItem(${item.id}, 'qty', this.value)" style="padding: 8px;">
-      <input type="number" placeholder="Price" value="${item.price || 0}" onchange="updateQuoteItem(${item.id}, 'price', this.value)" step="0.01" style="padding: 8px;">
-      <input type="text" value="R${((item.qty || 1) * (item.price || 0)).toLocaleString('en-ZA')}" readonly style="padding: 8px; background: #f0f0f0;">
-      <button class="btn" style="padding: 8px 12px; background: #e74c3c; color: white; width: auto;" onclick="removeQuoteItem(${item.id})">×</button>
-    </div>
-  `).join('');
-  
-  updateQuotePreview();
-}
-
-function updateQuotePreview() {
-  const clientName = document.getElementById('qb_clientName')?.value || 'Client Name';
-  const clientPhone = document.getElementById('qb_clientPhone')?.value || '';
-  const clientAddress = document.getElementById('qb_clientAddress')?.value || '';
-  const quoteNum = document.getElementById('qb_quoteNumber')?.value || 'QUA-001';
-  const quoteDate = document.getElementById('qb_quoteDate')?.value || new Date().toISOString().split('T')[0];
-  const validDays = document.getElementById('qb_validDays')?.value || '14';
-  const vatStatus = document.getElementById('qb_vatStatus')?.value === 'yes';
-  const depositPercent = parseFloat(document.getElementById('qb_depositPercent')?.value || 0);
-  const companyRegNo = document.getElementById('qb_companyRegNo')?.value || '';
-  const vatRegNo = document.getElementById('qb_vatRegNo')?.value || '';
-
-  const subtotal = quoteBuilderItems.reduce((s, i) => s + ((i.qty || 1) * (i.price || 0)), 0);
-  const deposit = (subtotal * depositPercent) / 100;
-  const vat = vatStatus ? (subtotal * 0.15) : 0;
-  const total = subtotal + vat;
-
-  const fmt = n => 'R' + n.toLocaleString('en-ZA', {minimumFractionDigits: 2, maximumFractionDigits: 2});
-
-  document.getElementById('qb_subtotal').textContent = fmt(subtotal);
-  document.getElementById('qb_deposit').textContent = fmt(deposit);
-  document.getElementById('qb_vat').textContent = fmt(vat);
-  document.getElementById('qb_total').textContent = fmt(total);
-
-  const dateStr = new Date(quoteDate).toLocaleDateString('en-ZA', {day: 'numeric', month: 'long', year: 'numeric'});
-  const itemsHtml = quoteBuilderItems.length === 0 ? '<tr><td colspan="4" style="text-align: center; padding: 20px; color: #999;">No items added yet</td></tr>' : quoteBuilderItems.map(i => `
-    <tr style="border-bottom: 1px solid #eee;">
-      <td style="padding: 10px;">${i.description || 'Item'}</td>
-      <td style="padding: 10px; text-align: center;">${i.qty || 1}</td>
-      <td style="padding: 10px; text-align: right;">${fmt(parseFloat(i.price || 0))}</td>
-      <td style="padding: 10px; text-align: right; font-weight: bold;">${fmt((i.qty || 1) * (i.price || 0))}</td>
-    </tr>
-  `).join('');
-
-  document.getElementById('qb_preview').innerHTML = `
-    <div style="background: white; padding: 20px; border-radius: 6px; border: 1px solid #ddd;">
-      <div style="background: #1a1a1a; color: white; padding: 20px; margin: -20px -20px 20px; border-radius: 6px 6px 0 0; display: flex; justify-content: space-between;">
-        <div>
-          <div style="font-weight: bold; font-size: 1.2rem;">${currentUser?.company || 'Your Company'}</div>
-          <div style="font-size: 0.75rem; color: #999; margin-top: 4px;">${companyRegNo ? 'Reg: ' + companyRegNo : 'Professional Services'}</div>
-          <div style="font-size: 0.75rem; color: #999; margin-top: 2px;">${vatRegNo ? 'VAT: ' + vatRegNo : ''}</div>
-        </div>
-        <div style="text-align: right;">
-          <div style="font-size: 0.7rem; color: #999;">QUOTATION</div>
-          <div style="font-size: 1.2rem; color: #E63946; font-weight: bold;">${quoteNum}</div>
-          <div style="font-size: 0.75rem; color: #ccc; margin-top: 4px;">${dateStr}</div>
-        </div>
-      </div>
-
-      <div style="background: #faf9f7; padding: 12px; margin: 12px 0; border-left: 3px solid #E63946;">
-        <div style="font-size: 0.7rem; color: #999; font-weight: bold;">QUOTED FOR</div>
-        <div style="font-weight: bold;">${clientName}</div>
-        ${clientPhone || clientAddress ? `<div style="font-size: 0.8rem; color: #666; margin-top: 4px;">${[clientPhone, clientAddress].filter(Boolean).join(' • ')}</div>` : ''}
-      </div>
-
-      <table style="width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 0.85rem;">
-        <thead>
-          <tr style="background: #1a1a1a; color: white;">
-            <th style="padding: 10px; text-align: left; font-weight: bold;">Description</th>
-            <th style="padding: 10px; text-align: center; font-weight: bold;">Qty</th>
-            <th style="padding: 10px; text-align: right; font-weight: bold;">Unit Price</th>
-            <th style="padding: 10px; text-align: right; font-weight: bold;">Amount</th>
-          </tr>
-        </thead>
-        <tbody>${itemsHtml}</tbody>
-      </table>
-
-      <div style="background: #FEF0F0; padding: 12px; margin: 12px 0; border-radius: 4px;">
-        <div style="display: flex; justify-content: space-between; margin: 4px 0; font-size: 0.9rem;">
-          <span>Subtotal:</span>
-          <span>${fmt(subtotal)}</span>
-        </div>
-        ${depositPercent > 0 ? `<div style="display: flex; justify-content: space-between; margin: 4px 0; font-size: 0.9rem;"><span>Deposit (${depositPercent}%):</span><span>${fmt(deposit)}</span></div>` : ''}
-        ${vat > 0 ? `<div style="display: flex; justify-content: space-between; margin: 4px 0; font-size: 0.9rem;"><span>VAT @ 15%:</span><span>${fmt(vat)}</span></div>` : ''}
-        <div style="display: flex; justify-content: space-between; margin: 8px 0 0 0; padding-top: 8px; border-top: 1px solid #E63946; font-weight: bold; font-size: 1.1rem; color: #1a1a1a;">
-          <span>TOTAL DUE:</span>
-          <span>${fmt(total)}</span>
-        </div>
-      </div>
-
-      <div style="text-align: center; padding: 12px; font-size: 0.75rem; color: #999; border-top: 1px solid #ddd; margin-top: 12px;">
-        Valid for ${validDays} days. Thank you for the opportunity.<br>
-        Powered by QForge | myquoteforge.co.za
-      </div>
-    </div>
-  `;
-}
-
-async function saveQuoteV2() {
-  const clientName = document.getElementById('qb_clientName')?.value?.trim();
-  const quoteNumber = document.getElementById('qb_quoteNumber')?.value?.trim();
-  const quoteDate = document.getElementById('qb_quoteDate')?.value;
-  const validDays = parseInt(document.getElementById('qb_validDays')?.value) || 14;
-  const vatStatus = document.getElementById('qb_vatStatus')?.value === 'yes';
-  const depositPercent = parseFloat(document.getElementById('qb_depositPercent')?.value || 0);
-  const companyRegNo = document.getElementById('qb_companyRegNo')?.value?.trim();
-  const vatRegNo = document.getElementById('qb_vatRegNo')?.value?.trim();
-  const notes = document.getElementById('qb_notes')?.value?.trim();
-
-  if (!clientName || quoteBuilderItems.length === 0) {
-    showToast('Please fill in client name and add at least one item', 'error');
-    return;
-  }
-
-  const subtotal = quoteBuilderItems.reduce((s, i) => s + ((i.qty || 1) * (i.price || 0)), 0);
-  const deposit = (subtotal * depositPercent) / 100;
-  const vatAmount = vatStatus ? (subtotal * 0.15) : 0;
-  const totalAmount = subtotal + vatAmount;
-
-  try {
-    if (editingQuoteId) {
-      const { error } = await sb.from('quotes_v2').update({
-        client_name: clientName,
-        quote_date: quoteDate,
-        valid_days: validDays,
-        items: quoteBuilderItems,
-        subtotal,
-        deposit_percent: depositPercent,
-        deposit_amount: deposit,
-        vat_percent: vatStatus ? 15 : 0,
-        vat_amount: vatAmount,
-        total_amount: totalAmount,
-        company_reg_no: companyRegNo,
-        vat_reg_no: vatRegNo,
-        notes,
-        updated_at: new Date().toISOString()
-      }).eq('id', editingQuoteId);
-      if (error) throw error;
-      showToast('✅ Quote updated!', 'success');
-      editingQuoteId = null;
-    } else {
-      const { error } = await sb.from('quotes_v2').insert([{
-        user_id: currentUser.id,
-        quote_number: quoteNumber,
-        client_name: clientName,
-        quote_date: quoteDate,
-        valid_days: validDays,
-        items: quoteBuilderItems,
-        subtotal,
-        deposit_percent: depositPercent,
-        deposit_amount: deposit,
-        vat_percent: vatStatus ? 15 : 0,
-        vat_amount: vatAmount,
-        total_amount: totalAmount,
-        company_reg_no: companyRegNo,
-        vat_reg_no: vatRegNo,
-        notes,
-        status: 'draft'
-      }]);
-      if (error) throw error;
-      const num = parseInt(quoteNumber.split('-')[1]) + 1;
-      await sb.from('profiles').update({ quote_next_number: num }).eq('id', currentUser.id);
-      showToast(`✅ Quote ${quoteNumber} saved!`, 'success');
-    }
-    quoteBuilderItems = [];
-    setTimeout(() => { loadQuotesV2(); goTo('quotes-v2'); }, 1000);
-  } catch (error) {
-    console.error(error);
-    showToast('Error saving quote: ' + error.message, 'error');
-  }
-}
-
-function downloadQuotePDF() {
-  showToast('PDF download - coming soon', 'info');
-}
-
-function shareQuoteWhatsApp() {
-  const phone = document.getElementById('qb_clientPhone')?.value?.replace(/[^0-9]/g, '');
-  const quoteNum = document.getElementById('qb_quoteNumber')?.value;
-  if (!phone) { showToast('Please enter a phone number', 'error'); return; }
-  const message = `Hi, I've prepared quote ${quoteNum} for you.`;
-  window.open(`https://wa.me/27${phone.slice(-9)}?text=${encodeURIComponent(message)}`, '_blank');
-}
-
-// ════════════════════════════════════════════════════════════════════════════════════
-// INVOICE BUILDER V2 - COMPLETE WITH ALL FEATURES
-// ════════════════════════════════════════════════════════════════════════════════════
-
-let invoiceBuilderItems = [];
-let editingInvoiceId = null;
-
-function renderInvoiceBuilder() {
-  const invoice = editingInvoiceId ? invoicesV2.find(inv => inv.id === editingInvoiceId) : null;
-  const isEditing = !!invoice;
-  if (isEditing) invoiceBuilderItems = invoice.items || [];
-
+// ───────────────────────────────────────────────────────────────
+// INVOICES V2 - LIST PAGE
+// ───────────────────────────────────────────────────────────────
+function renderInvoicesV2() {
   return `
-  <div class="builder-layout">
-    <div class="builder-left">
-      <div class="page-header" style="margin-bottom: 20px;">
-        <h2>${isEditing ? 'Edit Invoice' : 'New Invoice'}</h2>
-        <button class="btn btn-ghost" onclick="goTo('invoices-v2')">← Back</button>
-      </div>
-
-      <!-- CLIENT DETAILS -->
-      <div class="section-label">Client Details</div>
-      <div class="form-group">
-        <label>Client Name *</label>
-        <input type="text" id="ib_clientName" placeholder="e.g. ABC Property Management" value="${isEditing ? invoice.client_name : ''}">
-      </div>
-      <div class="input-row">
-        <div class="form-group">
-          <label>Phone</label>
-          <input type="tel" id="ib_clientPhone" placeholder="011 000 0000" value="${isEditing ? invoice.client_phone : ''}">
-        </div>
-        <div class="form-group">
-          <label>Email</label>
-          <input type="email" id="ib_clientEmail" placeholder="contact@company.co.za" value="${isEditing ? invoice.client_email : ''}">
-        </div>
-      </div>
-      <div class="form-group">
-        <label>Address</label>
-        <input type="text" id="ib_clientAddress" placeholder="123 Main Road, Unit 4" value="${isEditing ? invoice.client_address : ''}">
-      </div>
-
-      <!-- INVOICE SETTINGS -->
-      <div class="section-label" style="margin-top: 20px;">Invoice Settings</div>
-      <div class="input-row">
-        <div class="form-group">
-          <label>Invoice Number</label>
-          <input type="text" id="ib_invoiceNumber" placeholder="INV-001" readonly>
-        </div>
-        <div class="form-group">
-          <label>Invoice Date</label>
-          <input type="date" id="ib_invoiceDate">
-        </div>
-      </div>
-      <div class="input-row">
-        <div class="form-group">
-          <label>Due Date</label>
-          <input type="date" id="ib_dueDate">
-        </div>
-        <div class="form-group">
-          <label>Status</label>
-          <select id="ib_status">
-            <option value="unpaid">Unpaid</option>
-            <option value="partial">Partial</option>
-            <option value="paid">Paid</option>
-          </select>
-        </div>
-      </div>
-      <div class="input-row">
-        <div class="form-group">
-          <label>VAT Status</label>
-          <select id="ib_vatStatus">
-            <option value="no">Not VAT Registered</option>
-            <option value="yes" ${isEditing && invoice.vat_percent === 15 ? 'selected' : ''}>VAT @ 15%</option>
-          </select>
-        </div>
-      </div>
-
-      <!-- COMPANY DETAILS -->
-      <div class="input-row">
-        <div class="form-group">
-          <label>Company Reg No.</label>
-          <input type="text" id="ib_companyRegNo" placeholder="e.g. 2020/123456/07" value="${isEditing ? invoice.company_reg_no || '' : ''}">
-        </div>
-        <div class="form-group">
-          <label>VAT Reg No.</label>
-          <input type="text" id="ib_vatRegNo" placeholder="e.g. 4123456789" value="${isEditing ? invoice.vat_reg_no || '' : ''}">
-        </div>
-      </div>
-
-      <!-- NOTES/TERMS -->
-      <div class="form-group">
-        <label>Notes / Payment Terms</label>
-        <textarea id="ib_notes" rows="2" placeholder="e.g. Payment due within 30 days...">${isEditing ? invoice.notes : ''}</textarea>
-      </div>
-
-      <!-- LINE ITEMS -->
-      <div class="section-label" style="margin-top: 20px;">Line Items</div>
-      <div id="ib_itemsList"></div>
-      <button class="btn btn-ghost" style="width: 100%; margin-bottom: 20px;" onclick="addInvoiceItem()">+ Add Item</button>
-
-      <!-- QUICK ADD -->
-      <div id="ib_quickAdd" style="margin-bottom: 20px;"></div>
-
-      <!-- TOTALS -->
-      <div class="section-label" style="margin-top: 20px;">Totals</div>
-      <div style="background: #f9f9f9; padding: 12px; border-radius: 6px; margin-bottom: 20px;">
-        <div style="display: flex; justify-content: space-between; margin: 6px 0; font-size: 0.9rem;">
-          <span>Subtotal:</span>
-          <span id="ib_subtotal">R0.00</span>
-        </div>
-        <div style="display: flex; justify-content: space-between; margin: 6px 0; font-size: 0.9rem;">
-          <span>VAT:</span>
-          <span id="ib_vat">R0.00</span>
-        </div>
-        <div style="display: flex; justify-content: space-between; margin: 6px 0; font-size: 1.1rem; font-weight: 700; border-top: 1px solid #ddd; padding-top: 8px; color: #E63946;">
-          <span>Total Due:</span>
-          <span id="ib_total">R0.00</span>
-        </div>
-      </div>
-
-      <!-- ACTIONS -->
-      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px;">
-        <button class="btn btn-red" style="color: white;" onclick="saveInvoiceV2()">💾 Save Invoice</button>
-        <button class="btn btn-ghost" onclick="goTo('invoices-v2')">Cancel</button>
-      </div>
-      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-        <button class="btn btn-ghost" onclick="downloadInvoicePDF()">📥 PDF</button>
-        <button class="btn btn-ghost" onclick="shareInvoiceWhatsApp()">💬 WhatsApp</button>
-      </div>
+  <div class="page-header">
+    <div>
+      <h2>Invoices v2</h2>
+      <div style="font-size:0.82rem;color:var(--muted);margin-top:3px;">${invoicesV2.length} invoices</div>
     </div>
+    <div style="display:flex;gap:10px;flex-wrap:nowrap;">
+      <button class="btn btn-red" style="color:#fff;" onclick="startNewInvoiceV2()">+ New Invoice</button>
+    </div>
+  </div>
 
-    <!-- PREVIEW -->
-    <div class="builder-right" id="ib_preview"></div>
+  <div style="overflow-x:auto;margin-bottom:20px;">
+    <table style="width:100%;border-collapse:collapse;">
+      <thead>
+        <tr style="background:#f5f5f5;border-bottom:2px solid #ddd;">
+          <th style="padding:12px;text-align:left;font-weight:600;color:#333;">Invoice #</th>
+          <th style="padding:12px;text-align:left;font-weight:600;color:#333;">Client</th>
+          <th style="padding:12px;text-align:left;font-weight:600;color:#333;">Date</th>
+          <th style="padding:12px;text-align:right;font-weight:600;color:#333;">Amount</th>
+          <th style="padding:12px;text-align:center;font-weight:600;color:#333;">Status</th>
+          <th style="padding:12px;text-align:right;font-weight:600;color:#333;">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${invoicesV2.length === 0 ? `
+          <tr>
+            <td colspan="6" style="text-align:center;padding:40px;color:#999;">
+              No invoices yet. <button class="btn btn-red" style="color:#fff;margin-top:12px;" onclick="startNewInvoiceV2()">Create First Invoice</button>
+            </td>
+          </tr>
+        ` : invoicesV2.map(inv => `
+          <tr style="border-bottom:1px solid #eee;">
+            <td style="padding:12px;"><strong>${esc(inv.invoice_number || 'N/A')}</strong></td>
+            <td style="padding:12px;">${esc(inv.client_name || 'Unknown')}</td>
+            <td style="padding:12px;">${formatDate(inv.invoice_date)}</td>
+            <td style="padding:12px;text-align:right;"><strong>R${(inv.total_amount || 0).toLocaleString('en-ZA')}</strong></td>
+            <td style="padding:12px;text-align:center;"><span style="background:${inv.status === 'paid' ? '#2ecc71' : inv.status === 'partial' ? '#E8B84B' : '#E63946'};color:#fff;padding:4px 8px;border-radius:4px;font-size:0.75rem;font-weight:600;">${esc(inv.status || 'unpaid')}</span></td>
+            <td style="padding:12px;text-align:right;">
+              <button class="btn btn-sm btn-ghost" onclick="editInvoiceV2('${inv.id}')" style="font-size:0.8rem;padding:4px 8px;margin-right:4px;">Edit</button>
+              <button class="btn btn-sm btn-ghost" onclick="downloadInvoicePDFv2('${inv.id}')" style="font-size:0.8rem;padding:4px 8px;">PDF</button>
+            </td>
+          </tr>
+        `).join('')}
+      </tbody>
+    </table>
   </div>
   `;
 }
 
-function initInvoiceBuilder() {
-  const isEditing = !!editingInvoiceId;
-  const invoice = isEditing ? invoicesV2.find(inv => inv.id === editingInvoiceId) : null;
+function initInvoicesV2() {
+  loadInvoicesV2();
+}
 
-  if (!isEditing) {
-    const nextNum = (currentUser?.invoice_prefix || 'INV') + '-' + String(currentUser?.invoice_next_number || 1).padStart(3, '0');
-    document.getElementById('ib_invoiceNumber').value = nextNum;
-    const today = new Date();
-    document.getElementById('ib_invoiceDate').valueAsDate = today;
-    const dueDate = new Date(today);
-    dueDate.setDate(dueDate.getDate() + 30);
-    document.getElementById('ib_dueDate').valueAsDate = dueDate;
-  } else {
-    document.getElementById('ib_invoiceNumber').value = invoice.invoice_number;
-    document.getElementById('ib_invoiceDate').value = invoice.invoice_date;
-    document.getElementById('ib_dueDate').value = invoice.due_date;
-    document.getElementById('ib_status').value = invoice.status;
+// ───────────────────────────────────────────────────────────────
+// QUOTE V2 - BUILDER FUNCTIONS
+// ───────────────────────────────────────────────────────────────
+function startNewQuoteV2() {
+  editingQuoteV2Id = null;
+  v2Items = [];
+  showToast('Quote builder coming soon - UI to be built', 'info');
+}
+
+function editQuoteV2(quoteId) {
+  const quote = quotesV2.find(q => q.id === quoteId);
+  if (!quote) return showToast('Quote not found', 'error');
+  
+  editingQuoteV2Id = quoteId;
+  v2Items = quote.items || [];
+  showToast('Quote editor coming soon - UI to be built', 'info');
+}
+
+// ───────────────────────────────────────────────────────────────
+// INVOICE V2 - BUILDER FUNCTIONS
+// ───────────────────────────────────────────────────────────────
+function startNewInvoiceV2() {
+  editingInvoiceV2Id = null;
+  v2Items = [];
+  showToast('Invoice builder coming soon - UI to be built', 'info');
+}
+
+function editInvoiceV2(invoiceId) {
+  const invoice = invoicesV2.find(inv => inv.id === invoiceId);
+  if (!invoice) return showToast('Invoice not found', 'error');
+  
+  editingInvoiceV2Id = invoiceId;
+  v2Items = invoice.items || [];
+  showToast('Invoice editor coming soon - UI to be built', 'info');
+}
+
+// ───────────────────────────────────────────────────────────────
+// CONVERT QUOTE → INVOICE
+// ───────────────────────────────────────────────────────────────
+async function convertQuoteToInvoiceV2(quoteId) {
+  const quote = quotesV2.find(q => q.id === quoteId);
+  if (!quote) return showToast('Quote not found', 'error');
+  
+  // Get next invoice number
+  let nextInvoiceNum = 'INV-001';
+  if (currentUser?.invoice_prefix && currentUser?.invoice_next_number) {
+    nextInvoiceNum = currentUser.invoice_prefix + '-' + String(currentUser.invoice_next_number).padStart(3, '0');
   }
+  
+  try {
+    // Create invoice with quote reference
+    const { data, error } = await sb
+      .from('invoices_v2')
+      .insert([{
+        user_id: currentUser.id,
+        invoice_number: nextInvoiceNum,
+        quote_id: quoteId,
+        client_id: quote.client_id,
+        client_name: quote.client_name,
+        client_email: quote.client_email,
+        client_phone: quote.client_phone,
+        client_address: quote.client_address,
+        items: quote.items,
+        subtotal: quote.subtotal || 0,
+        vat_percent: quote.vat_percent || 0,
+        vat_amount: quote.vat_amount || 0,
+        total_amount: quote.total_amount || 0,
+        invoice_date: new Date().toISOString().split('T')[0],
+        due_date: new Date(Date.now() + 30*24*60*60*1000).toISOString().split('T')[0],
+        notes: quote.notes || '',
+        status: 'unpaid'
+      }])
+      .select()
+      .single();
+    
+    if (error) throw error;
+    
+    // Update invoice number in profiles
+    await sb
+      .from('profiles')
+      .update({ invoice_next_number: (currentUser.invoice_next_number || 0) + 1 })
+      .eq('id', currentUser.id);
+    
+    // Update quote status to invoiced
+    await sb
+      .from('quotes_v2')
+      .update({ status: 'invoiced', converted_to_invoice_id: data.id })
+      .eq('id', quoteId);
+    
+    showToast(`✅ Invoice ${nextInvoiceNum} created from quote!`, 'success');
+    loadQuotesV2();
+    loadInvoicesV2();
+    goTo('invoices-v2');
+  } catch (error) {
+    console.error('❌ Conversion error:', error);
+    showToast('Error converting quote to invoice', 'error');
+  }
+}
 
-  renderQuickAddButtons('ib_quickAdd', 'invoice');
-  renderInvoiceItems();
+// ───────────────────────────────────────────────────────────────
+// PDF GENERATION
+// ───────────────────────────────────────────────────────────────
+function downloadQuotePDFv2(quoteId) {
+  const quote = quotesV2.find(q => q.id === quoteId);
+  if (!quote) return showToast('Quote not found', 'error');
+  generateQuotePDFv2(quote);
+}
 
-  ['ib_clientName', 'ib_clientPhone', 'ib_clientEmail', 'ib_clientAddress', 'ib_invoiceDate', 'ib_dueDate', 'ib_status', 'ib_vatStatus', 'ib_notes', 'ib_companyRegNo', 'ib_vatRegNo'].forEach(id => {
-    const el = document.getElementById(id);
-    if (el) el.addEventListener('change', updateInvoicePreview);
+function downloadInvoicePDFv2(invoiceId) {
+  const invoice = invoicesV2.find(inv => inv.id === invoiceId);
+  if (!invoice) return showToast('Invoice not found', 'error');
+  generateInvoicePDFv2(invoice);
+}
+
+function generateQuotePDFv2(quote) {
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+  const pageW = 210;
+  const pageH = 297;
+  const margin = 15;
+  const dark = [26, 26, 26];
+  const orange = [230, 57, 70];
+  const white = [255, 255, 255];
+  const borderGrey = [220, 220, 220];
+  let y = margin;
+
+  // Header
+  doc.setFillColor(...dark);
+  doc.rect(0, 0, pageW, 38, 'F');
+  doc.setFillColor(...orange);
+  doc.rect(0, 38, pageW, 1.5, 'F');
+
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(16);
+  doc.setTextColor(...white);
+  doc.text(currentUser?.company || 'Your Company', margin, 14);
+
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(8);
+  doc.setTextColor(180, 180, 180);
+  doc.text('QUOTATION', pageW - margin, 10, { align: 'right' });
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(10);
+  doc.setTextColor(...orange);
+  doc.text(quote.quote_number || 'QTE', pageW - margin, 18, { align: 'right' });
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(7.5);
+  doc.setTextColor(160, 160, 160);
+  doc.text('Date: ' + (quote.quote_date || new Date().toLocaleDateString('en-ZA')), pageW - margin, 24, { align: 'right' });
+
+  y = 46;
+
+  // Client info
+  doc.setFillColor(250, 249, 247);
+  doc.rect(0, y, pageW, 24, 'F');
+  doc.setDrawColor(...borderGrey);
+  doc.setLineWidth(0.3);
+  doc.line(0, y+24, pageW, y+24);
+
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(6);
+  doc.setTextColor(170, 170, 170);
+  doc.text('QUOTED FOR', margin, y+6);
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(10);
+  doc.setTextColor(...dark);
+  doc.text(quote.client_name || 'Client', margin, y+12);
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(7.5);
+  doc.setTextColor(100, 100, 100);
+  let cy = y+17;
+  if (quote.client_phone) { doc.text(quote.client_phone, margin, cy); cy += 4; }
+  if (quote.client_address) { doc.text(quote.client_address, margin, cy); }
+  y += 28;
+
+  // Items table
+  const items = (quote.items||[]).map(item => [
+    item.description || item.name || 'Item',
+    String(item.qty||1),
+    'R ' + parseFloat(item.price||0).toFixed(2),
+    'R ' + ((item.qty||1)*(item.price||0)).toFixed(2)
+  ]);
+
+  doc.autoTable({
+    startY: y,
+    head: [['DESCRIPTION', 'QTY', 'UNIT PRICE', 'AMOUNT']],
+    body: items,
+    margin: { left: 0, right: 0, top: 2, bottom: 2 },
+    styles: { fontSize:8.5, cellPadding:4, textColor:dark, lineColor:borderGrey, lineWidth:0.2 },
+    headStyles: { fillColor:dark, textColor:white, fontStyle:'bold', fontSize:7.5, cellPadding:5 },
+    columnStyles: {
+      1:{halign:'center'},
+      2:{halign:'right'}, 3:{halign:'right',fontStyle:'bold'}
+    },
+    alternateRowStyles: { fillColor:[252,252,252] }
   });
 
-  updateInvoicePreview();
-}
+  y = doc.lastAutoTable.finalY + 4;
 
-function addInvoiceItem() {
-  invoiceBuilderItems.push({ id: Date.now(), description: '', qty: 1, price: 0 });
-  renderInvoiceItems();
-}
+  // Totals
+  const subtotal = quote.subtotal || 0;
+  const vat = quote.vat_amount || 0;
+  const total = quote.total_amount || 0;
+  const fmt = n => 'R ' + n.toLocaleString('en-ZA',{minimumFractionDigits:2,maximumFractionDigits:2});
+  
+  doc.setFillColor(254, 240, 240);
+  doc.rect(0, y-2, pageW, 28, 'F');
+  
+  const totalsX = pageW - 85;
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(8.5);
+  doc.setTextColor(100, 100, 100);
+  doc.text('Subtotal', totalsX+4, y+5.5);
+  doc.text(fmt(subtotal), pageW-2, y+5.5, {align:'right'});
+  y += 8;
 
-function removeInvoiceItem(id) {
-  invoiceBuilderItems = invoiceBuilderItems.filter(i => i.id !== id);
-  renderInvoiceItems();
-}
-
-function updateInvoiceItem(id, field, value) {
-  const item = invoiceBuilderItems.find(i => i.id === id);
-  if (item) {
-    if (field === 'qty') item.qty = parseInt(value) || 1;
-    else if (field === 'price') item.price = parseFloat(value) || 0;
-    else item[field] = value;
-    renderInvoiceItems();
-  }
-}
-
-function renderInvoiceItems() {
-  const list = document.getElementById('ib_itemsList');
-  if (!list) return;
-
-  list.innerHTML = invoiceBuilderItems.map(item => `
-    <div style="display: grid; grid-template-columns: 2fr 1fr 1fr 1fr auto; gap: 8px; align-items: flex-end; margin-bottom: 8px;">
-      <input type="text" placeholder="Description" value="${item.description || ''}" onchange="updateInvoiceItem(${item.id}, 'description', this.value)" style="padding: 8px;">
-      <input type="number" placeholder="Qty" value="${item.qty || 1}" onchange="updateInvoiceItem(${item.id}, 'qty', this.value)" style="padding: 8px;">
-      <input type="number" placeholder="Price" value="${item.price || 0}" onchange="updateInvoiceItem(${item.id}, 'price', this.value)" step="0.01" style="padding: 8px;">
-      <input type="text" value="R${((item.qty || 1) * (item.price || 0)).toLocaleString('en-ZA')}" readonly style="padding: 8px; background: #f0f0f0;">
-      <button class="btn" style="padding: 8px 12px; background: #e74c3c; color: white; width: auto;" onclick="removeInvoiceItem(${item.id})">×</button>
-    </div>
-  `).join('');
-
-  updateInvoicePreview();
-}
-
-function updateInvoicePreview() {
-  const clientName = document.getElementById('ib_clientName')?.value || 'Client Name';
-  const clientPhone = document.getElementById('ib_clientPhone')?.value || '';
-  const clientAddress = document.getElementById('ib_clientAddress')?.value || '';
-  const invoiceNum = document.getElementById('ib_invoiceNumber')?.value || 'INV-001';
-  const invoiceDate = document.getElementById('ib_invoiceDate')?.value || new Date().toISOString().split('T')[0];
-  const dueDate = document.getElementById('ib_dueDate')?.value || new Date(Date.now() + 30*24*60*60*1000).toISOString().split('T')[0];
-  const status = document.getElementById('ib_status')?.value || 'unpaid';
-  const vatStatus = document.getElementById('ib_vatStatus')?.value === 'yes';
-  const companyRegNo = document.getElementById('ib_companyRegNo')?.value || '';
-  const vatRegNo = document.getElementById('ib_vatRegNo')?.value || '';
-
-  const subtotal = invoiceBuilderItems.reduce((s, i) => s + ((i.qty || 1) * (i.price || 0)), 0);
-  const vat = vatStatus ? (subtotal * 0.15) : 0;
-  const total = subtotal + vat;
-
-  const fmt = n => 'R' + n.toLocaleString('en-ZA', {minimumFractionDigits: 2, maximumFractionDigits: 2});
-
-  document.getElementById('ib_subtotal').textContent = fmt(subtotal);
-  document.getElementById('ib_vat').textContent = fmt(vat);
-  document.getElementById('ib_total').textContent = fmt(total);
-
-  const invDateStr = new Date(invoiceDate).toLocaleDateString('en-ZA', {day: 'numeric', month: 'long', year: 'numeric'});
-  const dueDateStr = new Date(dueDate).toLocaleDateString('en-ZA', {day: 'numeric', month: 'long', year: 'numeric'});
-  const statusColor = { unpaid: '#e74c3c', partial: '#f39c12', paid: '#27ae60' }[status] || '#333';
-  const itemsHtml = invoiceBuilderItems.length === 0 ? '<tr><td colspan="4" style="text-align: center; padding: 20px; color: #999;">No items added yet</td></tr>' : invoiceBuilderItems.map(i => `
-    <tr style="border-bottom: 1px solid #eee;">
-      <td style="padding: 10px;">${i.description || 'Item'}</td>
-      <td style="padding: 10px; text-align: center;">${i.qty || 1}</td>
-      <td style="padding: 10px; text-align: right;">${fmt(parseFloat(i.price || 0))}</td>
-      <td style="padding: 10px; text-align: right; font-weight: bold;">${fmt((i.qty || 1) * (i.price || 0))}</td>
-    </tr>
-  `).join('');
-
-  document.getElementById('ib_preview').innerHTML = `
-    <div style="background: white; padding: 20px; border-radius: 6px; border: 1px solid #ddd;">
-      <div style="background: #1a1a1a; color: white; padding: 20px; margin: -20px -20px 20px; border-radius: 6px 6px 0 0; display: flex; justify-content: space-between;">
-        <div>
-          <div style="font-weight: bold; font-size: 1.2rem;">${currentUser?.company || 'Your Company'}</div>
-          <div style="font-size: 0.75rem; color: #999; margin-top: 4px;">${companyRegNo ? 'Reg: ' + companyRegNo : 'Professional Services'}</div>
-          <div style="font-size: 0.75rem; color: #999; margin-top: 2px;">${vatRegNo ? 'VAT: ' + vatRegNo : ''}</div>
-        </div>
-        <div style="text-align: right;">
-          <div style="font-size: 0.7rem; color: #999;">INVOICE</div>
-          <div style="font-size: 1.2rem; color: #E63946; font-weight: bold;">${invoiceNum}</div>
-          <div style="font-size: 0.75rem; color: #ccc; margin-top: 4px;">Date: ${invDateStr}<br>Due: ${dueDateStr}</div>
-          <div style="font-size: 0.7rem; margin-top: 6px; padding: 4px 8px; background: ${statusColor}; color: white; border-radius: 4px; font-weight: bold;">${status.toUpperCase()}</div>
-        </div>
-      </div>
-
-      <div style="background: #faf9f7; padding: 12px; margin: 12px 0; border-left: 3px solid #E63946;">
-        <div style="font-size: 0.7rem; color: #999; font-weight: bold;">INVOICE TO</div>
-        <div style="font-weight: bold;">${clientName}</div>
-        ${clientPhone || clientAddress ? `<div style="font-size: 0.8rem; color: #666; margin-top: 4px;">${[clientPhone, clientAddress].filter(Boolean).join(' • ')}</div>` : ''}
-      </div>
-
-      <table style="width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 0.85rem;">
-        <thead>
-          <tr style="background: #1a1a1a; color: white;">
-            <th style="padding: 10px; text-align: left; font-weight: bold;">Description</th>
-            <th style="padding: 10px; text-align: center; font-weight: bold;">Qty</th>
-            <th style="padding: 10px; text-align: right; font-weight: bold;">Unit Price</th>
-            <th style="padding: 10px; text-align: right; font-weight: bold;">Amount</th>
-          </tr>
-        </thead>
-        <tbody>${itemsHtml}</tbody>
-      </table>
-
-      <div style="background: #FEF0F0; padding: 12px; margin: 12px 0; border-radius: 4px;">
-        <div style="display: flex; justify-content: space-between; margin: 4px 0; font-size: 0.9rem;">
-          <span>Subtotal:</span>
-          <span>${fmt(subtotal)}</span>
-        </div>
-        ${vat > 0 ? `<div style="display: flex; justify-content: space-between; margin: 4px 0; font-size: 0.9rem;"><span>VAT @ 15%:</span><span>${fmt(vat)}</span></div>` : ''}
-        <div style="display: flex; justify-content: space-between; margin: 8px 0 0 0; padding-top: 8px; border-top: 1px solid #E63946; font-weight: bold; font-size: 1.1rem; color: #1a1a1a;">
-          <span>TOTAL DUE:</span>
-          <span>${fmt(total)}</span>
-        </div>
-      </div>
-
-      <div style="text-align: center; padding: 12px; font-size: 0.75rem; color: #999; border-top: 1px solid #ddd; margin-top: 12px;">
-        Payment due ${dueDateStr}. Thank you for your business.<br>
-        Powered by QForge | myquoteforge.co.za
-      </div>
-    </div>
-  `;
-}
-
-async function saveInvoiceV2() {
-  const clientName = document.getElementById('ib_clientName')?.value?.trim();
-  const invoiceNumber = document.getElementById('ib_invoiceNumber')?.value?.trim();
-  const invoiceDate = document.getElementById('ib_invoiceDate')?.value;
-  const dueDate = document.getElementById('ib_dueDate')?.value;
-  const status = document.getElementById('ib_status')?.value;
-  const vatStatus = document.getElementById('ib_vatStatus')?.value === 'yes';
-  const companyRegNo = document.getElementById('ib_companyRegNo')?.value?.trim();
-  const vatRegNo = document.getElementById('ib_vatRegNo')?.value?.trim();
-  const notes = document.getElementById('ib_notes')?.value?.trim();
-
-  if (!clientName || invoiceBuilderItems.length === 0) {
-    showToast('Please fill in client name and add at least one item', 'error');
-    return;
+  if (vat > 0) {
+    doc.text('VAT @ 15%', totalsX+4, y+5.5);
+    doc.text(fmt(vat), pageW-2, y+5.5, {align:'right'});
+    y += 8;
   }
 
-  const subtotal = invoiceBuilderItems.reduce((s, i) => s + ((i.qty || 1) * (i.price || 0)), 0);
-  const vatAmount = vatStatus ? (subtotal * 0.15) : 0;
-  const totalAmount = subtotal + vatAmount;
+  doc.setFillColor(...dark);
+  doc.rect(totalsX, y, 85, 10, 'F');
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(10);
+  doc.setTextColor(...white);
+  doc.text('TOTAL DUE', totalsX+6, y+7);
+  doc.text(fmt(total), pageW-2, y+7, {align:'right'});
 
-  try {
-    if (editingInvoiceId) {
-      const { error } = await sb.from('invoices_v2').update({
-        client_name: clientName,
-        invoice_date: invoiceDate,
-        due_date: dueDate,
-        status,
-        items: invoiceBuilderItems,
-        subtotal,
-        vat_percent: vatStatus ? 15 : 0,
-        vat_amount: vatAmount,
-        total_amount: totalAmount,
-        company_reg_no: companyRegNo,
-        vat_reg_no: vatRegNo,
-        notes,
-        updated_at: new Date().toISOString()
-      }).eq('id', editingInvoiceId);
-      if (error) throw error;
-      showToast('✅ Invoice updated!', 'success');
-      editingInvoiceId = null;
-    } else {
-      const { error } = await sb.from('invoices_v2').insert([{
-        user_id: currentUser.id,
-        invoice_number: invoiceNumber,
-        client_name: clientName,
-        invoice_date: invoiceDate,
-        due_date: dueDate,
-        status,
-        items: invoiceBuilderItems,
-        subtotal,
-        vat_percent: vatStatus ? 15 : 0,
-        vat_amount: vatAmount,
-        total_amount: totalAmount,
-        company_reg_no: companyRegNo,
-        vat_reg_no: vatRegNo,
-        notes
-      }]);
-      if (error) throw error;
-      const num = parseInt(invoiceNumber.split('-')[1]) + 1;
-      await sb.from('profiles').update({ invoice_next_number: num }).eq('id', currentUser.id);
-      showToast(`✅ Invoice ${invoiceNumber} saved!`, 'success');
-    }
-    invoiceBuilderItems = [];
-    setTimeout(() => { loadInvoicesV2(); goTo('invoices-v2'); }, 1000);
-  } catch (error) {
-    console.error(error);
-    showToast('Error saving invoice: ' + error.message, 'error');
+  // Footer
+  y = pageH - 30;
+  doc.setFillColor(26, 26, 26);
+  doc.rect(0, y, pageW, 30, 'F');
+  doc.setFillColor(...orange);
+  doc.rect(0, y, pageW, 1.5, 'F');
+  doc.setFont('helvetica', 'italic');
+  doc.setFontSize(8);
+  doc.setTextColor(180, 180, 180);
+  doc.text('Thank you for the opportunity. Valid for '+quote.valid_days+' days.', margin, y+8);
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(7.5);
+  doc.setTextColor(130, 130, 130);
+  doc.text('Powered by QForge | myquoteforge.co.za', pageW/2, y+24, {align:'center'});
+
+  const fileName = quote.quote_number + '-' + (quote.client_name||'Quote').replace(/[^a-z0-9]/gi,'-') + '.pdf';
+  doc.save(fileName);
+  showToast('Quote PDF downloaded!', 'success');
+}
+
+function generateInvoicePDFv2(invoice) {
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+  const pageW = 210;
+  const pageH = 297;
+  const margin = 15;
+  const dark = [26, 26, 26];
+  const orange = [230, 57, 70];
+  const white = [255, 255, 255];
+  const borderGrey = [220, 220, 220];
+  let y = margin;
+
+  // Header - same as quote
+  doc.setFillColor(...dark);
+  doc.rect(0, 0, pageW, 38, 'F');
+  doc.setFillColor(...orange);
+  doc.rect(0, 38, pageW, 1.5, 'F');
+
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(16);
+  doc.setTextColor(...white);
+  doc.text(currentUser?.company || 'Your Company', margin, 14);
+
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(8);
+  doc.setTextColor(180, 180, 180);
+  doc.text('INVOICE', pageW - margin, 10, { align: 'right' });
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(10);
+  doc.setTextColor(...orange);
+  doc.text(invoice.invoice_number || 'INV', pageW - margin, 18, { align: 'right' });
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(7.5);
+  doc.setTextColor(160, 160, 160);
+  doc.text('Date: ' + (invoice.invoice_date || new Date().toLocaleDateString('en-ZA')), pageW - margin, 24, { align: 'right' });
+  doc.text('Due: ' + (invoice.due_date || new Date().toLocaleDateString('en-ZA')), pageW - margin, 29, { align: 'right' });
+
+  y = 46;
+
+  // Client info
+  doc.setFillColor(250, 249, 247);
+  doc.rect(0, y, pageW, 24, 'F');
+  doc.setDrawColor(...borderGrey);
+  doc.setLineWidth(0.3);
+  doc.line(0, y+24, pageW, y+24);
+
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(6);
+  doc.setTextColor(170, 170, 170);
+  doc.text('INVOICE TO', margin, y+6);
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(10);
+  doc.setTextColor(...dark);
+  doc.text(invoice.client_name || 'Client', margin, y+12);
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(7.5);
+  doc.setTextColor(100, 100, 100);
+  let cy = y+17;
+  if (invoice.client_phone) { doc.text(invoice.client_phone, margin, cy); cy += 4; }
+  if (invoice.client_address) { doc.text(invoice.client_address, margin, cy); }
+  y += 28;
+
+  // Items table
+  const items = (invoice.items||[]).map(item => [
+    item.description || item.name || 'Item',
+    String(item.qty||1),
+    'R ' + parseFloat(item.price||0).toFixed(2),
+    'R ' + ((item.qty||1)*(item.price||0)).toFixed(2)
+  ]);
+
+  doc.autoTable({
+    startY: y,
+    head: [['DESCRIPTION', 'QTY', 'UNIT PRICE', 'AMOUNT']],
+    body: items,
+    margin: { left: 0, right: 0, top: 2, bottom: 2 },
+    styles: { fontSize:8.5, cellPadding:4, textColor:dark, lineColor:borderGrey, lineWidth:0.2 },
+    headStyles: { fillColor:dark, textColor:white, fontStyle:'bold', fontSize:7.5, cellPadding:5 },
+    columnStyles: {
+      1:{halign:'center'},
+      2:{halign:'right'}, 3:{halign:'right',fontStyle:'bold'}
+    },
+    alternateRowStyles: { fillColor:[252,252,252] }
+  });
+
+  y = doc.lastAutoTable.finalY + 4;
+
+  // Totals - SAME DESIGN
+  const subtotal = invoice.subtotal || 0;
+  const vat = invoice.vat_amount || 0;
+  const total = invoice.total_amount || 0;
+  const fmt = n => 'R ' + n.toLocaleString('en-ZA',{minimumFractionDigits:2,maximumFractionDigits:2});
+  
+  doc.setFillColor(254, 240, 240);
+  doc.rect(0, y-2, pageW, 28, 'F');
+  
+  const totalsX = pageW - 85;
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(8.5);
+  doc.setTextColor(100, 100, 100);
+  doc.text('Subtotal', totalsX+4, y+5.5);
+  doc.text(fmt(subtotal), pageW-2, y+5.5, {align:'right'});
+  y += 8;
+
+  if (vat > 0) {
+    doc.text('VAT @ 15%', totalsX+4, y+5.5);
+    doc.text(fmt(vat), pageW-2, y+5.5, {align:'right'});
+    y += 8;
   }
+
+  doc.setFillColor(...dark);
+  doc.rect(totalsX, y, 85, 10, 'F');
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(10);
+  doc.setTextColor(...white);
+  doc.text('TOTAL DUE', totalsX+6, y+7);
+  doc.text(fmt(total), pageW-2, y+7, {align:'right'});
+
+  // Footer
+  y = pageH - 30;
+  doc.setFillColor(26, 26, 26);
+  doc.rect(0, y, pageW, 30, 'F');
+  doc.setFillColor(...orange);
+  doc.rect(0, y, pageW, 1.5, 'F');
+  doc.setFont('helvetica', 'italic');
+  doc.setFontSize(8);
+  doc.setTextColor(180, 180, 180);
+  doc.text('Payment due by '+invoice.due_date+'. Thank you for your business.', margin, y+8);
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(7.5);
+  doc.setTextColor(130, 130, 130);
+  doc.text('Powered by QForge | myquoteforge.co.za', pageW/2, y+24, {align:'center'});
+
+  const fileName = invoice.invoice_number + '-' + (invoice.client_name||'Invoice').replace(/[^a-z0-9]/gi,'-') + '.pdf';
+  doc.save(fileName);
+  showToast('Invoice PDF downloaded!', 'success');
 }
 
-function downloadInvoicePDF() {
-  showToast('PDF download - coming soon', 'info');
-}
-
-function shareInvoiceWhatsApp() {
-  const phone = document.getElementById('ib_clientPhone')?.value?.replace(/[^0-9]/g, '');
-  const invoiceNum = document.getElementById('ib_invoiceNumber')?.value;
-  const dueDate = document.getElementById('ib_dueDate')?.value;
-  if (!phone) { showToast('Please enter a phone number', 'error'); return; }
-  const message = `Hi, invoice ${invoiceNum} is due ${dueDate}.`;
-  window.open(`https://wa.me/27${phone.slice(-9)}?text=${encodeURIComponent(message)}`, '_blank');
-}
-
-// Update goTo() to handle new builder routes
-const originalGoTo = window.goTo;
-function goTo(page) {
-  if (page === 'quotes-builder') {
-    editingQuoteId = null;
-    mc.innerHTML = renderQuoteBuilder();
-    setTimeout(initQuoteBuilder, 100);
-  } else if (page === 'invoices-builder') {
-    editingInvoiceId = null;
-    mc.innerHTML = renderInvoiceBuilder();
-    setTimeout(initInvoiceBuilder, 100);
-  } else {
-    originalGoTo(page);
-  }
-}
-
-// Wait for DOM then init
-setTimeout(init, 500);
 </script>
 </body>
 </html>
