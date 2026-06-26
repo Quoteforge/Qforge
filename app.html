@@ -3407,6 +3407,21 @@ function updateBuilderPreview() {
   const si = (id, html) => { const e=document.getElementById(id); if(e) e.innerHTML=html; };
   const st = (id, txt) => { const e=document.getElementById(id); if(e) e.textContent=txt; };
 
+  // Update theme color in preview
+  const colorElements = document.querySelectorAll('[data-theme-color]');
+  colorElements.forEach(el => {
+    if (el.style.color) el.style.color = builderThemeColor;
+    if (el.style.borderColor) el.style.borderColor = builderThemeColor;
+    if (el.style.backgroundColor) el.style.backgroundColor = builderThemeColor;
+  });
+  
+  // Update specific preview color elements
+  const qnumEl = document.getElementById('pv_qnum');
+  if (qnumEl) qnumEl.style.color = builderThemeColor;
+  
+  const headerLineEl = document.getElementById('pv_header_line');
+  if (headerLineEl) headerLineEl.style.backgroundColor = builderThemeColor;
+
   st('pv_clientName', gv('b_clientName')||'Client Name');
   si('pv_clientDetail', gv('b_clientContact')||'-');
   si('pv_clientAddress', gv('b_clientAddress')||'-');

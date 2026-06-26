@@ -92,6 +92,11 @@ function extractQuoteNumber(compositeId) {
   return compositeId.includes('|') ? compositeId.split('|')[1] : compositeId;
 }
 
+function hexToRGB(hex) {
+  const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+  return result ? [parseInt(result[1],16), parseInt(result[2],16), parseInt(result[3],16)] : [230, 57, 70];
+}
+
 function getVehicleHTML() {
   if (!invoiceData) return '';
   let html = '<span class="info-label">Vehicle Details</span><div class="client-detail">';
@@ -210,6 +215,12 @@ async function loadInvoice() {
     }
 
     invoiceData = data;
+    // Apply theme color from invoice
+    if (invoiceData.theme_color) {
+      document.documentElement.style.setProperty('--red', invoiceData.theme_color);
+      const rgb = hexToRGB(invoiceData.theme_color);
+      document.documentElement.style.setProperty('--red-light', `rgba(${rgb[0]}, ${rgb[1]}, ${rgb[2]}, 0.08)`);
+    }
     renderInvoice();
   } catch (err) {
     document.getElementById('loadingDiv').style.display = 'none';
