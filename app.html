@@ -7043,7 +7043,77 @@ async function handleLogoUpload(input) {
 
 function showLogoCropperModal() {
   document.getElementById('logoCropperModal').style.display = 'flex';
-  setTimeout(() => renderLogoCropper(), 50);
+  setTimeout(() => {
+    renderLogoCropper();
+    attachLogoCropperEvents();
+  }, 50);
+}
+
+function attachLogoCropperEvents() {
+  const canvas = document.getElementById('logoCropCanvas');
+  const overlay = document.getElementById('cropOverlay');
+  if (!overlay) return;
+  
+  let isDragging = false;
+  let startX, startY, startOffsetX, startOffsetY;
+  
+  // Mouse events
+  overlay.addEventListener('mousedown', (e) => {
+    isDragging = true;
+    startX = e.clientX;
+    startY = e.clientY;
+    startOffsetX = logoCropperState.offsetX;
+    startOffsetY = logoCropperState.offsetY;
+    overlay.style.cursor = 'grabbing';
+  });
+  
+  document.addEventListener('mousemove', (e) => {
+    if (!isDragging) return;
+    const deltaX = e.clientX - startX;
+    const deltaY = e.clientY - startY;
+    logoCropperState.offsetX = startOffsetX + deltaX;
+    logoCropperState.offsetY = startOffsetY + deltaY;
+    renderLogoCropper();
+  });
+  
+  document.addEventListener('mouseup', () => {
+    isDragging = false;
+    overlay.style.cursor = 'move';
+  });
+  
+  // Zoom with wheel
+  canvas.addEventListener('wheel', (e) => {
+    e.preventDefault();
+    const delta = e.deltaY > 0 ? -0.1 : 0.1;
+    logoCropperState.scale = Math.max(0.5, Math.min(3, logoCropperState.scale + delta));
+    renderLogoCropper();
+  }, { passive: false });
+  
+  // Touch events
+  let touchStartX, touchStartY, touchStartOffsetX, touchStartOffsetY;
+  overlay.addEventListener('touchstart', (e) => {
+    if (e.touches.length === 1) {
+      isDragging = true;
+      touchStartX = e.touches[0].clientX;
+      touchStartY = e.touches[0].clientY;
+      touchStartOffsetX = logoCropperState.offsetX;
+      touchStartOffsetY = logoCropperState.offsetY;
+    }
+  });
+  
+  overlay.addEventListener('touchmove', (e) => {
+    if (isDragging && e.touches.length === 1) {
+      const deltaX = e.touches[0].clientX - touchStartX;
+      const deltaY = e.touches[0].clientY - touchStartY;
+      logoCropperState.offsetX = touchStartOffsetX + deltaX;
+      logoCropperState.offsetY = touchStartOffsetY + deltaY;
+      renderLogoCropper();
+    }
+  });
+  
+  overlay.addEventListener('touchend', () => {
+    isDragging = false;
+  });
 }
 
 function closeLogoCropperModal() {
@@ -7055,8 +7125,12 @@ function renderLogoCropper() {
   const canvas = document.getElementById('logoCropCanvas');
   const ctx = canvas.getContext('2d');
   const overlay = document.getElementById('cropOverlay');
+  const zoomDisplay = document.getElementById('zoomLevel');
   
   if (!canvas || !logoCropperState.image) return;
+  
+  // Update zoom display
+  if (zoomDisplay) zoomDisplay.textContent = Math.round(logoCropperState.scale * 100) + '%';
   
   // Set canvas size to fit container
   canvas.width = overlay.parentElement.offsetWidth;
@@ -7908,15 +7982,23 @@ function hideLoadingScreen(showAuth) {
 <div class="modal-overlay" id="logoCropperModal" style="display:none;">
   <div class="modal" style="max-width:500px;">
     <h3>Crop Your Logo</h3>
-    <p style="font-size:0.9rem;color:#666;margin-bottom:12px;">Adjust the crop box to fit your logo perfectly. It will be fitted to a square.</p>
+    <p style="font-size:0.9rem;color:#666;margin-bottom:12px;">Adjust your logo to fit in the square below</p>
     
     <div style="position:relative;width:100%;max-height:400px;background:#f0f0f0;border-radius:8px;overflow:hidden;margin-bottom:12px;">
       <canvas id="logoCropCanvas" style="width:100%;display:block;"></canvas>
       <div id="cropOverlay" style="position:absolute;top:0;left:0;width:100%;height:100%;cursor:move;touch-action:none;"></div>
     </div>
     
+    <div style="display:flex;gap:8px;margin-bottom:12px;background:#f9f9f9;padding:10px;border-radius:6px;">
+      <button class="btn btn-ghost" style="flex:1;font-size:1.1rem;" onclick="logoCropperState.scale=Math.max(0.5,logoCropperState.scale-0.1);renderLogoCropper();" title="Zoom Out">−</button>
+      <span style="display:flex;align-items:center;padding:0 12px;color:#666;font-size:0.9rem;min-width:60px;text-align:center;">
+        <span id="zoomLevel" style="flex:1;">100%</span>
+      </span>
+      <button class="btn btn-ghost" style="flex:1;font-size:1.1rem;" onclick="logoCropperState.scale=Math.min(3,logoCropperState.scale+0.1);renderLogoCropper();" title="Zoom In">+</button>
+    </div>
+    
     <div style="display:flex;gap:1px;font-size:0.85rem;color:#888;margin-bottom:12px;background:#f9f9f9;padding:10px;border-radius:6px;">
-      <span>💡 <strong>Tip:</strong> Drag to reposition, scroll to zoom</span>
+      <span>💡 <strong>Drag</strong> to move • <strong>+ -</strong> buttons to zoom</span>
     </div>
     
     <div class="modal-actions">
