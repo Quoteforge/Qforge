@@ -115,7 +115,8 @@ h1,h2,h3,.logo,.mono{font-family:'Syne',sans-serif;}
   font-family:var(--font-display);font-size:0.95rem;font-weight:700;
   padding:14px;cursor:pointer;transition:all 0.2s;width:100%;
 }
-.btn-auth:hover{background:var(--red-dark);transform:translateY(-2px);box-shadow:0 6px 16px rgba(230,57,70,0.3);}
+.btn-auth:hover:not(:disabled){background:var(--red-dark);transform:translateY(-2px);box-shadow:0 6px 16px rgba(230,57,70,0.3);}
+.btn-auth:disabled{opacity:0.5;cursor:not-allowed;}
 .auth-divider{display:flex;align-items:center;gap:12px;margin:20px 0;}
 .auth-divider::before,.auth-divider::after{content:'';flex:1;height:1px;background:var(--border2);}
 .auth-divider span{font-size:0.78rem;color:#999;font-weight:500;}
@@ -1806,8 +1807,28 @@ h1, h2, h3 {
       <div class="form-group">
         <label>Password</label>
         <div class="password-wrap">
-          <input type="password" id="regPassword" placeholder="Min 6 characters" onkeydown="if(event.key==='Enter')doRegister()">
+          <input type="password" id="regPassword" placeholder="Create a strong password" onkeyup="validatePasswordStrength()" onkeydown="if(event.key==='Enter')doRegister()">
           <button class="eye-btn" type="button" onclick="togglePassword('regPassword', this)" tabindex="-1">&#128065;</button>
+        </div>
+        <!-- Password strength requirements -->
+        <div id="passwordRequirements" style="margin-top:12px;padding:12px;background:#f5f5f5;border-radius:6px;font-size:0.85rem;">
+          <div style="margin-bottom:8px;font-weight:600;color:#333;">Password must have:</div>
+          <div id="reqLength" style="display:flex;align-items:center;gap:8px;margin-bottom:6px;color:#999;">
+            <span id="checkLength" style="font-size:1.2rem;">○</span>
+            <span>At least 6 characters</span>
+          </div>
+          <div id="reqUppercase" style="display:flex;align-items:center;gap:8px;margin-bottom:6px;color:#999;">
+            <span id="checkUppercase" style="font-size:1.2rem;">○</span>
+            <span>One uppercase letter (A-Z)</span>
+          </div>
+          <div id="reqLowercase" style="display:flex;align-items:center;gap:8px;margin-bottom:6px;color:#999;">
+            <span id="checkLowercase" style="font-size:1.2rem;">○</span>
+            <span>One lowercase letter (a-z)</span>
+          </div>
+          <div id="reqSpecial" style="display:flex;align-items:center;gap:8px;color:#999;">
+            <span id="checkSpecial" style="font-size:1.2rem;">○</span>
+            <span>One special character (!@#$%^&*)</span>
+          </div>
         </div>
       </div>
       <button type="button" class="btn-auth" onclick="doRegister()">Create Free Account</button>
@@ -2172,6 +2193,16 @@ function switchTab(tab) {
   document.getElementById('tabRegister').classList.toggle('active', tab==='register');
   document.getElementById('loginForm').style.display = tab==='login' ? 'flex' : 'none';
   document.getElementById('registerForm').style.display = tab==='register' ? 'flex' : 'none';
+  
+  // Initialize password validation when switching to register tab
+  if (tab === 'register') {
+    const signupBtn = document.querySelector('#registerForm .btn-auth');
+    if (signupBtn) {
+      signupBtn.disabled = true;
+      signupBtn.style.opacity = '0.5';
+      signupBtn.style.cursor = 'not-allowed';
+    }
+  }
 }
 
 async function doLogin() {
@@ -2251,8 +2282,10 @@ async function doRegister() {
     errEl.classList.add('show'); 
     return; 
   }
-  if (pass.length < 6) { 
-    errEl.textContent='Password must be at least 6 characters.'; 
+  
+  // Strong password validation
+  if (!isPasswordStrong(pass)) {
+    errEl.textContent='Password must be at least 6 characters with uppercase, lowercase, and special character.'; 
     errEl.classList.add('show'); 
     return; 
   }
@@ -6329,6 +6362,61 @@ function togglePassword(inputId, btn) {
   } else {
     input.type = 'password';
     btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>';
+  }
+}
+
+// Password strength validation functions
+function isPasswordStrong(password) {
+  if (!password) return false;
+  const hasLength = password.length >= 6;
+  const hasUppercase = /[A-Z]/.test(password);
+  const hasLowercase = /[a-z]/.test(password);
+  const hasSpecial = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password);
+  return hasLength && hasUppercase && hasLowercase && hasSpecial;
+}
+
+function validatePasswordStrength() {
+  const password = document.getElementById('regPassword').value;
+  
+  // Check each requirement
+  const hasLength = password.length >= 6;
+  const hasUppercase = /[A-Z]/.test(password);
+  const hasLowercase = /[a-z]/.test(password);
+  const hasSpecial = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password);
+  
+  // Update visual indicators
+  updateRequirementUI('checkLength', 'reqLength', hasLength);
+  updateRequirementUI('checkUppercase', 'reqUppercase', hasUppercase);
+  updateRequirementUI('checkLowercase', 'reqLowercase', hasLowercase);
+  updateRequirementUI('checkSpecial', 'reqSpecial', hasSpecial);
+  
+  // Update signup button disabled state
+  const signupBtn = document.querySelector('#registerForm .btn-auth');
+  if (signupBtn) {
+    signupBtn.disabled = !(hasLength && hasUppercase && hasLowercase && hasSpecial);
+    if (signupBtn.disabled) {
+      signupBtn.style.opacity = '0.5';
+      signupBtn.style.cursor = 'not-allowed';
+    } else {
+      signupBtn.style.opacity = '1';
+      signupBtn.style.cursor = 'pointer';
+    }
+  }
+}
+
+function updateRequirementUI(checkId, reqId, isMet) {
+  const checkEl = document.getElementById(checkId);
+  const reqEl = document.getElementById(reqId);
+  if (!checkEl || !reqEl) return;
+  
+  if (isMet) {
+    checkEl.textContent = '✓';
+    checkEl.style.color = '#2ecc71';
+    reqEl.style.color = '#2ecc71';
+  } else {
+    checkEl.textContent = '○';
+    checkEl.style.color = '#999';
+    reqEl.style.color = '#999';
   }
 }
 
