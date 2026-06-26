@@ -2901,8 +2901,8 @@ function updateDocTypeLabels(isInvoice) {
     if (el.textContent.includes('INVOICE SETTINGS')) el.textContent = sectionLabel;
   });
 
-  // Quote number field label
-  document.querySelectorAll('.form-group label').forEach(el => {
+  // Quote number field label (in input-group, not form-group)
+  document.querySelectorAll('.input-group label, .form-group label').forEach(el => {
     if (el.textContent.trim() === 'QUOTE NUMBER') el.textContent = docLabel;
     if (el.textContent.trim() === 'INVOICE NUMBER') el.textContent = docLabel;
   });
@@ -3214,7 +3214,7 @@ function renderBuilder() {
     <div style="width:100%;max-width:680px;margin:20px auto 0;padding:16px 12px;background:#ffffff;border:1px solid rgba(0,0,0,0.07);border-radius:12px;display:grid;grid-template-columns:1fr 1fr;gap:1px;align-items:stretch;box-shadow:0 2px 8px rgba(0,0,0,0.04);">
       <button class="btn btn-red" onclick="saveQuote()" style="width:100%;display:flex;color:#fff;font-family:'Plus Jakarta Sans',sans-serif;">Save Quote</button>
       <button class="btn btn-red" onclick="sendWhatsAppFromBuilder()" style="width:100%;display:flex;color:#fff;font-family:'Plus Jakarta Sans',sans-serif;">Send via WhatsApp</button>
-      <button class="btn btn-ghost" onclick="printQuote()" style="width:100%;display:flex;font-family:'Plus Jakarta Sans',sans-serif;color:#E63946;border-color:#E63946;">Download PDF</button>
+      <button class="btn btn-ghost" onclick="isInvoiceMode ? downloadBuilderInvoicePDF() : printQuote()" style="width:100%;display:flex;font-family:'Plus Jakarta Sans',sans-serif;color:#E63946;border-color:#E63946;">Download PDF</button>
       <button class="btn btn-ghost" onclick="viewAsClient()" style="width:100%;display:flex;font-family:'Plus Jakarta Sans',sans-serif;color:#E63946;border-color:#E63946;">Preview as Client</button>
     </div>
   </div>`;
@@ -3506,7 +3506,7 @@ async function saveQuote() {
     quotes.unshift(localQuote);
     editingQuoteId = compositeId;
   }
-  showToast('Quote saved', 'success');
+  showToast(isInvoiceMode ? 'Invoice saved' : 'Quote saved', 'success');
 }
 
 // ══════════════════════════════════════
@@ -3675,6 +3675,31 @@ function downloadInvoicePDF(id) {
   builderItems = savedItems;
   builderScope = savedScope;
   editingQuoteId = savedEditing;
+}
+
+function downloadBuilderInvoicePDF() {
+  // Build invoice object from current builder state and print
+  const {subtotal,vat,total} = calcBuilderTotals();
+  const invoice = {
+    id: document.getElementById('b_quoteNumber')?.value.trim() || 'INV-001',
+    client: document.getElementById('b_clientName')?.value.trim() || '',
+    contact: document.getElementById('b_clientContact')?.value.trim() || '',
+    email: document.getElementById('b_clientEmail')?.value.trim() || '',
+    address: [
+      document.getElementById('b_clientStreet')?.value.trim(),
+      document.getElementById('b_clientTown')?.value.trim(),
+      document.getElementById('b_clientProvince')?.value,
+      document.getElementById('b_clientAreaCode')?.value.trim(),
+    ].filter(Boolean).join(', '),
+    scope: builderScope,
+    subtotal: Math.round(subtotal),
+    vat: Math.round(vat),
+    amount: Math.round(total),
+    items: builderItems,
+    date: new Date().toISOString().split('T')[0],
+    status: 'invoice'
+  };
+  printInvoicePDF(invoice);
 }
 
 function printInvoicePDF(inv) {
@@ -7615,8 +7640,14 @@ function openWhatsApp() {
 
 function viewAsClient() {
   const qNum = document.getElementById('b_quoteNumber')?.value.trim();
-  if (!qNum) { showToast('Please enter a quote number first', 'error'); return; }
-  const url = 'https://qforge-eight.vercel.app/quote.html?id=' + qNum;
+  if (!qNum) { 
+    const msg = isInvoiceMode ? 'Please enter an invoice number first' : 'Please enter a quote number first';
+    showToast(msg, 'error'); 
+    return; 
+  }
+  // Use quote.html for quotes, invoice.html for invoices
+  const page = isInvoiceMode ? 'invoice.html' : 'quote.html';
+  const url = 'https://qforge-eight.vercel.app/' + page + '?id=' + qNum;
   window.open(url, '_blank');
 }
 
