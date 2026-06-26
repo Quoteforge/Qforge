@@ -215,12 +215,11 @@ async function loadInvoice() {
     }
 
     invoiceData = data;
-    // Apply theme color from invoice
-    if (invoiceData.theme_color) {
-      document.documentElement.style.setProperty('--red', invoiceData.theme_color);
-      const rgb = hexToRGB(invoiceData.theme_color);
-      document.documentElement.style.setProperty('--red-light', `rgba(${rgb[0]}, ${rgb[1]}, ${rgb[2]}, 0.08)`);
-    }
+    // Apply theme color from invoice (default to red if not set)
+    const themeColor = invoiceData.theme_color || '#E63946';
+    document.documentElement.style.setProperty('--red', themeColor);
+    const rgb = hexToRGB(themeColor);
+    document.documentElement.style.setProperty('--red-light', `rgba(${rgb[0]}, ${rgb[1]}, ${rgb[2]}, 0.08)`);
     renderInvoice();
   } catch (err) {
     document.getElementById('loadingDiv').style.display = 'none';

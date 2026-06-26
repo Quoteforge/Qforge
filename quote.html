@@ -267,12 +267,11 @@ async function loadQuote() {
     }
 
     quoteData = data;
-    // Apply theme color from quote
-    if (quoteData.theme_color) {
-      document.documentElement.style.setProperty('--red', quoteData.theme_color);
-      const rgb = hexToRGB(quoteData.theme_color);
-      document.documentElement.style.setProperty('--red-light', `rgba(${rgb[0]}, ${rgb[1]}, ${rgb[2]}, 0.08)`);
-    }
+    // Apply theme color from quote (default to red if not set)
+    const themeColor = quoteData.theme_color || '#E63946';
+    document.documentElement.style.setProperty('--red', themeColor);
+    const rgb = hexToRGB(themeColor);
+    document.documentElement.style.setProperty('--red-light', `rgba(${rgb[0]}, ${rgb[1]}, ${rgb[2]}, 0.08)`);
     renderQuote();
   } catch (err) {
     document.getElementById('loadingDiv').style.display = 'none';
