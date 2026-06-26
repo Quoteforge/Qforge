@@ -2639,7 +2639,7 @@ function renderQuoteTable(list, compact) {
   const rows = list.map(q => {
     const isConverted = q.status === 'invoice' || q.status === 'invoiced' || q.status === 'paid';
     const convertedBadge = isConverted ? '<span style="font-size:0.68rem;color:#E63946;font-weight:600;margin-left:8px;">✓ Converted to Invoice</span>' : '';
-    const displayNum = q.quote_number || extractQuoteNumber(q.id);  // Show quote number, not composite ID
+    const displayNum = extractQuoteNumber(q.id);  // Extract display number from composite ID
     return `
   <div class="qt-row" onclick="viewQuote('${q.id}')" ${isConverted ? 'style="opacity:0.7;"' : ''}>
     <div><div class="qt-client">${esc(q.client)}</div><div class="qt-num">${displayNum}${convertedBadge}</div></div>
@@ -2748,7 +2748,6 @@ async function convertToInvoice(el, id) {
       const invoice = {
         id: compositeInvId,  // Use composite ID for data isolation
         user_id: userId,
-        invoice_number: invNum,  // Store display number separately
         client: q.client,
         contact: q.contact,
         address: q.address,
@@ -3398,7 +3397,6 @@ async function saveQuote() {
   const quoteData = {
     id: compositeId,  // Now includes user_id for uniqueness
     user_id: userId,
-    quote_number: qNum,  // Store the display number separately
     client: clientName,
     contact: document.getElementById('b_clientContact')?.value.trim()||'',
     email: document.getElementById('b_clientEmail')?.value.trim()||null,
@@ -3442,7 +3440,6 @@ async function saveQuote() {
   // Update local state
   const localQuote = {
     id: compositeId, 
-    quote_number: qNum,  // Store display number
     client: clientName,
     contact: quoteData.contact, 
     address: quoteData.address,
