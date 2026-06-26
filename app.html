@@ -1860,6 +1860,9 @@ h1, h2, h3 {
       <button class="sidebar-link" id="nav-invoices" onclick="goTo('invoices')">
         <span class="icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg></span> Invoices
       </button>
+      <button class="sidebar-link" id="nav-newinvoice" onclick="newInvoice()">
+        <span class="icon">📄</span> New Invoice
+      </button>
       <button class="sidebar-link" id="nav-jobcards" onclick="goTo('jobcards')" title="For automotive, electrical, plumbing & HVAC">
         <span class="icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6-3 6 3v6l-6 3-6-3V9z"/><line x1="9" y1="22" x2="9" y2="16"/><line x1="15" y1="22" x2="15" y2="16"/><line x1="9" y1="2" x2="15" y2="2"/></svg></span> Job Cards
       </button>
@@ -1922,6 +1925,7 @@ let builderItems = [];
 let builderItemCounter = 0;
 let builderScope = '';
 let editingQuoteId = null;
+let isInvoiceMode = false;  // Track if building invoice or quote
 let currentClientId = null;
 let customItems = []; // user's saved custom quick-add items
 let productLibrary = []; // imported product catalogue
@@ -2675,9 +2679,41 @@ function viewQuote(id) {
 
 function editQuote(id) {
   editingQuoteId = id;
+  isInvoiceMode = false;
   const q = quotes.find(x=>x.id===id); if(!q) return;
   goTo('builder');
   setTimeout(() => loadQuoteIntoBuilder(q), 50);
+}
+
+function newInvoice() {
+  // Start creating a new invoice from scratch (not from quote)
+  editingQuoteId = null;
+  isInvoiceMode = true;  // Set invoice mode
+  builderItems = [];
+  builderItemCounter = 0;
+  builderScope = '';
+  // Clear builder fields
+  document.getElementById('b_clientName').value = '';
+  document.getElementById('b_clientContact').value = '';
+  document.getElementById('b_clientEmail').value = '';
+  document.getElementById('b_clientStreet').value = '';
+  document.getElementById('b_clientTown').value = '';
+  document.getElementById('b_clientProvince').value = '';
+  document.getElementById('b_clientAreaCode').value = '';
+  document.getElementById('b_clientVat').value = '';
+  document.getElementById('b_clientReg').value = '';
+  document.getElementById('b_invoiceNumber').value = 'INV-001';  // Default invoice number
+  document.getElementById('b_deposit').value = '';
+  document.getElementById('b_notes').value = '';
+  document.getElementById('b_vat').value = 'yes';
+  document.getElementById('b_validDays').value = '30';
+  builderScope = '';
+  document.getElementById('previewScope').textContent = 'Click "Generate Scope with AI" to add a description.';
+  renderBuilderItems();
+  updateBuilderPreview();
+  goTo('builder');
+  // Update labels to show "Invoice"
+  setTimeout(() => updateDocTypeLabels(true), 100);
 }
 
 async function deleteQuote(id) {
@@ -2919,10 +2955,10 @@ function renderBuilder() {
   return `
   <div class="page-header">
     <div>
-      <h2>Quote Builder</h2>
+      <h2>${isInvoiceMode ? 'Invoice Builder' : 'Quote Builder'}</h2>
     </div>
     <div style="display:flex;gap:10px;flex-wrap:nowrap;">
-      <button class="btn btn-red" style="color:#fff;" onclick="goTo('quotes')">← Back</button>
+      <button class="btn btn-red" style="color:#fff;" onclick="goTo('${isInvoiceMode ? 'invoices' : 'quotes'}')">← Back</button>
     </div>
   </div>
 
@@ -3379,7 +3415,7 @@ function updateBuilderPreview() {
 }
 
 // ══════════════════════════════════════
-// SAVE QUOTE
+// SAVE QUOTE or INVOICE
 // ══════════════════════════════════════
 async function saveQuote() {
   const clientName = document.getElementById('b_clientName')?.value.trim();
@@ -3393,7 +3429,7 @@ async function saveQuote() {
   const userId = currentUser?.id;
   if (!userId) { showToast('User ID missing - please sign in again', 'error'); return; }
   
-  // Create composite ID for data isolation: "userId|QUA-001"
+  // Create composite ID for data isolation: "userId|QUA-001" or "userId|INV-001"
   const compositeId = createCompositeId(userId, editingQuoteId ? extractQuoteNumber(editingQuoteId) : qNum);
   
   const quoteData = {
@@ -3413,7 +3449,7 @@ async function saveQuote() {
     scope: builderScope,
     deposit: document.getElementById('b_deposit')?.value || null,
     notes: document.getElementById('b_notes')?.value.trim() || null,
-    status: editingQuoteId ? (quotes.find(q=>q.id===editingQuoteId)?.status||'draft') : 'draft',
+    status: isInvoiceMode ? 'invoice' : (editingQuoteId ? (quotes.find(q=>q.id===editingQuoteId)?.status||'draft') : 'draft'),
     subtotal: Math.round(subtotal),
     vat: Math.round(vat),
     amount: Math.round(total),
