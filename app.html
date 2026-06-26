@@ -115,8 +115,7 @@ h1,h2,h3,.logo,.mono{font-family:'Syne',sans-serif;}
   font-family:var(--font-display);font-size:0.95rem;font-weight:700;
   padding:14px;cursor:pointer;transition:all 0.2s;width:100%;
 }
-.btn-auth:hover:not(:disabled){background:var(--red-dark);transform:translateY(-2px);box-shadow:0 6px 16px rgba(230,57,70,0.3);}
-.btn-auth:disabled{opacity:0.5;cursor:not-allowed;}
+.btn-auth:hover{background:var(--red-dark);transform:translateY(-2px);box-shadow:0 6px 16px rgba(230,57,70,0.3);}
 .auth-divider{display:flex;align-items:center;gap:12px;margin:20px 0;}
 .auth-divider::before,.auth-divider::after{content:'';flex:1;height:1px;background:var(--border2);}
 .auth-divider span{font-size:0.78rem;color:#999;font-weight:500;}
@@ -1770,54 +1769,45 @@ h1, h2, h3 {
       </div>
       <div class="form-group">
         <label>What type of business are you? <span style="color:var(--orange)">*</span></label>
-        <select id="regIndustry" style="width:100%;padding:12px 14px;border:1px solid var(--border);border-radius:8px;font-family:var(--font-body);font-size:0.95rem;color:var(--dark);background:#fff;cursor:pointer;transition:border-color 0.2s;" onchange="this.parentElement.style.borderColor='var(--border)'">
-          <option value="electrical">⚡ Electrical & Construction</option>
-          <option value="plumbing">🔧 Plumbing & Gas</option>
-          <option value="solar">☀️ Solar & Renewable Energy</option>
-          <option value="auto">🚗 Auto Mechanic & Panel Beating</option>
-          <option value="building">🏗️ Building & Construction</option>
-          <option value="painting">🎨 Painting & Waterproofing</option>
-          <option value="roofing">🏠 Roofing & Gutters</option>
-          <option value="cctv">📹 CCTV & Security</option>
-          <option value="hvac">❄️ Air Conditioning & HVAC</option>
-          <option value="marketing">📱 Marketing & Design</option>
-          <option value="it">💻 IT & Tech Support</option>
-          <option value="cleaning">🧹 Cleaning Services</option>
-          <option value="landscaping">🌿 Landscaping & Garden</option>
-          <option value="events">🎉 Events & Catering</option>
-          <option value="photography">📸 Photography & Videography</option>
-          <option value="lodge">🏨 Lodge & B&B</option>
-          <option value="consulting">📊 Consulting & Finance</option>
-          <option value="legal">⚖️ Legal & Compliance</option>
-          <option value="health">💚 Health & Wellness</option>
-          <option value="general">🏢 General Business</option>
-        </select>
+        <div class="industry-grid" id="industryGrid">
+          <div class="industry-card selected" data-industry="electrical" onclick="selectIndustry(this,'electrical')">
+            <span class="ic-icon">⚡</span><span class="ic-label">Electrical & Construction</span>
+          </div>
+          <div class="industry-card" data-industry="plumbing" onclick="selectIndustry(this,'plumbing')">
+            <span class="ic-icon">🔧</span><span class="ic-label">Plumbing & Gas</span>
+          </div>
+          <div class="industry-card" data-industry="marketing" onclick="selectIndustry(this,'marketing')">
+            <span class="ic-icon">📱</span><span class="ic-label">Marketing & Design</span>
+          </div>
+          <div class="industry-card" data-industry="it" onclick="selectIndustry(this,'it')">
+            <span class="ic-icon">💻</span><span class="ic-label">IT & Tech Support</span>
+          </div>
+          <div class="industry-card" data-industry="cleaning" onclick="selectIndustry(this,'cleaning')">
+            <span class="ic-icon">🧹</span><span class="ic-label">Cleaning Services</span>
+          </div>
+          <div class="industry-card" data-industry="landscaping" onclick="selectIndustry(this,'landscaping')">
+            <span class="ic-icon">🌿</span><span class="ic-label">Landscaping & Garden</span>
+          </div>
+          <div class="industry-card" data-industry="events" onclick="selectIndustry(this,'events')">
+            <span class="ic-icon">🎉</span><span class="ic-label">Events & Catering</span>
+          </div>
+          <div class="industry-card" data-industry="lodge" onclick="selectIndustry(this,'lodge')">
+            <span class="ic-icon">🏨</span><span class="ic-label">Lodge & B&B</span>
+          </div>
+          <div class="industry-card" data-industry="consulting" onclick="selectIndustry(this,'consulting')">
+            <span class="ic-icon">📊</span><span class="ic-label">Consulting & Finance</span>
+          </div>
+          <div class="industry-card" data-industry="other" onclick="selectIndustry(this,'other')">
+            <span class="ic-icon">🏢</span><span class="ic-label">Other / General</span>
+          </div>
+        </div>
+        <input type="hidden" id="regIndustry" value="electrical">
       </div>
       <div class="form-group">
         <label>Password</label>
         <div class="password-wrap">
-          <input type="password" id="regPassword" placeholder="Create a strong password" onkeyup="validatePasswordStrength()" onkeydown="if(event.key==='Enter')doRegister()">
+          <input type="password" id="regPassword" placeholder="Min 6 characters" onkeydown="if(event.key==='Enter')doRegister()">
           <button class="eye-btn" type="button" onclick="togglePassword('regPassword', this)" tabindex="-1">&#128065;</button>
-        </div>
-        <!-- Password strength requirements -->
-        <div id="passwordRequirements" style="margin-top:12px;padding:12px;background:#f5f5f5;border-radius:6px;font-size:0.85rem;">
-          <div style="margin-bottom:8px;font-weight:600;color:#333;">Password must have:</div>
-          <div id="reqLength" style="display:flex;align-items:center;gap:8px;margin-bottom:6px;color:#999;">
-            <span id="checkLength" style="font-size:1.2rem;">○</span>
-            <span>At least 6 characters</span>
-          </div>
-          <div id="reqUppercase" style="display:flex;align-items:center;gap:8px;margin-bottom:6px;color:#999;">
-            <span id="checkUppercase" style="font-size:1.2rem;">○</span>
-            <span>One uppercase letter (A-Z)</span>
-          </div>
-          <div id="reqLowercase" style="display:flex;align-items:center;gap:8px;margin-bottom:6px;color:#999;">
-            <span id="checkLowercase" style="font-size:1.2rem;">○</span>
-            <span>One lowercase letter (a-z)</span>
-          </div>
-          <div id="reqSpecial" style="display:flex;align-items:center;gap:8px;color:#999;">
-            <span id="checkSpecial" style="font-size:1.2rem;">○</span>
-            <span>One special character (!@#$%^&*)</span>
-          </div>
         </div>
       </div>
       <button type="button" class="btn-auth" onclick="doRegister()">Create Free Account</button>
@@ -1861,11 +1851,11 @@ h1, h2, h3 {
       <button class="sidebar-link active" id="nav-dashboard" onclick="goTo('dashboard')">
         <span class="icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg></span> Dashboard
       </button>
+      <button class="sidebar-link" id="nav-quotes" onclick="goTo('quotes')">
+        <span class="icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg></span> My Quotes
+      </button>
       <button class="sidebar-link" id="nav-new" onclick="goTo('builder')">
         <span class="icon">➕</span> New Quote
-      </button>
-      <button class="sidebar-link" id="nav-quotes" onclick="goTo('quotes')">
-        <span class="icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg></span> Quotes
       </button>
       <button class="sidebar-link" id="nav-invoices" onclick="goTo('invoices')">
         <span class="icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg></span> Invoices
@@ -2182,16 +2172,6 @@ function switchTab(tab) {
   document.getElementById('tabRegister').classList.toggle('active', tab==='register');
   document.getElementById('loginForm').style.display = tab==='login' ? 'flex' : 'none';
   document.getElementById('registerForm').style.display = tab==='register' ? 'flex' : 'none';
-  
-  // Initialize password validation when switching to register tab
-  if (tab === 'register') {
-    const signupBtn = document.querySelector('#registerForm .btn-auth');
-    if (signupBtn) {
-      signupBtn.disabled = true;
-      signupBtn.style.opacity = '0.5';
-      signupBtn.style.cursor = 'not-allowed';
-    }
-  }
 }
 
 async function doLogin() {
@@ -2271,10 +2251,8 @@ async function doRegister() {
     errEl.classList.add('show'); 
     return; 
   }
-  
-  // Strong password validation
-  if (!isPasswordStrong(pass)) {
-    errEl.textContent='Password must be at least 6 characters with uppercase, lowercase, and special character.'; 
+  if (pass.length < 6) { 
+    errEl.textContent='Password must be at least 6 characters.'; 
     errEl.classList.add('show'); 
     return; 
   }
@@ -6354,61 +6332,6 @@ function togglePassword(inputId, btn) {
   }
 }
 
-// Password strength validation functions
-function isPasswordStrong(password) {
-  if (!password) return false;
-  const hasLength = password.length >= 6;
-  const hasUppercase = /[A-Z]/.test(password);
-  const hasLowercase = /[a-z]/.test(password);
-  const hasSpecial = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password);
-  return hasLength && hasUppercase && hasLowercase && hasSpecial;
-}
-
-function validatePasswordStrength() {
-  const password = document.getElementById('regPassword').value;
-  
-  // Check each requirement
-  const hasLength = password.length >= 6;
-  const hasUppercase = /[A-Z]/.test(password);
-  const hasLowercase = /[a-z]/.test(password);
-  const hasSpecial = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password);
-  
-  // Update visual indicators
-  updateRequirementUI('checkLength', 'reqLength', hasLength);
-  updateRequirementUI('checkUppercase', 'reqUppercase', hasUppercase);
-  updateRequirementUI('checkLowercase', 'reqLowercase', hasLowercase);
-  updateRequirementUI('checkSpecial', 'reqSpecial', hasSpecial);
-  
-  // Update signup button disabled state
-  const signupBtn = document.querySelector('#registerForm .btn-auth');
-  if (signupBtn) {
-    signupBtn.disabled = !(hasLength && hasUppercase && hasLowercase && hasSpecial);
-    if (signupBtn.disabled) {
-      signupBtn.style.opacity = '0.5';
-      signupBtn.style.cursor = 'not-allowed';
-    } else {
-      signupBtn.style.opacity = '1';
-      signupBtn.style.cursor = 'pointer';
-    }
-  }
-}
-
-function updateRequirementUI(checkId, reqId, isMet) {
-  const checkEl = document.getElementById(checkId);
-  const reqEl = document.getElementById(reqId);
-  if (!checkEl || !reqEl) return;
-  
-  if (isMet) {
-    checkEl.textContent = '✓';
-    checkEl.style.color = '#2ecc71';
-    reqEl.style.color = '#2ecc71';
-  } else {
-    checkEl.textContent = '○';
-    checkEl.style.color = '#999';
-    reqEl.style.color = '#999';
-  }
-}
-
 function exportQuotesPeriodCSV(period) {
   function startOfPeriod(p) {
     const d = new Date();
@@ -7174,337 +7097,335 @@ function printQuote() {
   const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
   
   const pageW = 210;
-  const margin = 15;
+  const pageH = 297;
+  const margin = 12;
   const contentW = pageW - margin * 2;
-  let y = 0;
+  let y = margin;
 
-  // ── COLOURS ──
-  const orange = [230, 57, 70]; // Red #E63946
+  // ── COLORS ──
+  const red = [230, 57, 70];
+  const redLight = [248, 247, 245];
   const dark = [26, 26, 26];
   const white = [255, 255, 255];
-  const lightGrey = [248, 247, 245];
-  const midGrey = [120, 120, 120];
-  const borderGrey = [220, 220, 220];
+  const grey = [102, 102, 102];
+  const lightGrey = [240, 240, 240];
+  const borderGrey = [238, 238, 238];
 
-  // ── HEADER BAND - white bg, orange bottom line ──
-  // White background
-  doc.setFillColor(255, 255, 255);
-  doc.rect(0, 0, pageW, 34, 'F');
-
-  // Orange bottom line
-  doc.setFillColor(...orange);
-  doc.rect(0, 34, pageW, 1.5, 'F');
-
-  // Logo top-left, then company name
-  let logoEndX = margin;
-  try {
-    if (currentUser?.logo) {
-      doc.addImage(currentUser.logo, 'JPEG', margin, 5, 24, 24, undefined, 'FAST');
-      logoEndX = margin + 28;
-    }
-  } catch(e) { console.log('Logo err:', e); }
-
-  const company = currentUser?.company || 'Your Company';
-  const textX = logoEndX;
-
-  // Company name
-  doc.setFont('helvetica', 'bold');
-  doc.setFontSize(13);
-  doc.setTextColor(...dark);
-  doc.text(company, textX, 12);
-
-  // Industry/tagline
-  doc.setFont('helvetica', 'normal');
-  doc.setFontSize(7);
-  doc.setTextColor(130, 130, 130);
-  const industry = INDUSTRY_LABELS[currentUser?.industry||'other'] || 'Professional Services';
-  doc.text(industry.toUpperCase(), textX, 18);
-
-  // Contact details
-  doc.setFontSize(7.5);
-  doc.setTextColor(80, 80, 80);
-  let contactY = 23;
-  if (currentUser?.phone) { doc.text('Tel: ' + currentUser.phone, textX, contactY); contactY += 4; }
-  if (currentUser?.email) { doc.text('Email: ' + currentUser.email, textX, contactY); }
-  if (currentUser?.vatNumber) { doc.text('VAT: ' + currentUser.vatNumber, textX, contactY + 4); }
-
-  // QUOTATION / INVOICE label
-  const qNum = document.getElementById('b_quoteNumber')?.value || editingQuoteId || 'QUA-001';
-  const isInvoice = qNum.toUpperCase().startsWith('INV-');
-  const docLabel = isInvoice ? 'INVOICE' : 'QUOTATION';
-  doc.setFont('helvetica', 'normal');
-  doc.setFontSize(6.5);
-  doc.setTextColor(150, 150, 150);
-  doc.text(docLabel, pageW - margin, 10, { align: 'right' });
-
-  // Quote number - ORANGE
-  doc.setFont('helvetica', 'bold');
-  doc.setFontSize(22);
-  doc.setTextColor(...orange);
-  doc.text(qNum, pageW - margin, 20, { align: 'right' });
-
-  // Date and valid - dark
-  doc.setFont('helvetica', 'normal');
-  doc.setFontSize(7.5);
-  doc.setTextColor(80, 80, 80);
-  const dateStr = new Date().toLocaleDateString('en-ZA', { day: 'numeric', month: 'long', year: 'numeric' });
-  const validDays = document.getElementById('b_validDays')?.value || '14';
-  doc.text('Date: ' + dateStr, pageW - margin, 27, { align: 'right' });
-  doc.text('Valid for ' + validDays + ' days', pageW - margin, 32, { align: 'right' });
-
-  y = 40;
-
-  // ── CLIENT + COMPANY INFO ROW ──
-  const clientName = document.getElementById('b_clientName')?.value || 'Client';
-  const clientContact = document.getElementById('b_clientContact')?.value || '';
-  const clientAddress = document.getElementById('b_clientAddress')?.value || '';
-
-  // White background full width
-  doc.setFillColor(255, 255, 255);
-  doc.rect(0, y, pageW, 28, 'F');
-
-  // Orange left accent on FROM col
-  doc.setFillColor(...orange);
-  doc.rect(0, y, 1.5, 28, 'F');
-
-  // Dividing line center
-  doc.setDrawColor(230, 230, 230);
-  doc.setLineWidth(0.3);
-  doc.line(pageW/2, y + 4, pageW/2, y + 24);
-
-  // Bottom border
-  doc.setDrawColor(230, 230, 230);
-  doc.line(0, y + 28, pageW, y + 28);
-
-  // QUOTED FOR label only (remove FROM)
-  doc.setFont('helvetica', 'bold');
-  doc.setFontSize(6);
-  doc.setTextColor(170, 170, 170);
-  doc.text('QUOTED FOR', margin, y + 6);
-
-  doc.setFont('helvetica', 'bold');
-  doc.setFontSize(11);
-  doc.setTextColor(...dark);
-  doc.text(clientName, margin, y + 13);
-
-  doc.setFont('helvetica', 'normal');
-  doc.setFontSize(7.5);
-  doc.setTextColor(100, 100, 100);
-  if (clientContact) doc.text(clientContact, margin, y + 19);
-  if (clientAddress) doc.text(clientAddress, margin, y + 24);
-
-  // VEHICLE DETAILS on right side (same y level as QUOTED FOR)
-  const vehicleModel = document.getElementById('b_vehicleModel')?.value;
-  const vehicleVin = document.getElementById('b_vin')?.value;
-  const vehicleReg = document.getElementById('b_regNo')?.value;
-  const vehicleEngine = document.getElementById('b_engineNo')?.value;
-  const vehicleEngineType = document.getElementById('b_engineType')?.value;
-  const vehicleKm = document.getElementById('b_km')?.value;
+  // ═══════════════════════════════════════════════════════════════════════
+  // HEADER
+  // ═══════════════════════════════════════════════════════════════════════
   
-  if (vehicleModel || vehicleVin || vehicleReg) {
-    const vehicleX = pageW / 2 + 5; // Right side, with margin
+  // Red line at top
+  doc.setFillColor(...red);
+  doc.rect(0, 0, pageW, 1.5, 'F');
+  
+  // Header background
+  doc.setFillColor(255, 255, 255);
+  doc.rect(0, 1.5, pageW, 32, 'F');
+  
+  // Red bottom border
+  doc.setFillColor(...red);
+  doc.rect(0, 33.5, pageW, 0.8, 'F');
+  
+  // Left side - logo + company info
+  const logoX = margin;
+  const logoSize = 12;
+  
+  // Logo placeholder (if available)
+  if (currentUser?.logo) {
+    try {
+      doc.addImage(currentUser.logo, 'JPEG', logoX, 2, logoSize, logoSize, undefined, 'FAST');
+    } catch(e) { console.log('Logo error:', e); }
+  } else {
+    doc.setFillColor(245, 245, 245);
+    doc.rect(logoX, 2, logoSize, logoSize, 'F');
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(6);
-    doc.setTextColor(170, 170, 170);
-    doc.text('VEHICLE DETAILS', vehicleX, y + 6);
-    
-    doc.setFont('helvetica', 'bold');
-    doc.setFontSize(10);
     doc.setTextColor(...dark);
-    if (vehicleModel) doc.text(vehicleModel, vehicleX, y + 13);
+    doc.text('LOGO', logoX + 6, 8.5, { align: 'center' });
+  }
+  
+  const infoX = logoX + logoSize + 2;
+  
+  // Company name
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(9);
+  doc.setTextColor(...dark);
+  doc.text(currentUser?.company || 'COMPANY', infoX, 4);
+  
+  // Contact details
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(6.5);
+  doc.setTextColor(...grey);
+  let infoY = 8;
+  if (currentUser?.owner_name) { doc.text(currentUser.owner_name + ': ' + (currentUser.phone || ''), infoX, infoY); infoY += 3; }
+  if (currentUser?.email) { doc.text('Email: ' + currentUser.email, infoX, infoY); infoY += 3; }
+  if (currentUser?.street) { doc.text(currentUser.street + ' ' + (currentUser.area || ''), infoX, infoY); infoY += 3; }
+  if (currentUser?.city) { doc.text(currentUser.city + ', ' + (currentUser.province || ''), infoX, infoY); infoY += 3; }
+  if (currentUser?.reg_number) { doc.text('Reg nr: ' + currentUser.reg_number, infoX, infoY); infoY += 3; }
+  if (currentUser?.vat_number) { doc.text('VAT: ' + currentUser.vat_number, infoX, infoY); }
+  
+  // Right side - quote number and date
+  const rightX = pageW - margin;
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(5);
+  doc.setTextColor(150, 150, 150);
+  doc.text('QUOTATION', rightX, 4, { align: 'right' });
+  
+  const qNum = document.getElementById('b_quoteNumber')?.value || editingQuoteId || 'QUA-001';
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(9);
+  doc.setTextColor(...red);
+  doc.text(qNum, rightX, 10, { align: 'right' });
+  
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(6);
+  doc.setTextColor(...grey);
+  const dateStr = new Date().toLocaleDateString('en-ZA');
+  doc.text('Date: ' + dateStr, rightX, 16, { align: 'right' });
+  
+  const validDays = document.getElementById('b_validDays')?.value || '14';
+  doc.text('Valid for: ' + validDays + ' days', rightX, 20, { align: 'right' });
+  
+  y = 36;
+
+  // ═══════════════════════════════════════════════════════════════════════
+  // CLIENT + VEHICLE INFO SECTION
+  // ═══════════════════════════════════════════════════════════════════════
+  
+  // Beige background
+  doc.setFillColor(...redLight);
+  doc.rect(0, y, pageW, 24, 'F');
+  
+  // Left column - CLIENT
+  const col1X = margin;
+  const col1W = contentW / 2 - 0.5;
+  
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(5);
+  doc.setTextColor(...red);
+  doc.text('QUOTED FOR', col1X, y + 2);
+  
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(7);
+  doc.setTextColor(...dark);
+  const clientName = document.getElementById('b_clientName')?.value || 'Client';
+  doc.text(clientName, col1X, y + 6);
+  
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(5.5);
+  doc.setTextColor(...grey);
+  let clientY = y + 10;
+  const clientContact = document.getElementById('b_clientContact')?.value || '';
+  const clientAddress = document.getElementById('b_clientAddress')?.value || '';
+  if (clientContact) { doc.text(clientContact, col1X, clientY); clientY += 3; }
+  if (clientAddress) {
+    const addressLines = doc.splitTextToSize(clientAddress, col1W - 1);
+    doc.text(addressLines, col1X, clientY);
+  }
+  
+  // Right column - VEHICLE
+  const col2X = margin + col1W + 1;
+  
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(5);
+  doc.setTextColor(...red);
+  doc.text('VEHICLE DETAILS', col2X, y + 2);
+  
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(5.5);
+  doc.setTextColor(...grey);
+  let vehicleY = y + 6;
+  
+  // Get vehicle data from builder
+  const vehicle_vin = document.getElementById('b_vin')?.value || '';
+  const vehicle_reg = document.getElementById('b_regNo')?.value || '';
+  const vehicle_km = document.getElementById('b_km')?.value || '';
+  const vehicle_model = document.getElementById('b_vehicleModel')?.value || '';
+  const vehicle_engine = document.getElementById('b_engineType')?.value || '';
+  
+  if (vehicle_vin) { doc.text('VIN: ' + vehicle_vin, col2X, vehicleY); vehicleY += 3; }
+  if (vehicle_reg) { doc.text('Reg: ' + vehicle_reg, col2X, vehicleY); vehicleY += 3; }
+  if (vehicle_km) { doc.text('KM: ' + vehicle_km, col2X, vehicleY); vehicleY += 3; }
+  if (vehicle_model) { doc.text('Make/Model: ' + vehicle_model, col2X, vehicleY); vehicleY += 3; }
+  if (vehicle_engine) { doc.text('Engine: ' + vehicle_engine, col2X, vehicleY); }
+  
+  y = y + 26;
+
+  // ═══════════════════════════════════════════════════════════════════════
+  // ITEMS TABLE
+  // ═══════════════════════════════════════════════════════════════════════
+  
+  // Beige background
+  doc.setFillColor(...redLight);
+  doc.rect(0, y, pageW, 1, 'F');
+  
+  // Table header - BLACK
+  doc.setFillColor(...dark);
+  doc.rect(0, y + 1, pageW, 4, 'F');
+  
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(5);
+  doc.setTextColor(255, 255, 255);
+  doc.text('DESCRIPTION', margin, y + 3.5);
+  doc.text('QTY', pageW/2 + 10, y + 3.5);
+  doc.text('UNIT PRICE', pageW/2 + 35, y + 3.5, { align: 'right' });
+  doc.text('AMOUNT', pageW - margin, y + 3.5, { align: 'right' });
+  
+  y = y + 6;
+  
+  // Items
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(5.5);
+  doc.setTextColor(...dark);
+  
+  (builderItems || []).forEach((item, idx) => {
+    const amount = (item.qty || 0) * (item.price || 0);
     
-    doc.setFont('helvetica', 'normal');
-    doc.setFontSize(7);
-    doc.setTextColor(100, 100, 100);
-    let vDetailY = vehicleModel ? (y + 19) : (y + 13);
-    if (vehicleReg) { doc.text('Reg: ' + vehicleReg, vehicleX, vDetailY); vDetailY += 4; }
-    if (vehicleVin) { doc.text('VIN: ' + vehicleVin, vehicleX, vDetailY); vDetailY += 4; }
-    if (vehicleEngine) { doc.text('Engine: ' + vehicleEngine, vehicleX, vDetailY); vDetailY += 4; }
-    if (vehicleEngineType) { doc.text('Type: ' + vehicleEngineType, vehicleX, vDetailY); vDetailY += 4; }
-    if (vehicleKm) { doc.text('KM: ' + vehicleKm, vehicleX, vDetailY); }
-  }
-
-  y += 32;
-
-  // ── SCOPE OF WORK ──
-  if (builderScope && builderScope.trim()) {
-    doc.setFont('helvetica', 'normal');
-    doc.setFontSize(8.5);
-    doc.setTextColor(60, 60, 60);
-    const scopeLines = doc.splitTextToSize(builderScope, pageW - margin - 10);
-    const scopeH = scopeLines.length * 4.8 + 10;
-
-    // White background full width
-    doc.setFillColor(255, 255, 255);
-    doc.rect(0, y, pageW, scopeH, 'F');
-
-    // Orange left border
-    doc.setFillColor(...orange);
-    doc.rect(0, y, 1.5, scopeH, 'F');
-
-    // Bottom border
-    doc.setDrawColor(230, 230, 230);
-    doc.setLineWidth(0.3);
-    doc.line(0, y + scopeH, pageW, y + scopeH);
-
-    doc.setTextColor(60, 60, 60);
-    doc.text(scopeLines, margin, y + 7);
-    y += scopeH;
-  }
-
-  // ── ITEMS TABLE ──
-  const items = builderItems.map(item => [
-    item.name + (item.desc ? ' - ' + item.desc : ''),
-    String(item.qty || 1),
-    'R ' + parseFloat(item.price || 0).toFixed(2),
-    'R ' + ((item.qty || 1) * (item.price || 0)).toFixed(2)
-  ]);
-
-  // Column widths that fill full page width (210mm)
-  const col0W = pageW - 18 - 35 - 35; // description fills remainder
-  doc.autoTable({
-    startY: y,
-    head: [['DESCRIPTION', 'QTY', 'UNIT PRICE', 'AMOUNT']],
-    body: items,
-    margin: { left: 0, right: 0 },
-    tableWidth: pageW,
-    styles: {
-      fontSize: 8.5,
-      cellPadding: { top: 4, bottom: 4, left: 5, right: 5 },
-      textColor: dark,
-      lineColor: borderGrey,
-      lineWidth: 0.2,
-      overflow: 'linebreak',
-    },
-    headStyles: {
-      fillColor: dark,
-      textColor: white,
-      fontStyle: 'bold',
-      fontSize: 7.5,
-      cellPadding: { top: 5, bottom: 5, left: 5, right: 5 },
-    },
-    columnStyles: {
-      0: { cellWidth: col0W },
-      1: { cellWidth: 18, halign: 'center' },
-      2: { cellWidth: 35, halign: 'right' },
-      3: { cellWidth: 35, halign: 'right', fontStyle: 'bold' },
-    },
-    alternateRowStyles: { fillColor: [252, 252, 252] },
+    // Alternate row colors
+    if (idx % 2 === 0) {
+      doc.setFillColor(255, 255, 255);
+    } else {
+      doc.setFillColor(250, 250, 250);
+    }
+    doc.rect(0, y - 1, pageW, 5, 'F');
+    
+    // Description
+    const desc = (item.name || '') + (item.desc ? ' (' + item.desc + ')' : '');
+    const descLines = doc.splitTextToSize(desc, 50);
+    doc.text(descLines, margin, y + 1);
+    
+    // QTY
+    doc.text((item.qty || 0).toString(), pageW/2 + 10, y + 1);
+    
+    // Unit Price
+    doc.text('R' + (item.price || 0).toFixed(2), pageW/2 + 35, y + 1, { align: 'right' });
+    
+    // Amount
+    doc.text('R' + amount.toFixed(2), pageW - margin, y + 1, { align: 'right' });
+    
+    y += 5;
+    
+    // Page break if needed
+    if (y > pageH - 40) {
+      doc.addPage();
+      y = margin;
+    }
   });
-
-  y = doc.lastAutoTable.finalY + 4;
-
-  // ── TOTALS ──
-  const { subtotal, vat, total, vatOn } = calcBuilderTotals();
-  const fmt = n => 'R ' + n.toLocaleString('en-ZA', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-
-  // Totals block - right-aligned, matching last 2 columns of table (70mm wide)
-  const totalsW = 35 + 35; // matches last 2 table columns
-  const totalsX = pageW - totalsW;
-  const labelX = totalsX + 5;
-  const valueX = pageW - 2;
-
-  // Subtotal row
-  doc.setFillColor(248, 247, 245);
-  doc.rect(totalsX, y, totalsW, 8, 'F');
+  
+  // Border under items
   doc.setDrawColor(...borderGrey);
   doc.setLineWidth(0.2);
-  doc.rect(totalsX, y, totalsW, 8, 'S');
-  doc.setFont('helvetica', 'normal');
-  doc.setFontSize(8.5);
-  doc.setTextColor(...midGrey);
-  doc.text('Subtotal', labelX, y + 5.5);
-  doc.text(fmt(subtotal), valueX, y + 5.5, { align: 'right' });
-  y += 8;
+  doc.line(0, y, pageW, y);
 
-  // VAT row
+  // ═══════════════════════════════════════════════════════════════════════
+  // TOTALS
+  // ═══════════════════════════════════════════════════════════════════════
+  
+  y += 1;
+  
+  // Pink background
+  doc.setFillColor(...redLight);
+  doc.rect(0, y, pageW, 14, 'F');
+  
+  const {subtotal, vat, total} = calcBuilderTotals();
+  
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(6);
+  doc.setTextColor(...grey);
+  
+  // Sub Total
+  doc.text('Sub Total', margin, y + 2);
+  doc.text('R' + subtotal.toFixed(2), pageW - margin, y + 2, { align: 'right' });
+  
+  // VAT (if enabled)
+  const vatOn = document.getElementById('b_vat')?.value === 'yes';
   if (vatOn) {
-    doc.setFillColor(248, 247, 245);
-    doc.rect(totalsX, y, totalsW, 8, 'F');
-    doc.rect(totalsX, y, totalsW, 8, 'S');
-    doc.setTextColor(...midGrey);
-    doc.text('VAT @ 15%', labelX, y + 5.5);
-    doc.text(fmt(vat), valueX, y + 5.5, { align: 'right' });
-    y += 8;
+    doc.text('VAT:', margin, y + 5);
+    doc.text('R' + vat.toFixed(2), pageW - margin, y + 5, { align: 'right' });
   }
-
-  // Total due - full width dark bar
-  doc.setFillColor(...dark);
-  doc.rect(0, y, pageW, 11, 'F');
-  doc.setFillColor(...orange);
-  doc.rect(0, y, 1.5, 11, 'F');
+  
+  // Total - BOLD RED
   doc.setFont('helvetica', 'bold');
-  doc.setFontSize(10);
-  doc.setTextColor(...white);
-  doc.text('TOTAL DUE', margin, y + 7.5);
-  doc.text(fmt(total), valueX, y + 7.5, { align: 'right' });
-  y += 15;
+  doc.setFontSize(7);
+  doc.setTextColor(...red);
+  doc.text('TOTAL DUE', margin, y + 10);
+  doc.text('R' + total.toFixed(2), pageW - margin, y + 10, { align: 'right' });
+  
+  y += 16;
 
-  // ── NOTES / TERMS above footer ──
-  const notesText = document.getElementById('b_notes')?.value?.trim() || '';
-  if (notesText) {
-    doc.setFillColor(248, 247, 245);
-    doc.rect(0, y, pageW, 2, 'F');
-    const noteLines = doc.splitTextToSize(notesText, contentW);
-    const notesH = noteLines.length * 4.5 + 10;
-    doc.setFillColor(252, 252, 252);
-    doc.rect(0, y + 2, pageW, notesH, 'F');
-    doc.setFillColor(...orange);
-    doc.rect(0, y + 2, 1.5, notesH, 'F');
+  // ═══════════════════════════════════════════════════════════════════════
+  // BANKING DETAILS
+  // ═══════════════════════════════════════════════════════════════════════
+  
+  if (currentUser?.bank_name) {
+    doc.setFillColor(...redLight);
+    doc.rect(0, y, pageW, 10, 'F');
+    
     doc.setFont('helvetica', 'bold');
-    doc.setFontSize(6.5);
-    doc.setTextColor(150, 150, 150);
-    doc.text('NOTES & TERMS', margin, y + 8);
+    doc.setFontSize(5);
+    doc.setTextColor(...red);
+    doc.text((currentUser.company || 'COMPANY').toUpperCase(), margin, y + 2);
+    
     doc.setFont('helvetica', 'normal');
-    doc.setFontSize(7.5);
-    doc.setTextColor(80, 80, 80);
-    doc.text(noteLines, margin, y + 14);
-    y += notesH + 4;
+    doc.setFontSize(5.5);
+    doc.setTextColor(...grey);
+    doc.text(currentUser.bank_name, margin, y + 4);
+    if (currentUser.bank_account) doc.text('Account: ' + currentUser.bank_account, margin, y + 6);
+    if (currentUser.bank_branch) doc.text('Branch: ' + currentUser.bank_branch, margin, y + 8);
+    
+    y += 12;
   }
 
-  // ── FOOTER ──
-  doc.setFillColor(26, 26, 26);
-  doc.rect(0, y, pageW, 26, 'F');
-  doc.setFillColor(...orange);
-  doc.rect(0, y, pageW, 1.5, 'F');
-
-  doc.setFont('helvetica', 'italic');
-  doc.setFontSize(8);
-  doc.setTextColor(180, 180, 180);
-  doc.text('Thank you for the opportunity to quote. We look forward to working with you.', margin, y + 8);
-
+  // ═══════════════════════════════════════════════════════════════════════
+  // FOOTER
+  // ═══════════════════════════════════════════════════════════════════════
+  
+  doc.setFillColor(...dark);
+  doc.rect(0, y, pageW, 8, 'F');
+  
   doc.setFont('helvetica', 'normal');
-  doc.setFontSize(7.5);
-  doc.setTextColor(140, 140, 140);
-  const depositVal = document.getElementById('b_deposit')?.value || '';
-  const depositLine = depositVal ? 'Deposit: ' + depositVal + '% required on acceptance' : 'Payment: EFT payments preferred';
-  doc.text(depositLine, pageW - margin, y + 7, { align: 'right' });
-  doc.text('Balance due on completion', pageW - margin, y + 12, { align: 'right' });
-
-  // ── SIGNATURE BLOCKS ──
-  y += 28;
-  const sigW = (contentW - 10) / 2;
-
-  doc.setDrawColor(...borderGrey);
+  doc.setFontSize(5);
+  doc.setTextColor(220, 220, 220);
+  doc.text('Thank you for your business. Payment is due within 30 days.', margin, y + 2);
+  
+  const deposit = document.getElementById('b_deposit')?.value || '';
+  if (deposit) {
+    doc.text('Deposit: ' + deposit + ' required on acceptance. Balance due on completion.', margin, y + 4);
+  }
+  
+  doc.setTextColor(150, 150, 150);
+  doc.setFontSize(5);
+  doc.text('Powered by QForge | myquoteforge.co.za', pageW - margin, y + 6, { align: 'right' });
+  
+  // ═══════════════════════════════════════════════════════════════════════
+  // SIGNATURE AREA
+  // ═══════════════════════════════════════════════════════════════════════
+  
+  y = pageH - 25;
+  
+  doc.setFillColor(255, 255, 255);
+  doc.rect(0, y, pageW, 25, 'F');
+  
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(6);
+  doc.setTextColor(...grey);
+  doc.text('Client Signature & Date', margin, y + 8);
+  doc.text('Authorised Signatory', pageW/2 + 10, y + 8);
+  
+  // Signature lines
+  doc.setDrawColor(...dark);
   doc.setLineWidth(0.5);
-  doc.line(margin, y, margin + sigW, y);
-  doc.setFont('helvetica', 'normal');
-  doc.setFontSize(7);
-  doc.setTextColor(...midGrey);
-  doc.text('CLIENT SIGNATURE & DATE', margin, y + 4);
+  doc.line(margin, y + 10, margin + 35, y + 10);
+  doc.line(pageW/2 + 10, y + 10, pageW - margin, y + 10);
 
-  doc.line(margin + sigW + 10, y, margin + contentW, y);
-  doc.text('AUTHORISED SIGNATORY', margin + sigW + 10, y + 4);
-
-  // ── POWERED BY ──
-  doc.setFontSize(6.5);
-  doc.setTextColor(180, 180, 180);
-  doc.text('Powered by QForge | myquoteforge.co.za', pageW / 2, 290, { align: 'center' });
-
-  // ── SAVE ──
-  const fileName = 'Quote-' + (document.getElementById('b_quoteNumber')?.value || 'QUA-001') + '-' + (clientName.replace(/[^a-z0-9]/gi, '-')) + '.pdf';
-  doc.save(fileName);
-  showToast('PDF downloaded', 'success');
+  // ═══════════════════════════════════════════════════════════════════════
+  // SAVE PDF
+  // ═══════════════════════════════════════════════════════════════════════
+  
+  const filename = qNum + '.pdf';
+  doc.save(filename);
+  showToast('PDF downloaded: ' + filename, 'success');
 }
 
 // ══════════════════════════════════════
