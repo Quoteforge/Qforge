@@ -1770,39 +1770,28 @@ h1, h2, h3 {
       </div>
       <div class="form-group">
         <label>What type of business are you? <span style="color:var(--orange)">*</span></label>
-        <div class="industry-grid" id="industryGrid">
-          <div class="industry-card selected" data-industry="electrical" onclick="selectIndustry(this,'electrical')">
-            <span class="ic-icon">⚡</span><span class="ic-label">Electrical & Construction</span>
-          </div>
-          <div class="industry-card" data-industry="plumbing" onclick="selectIndustry(this,'plumbing')">
-            <span class="ic-icon">🔧</span><span class="ic-label">Plumbing & Gas</span>
-          </div>
-          <div class="industry-card" data-industry="marketing" onclick="selectIndustry(this,'marketing')">
-            <span class="ic-icon">📱</span><span class="ic-label">Marketing & Design</span>
-          </div>
-          <div class="industry-card" data-industry="it" onclick="selectIndustry(this,'it')">
-            <span class="ic-icon">💻</span><span class="ic-label">IT & Tech Support</span>
-          </div>
-          <div class="industry-card" data-industry="cleaning" onclick="selectIndustry(this,'cleaning')">
-            <span class="ic-icon">🧹</span><span class="ic-label">Cleaning Services</span>
-          </div>
-          <div class="industry-card" data-industry="landscaping" onclick="selectIndustry(this,'landscaping')">
-            <span class="ic-icon">🌿</span><span class="ic-label">Landscaping & Garden</span>
-          </div>
-          <div class="industry-card" data-industry="events" onclick="selectIndustry(this,'events')">
-            <span class="ic-icon">🎉</span><span class="ic-label">Events & Catering</span>
-          </div>
-          <div class="industry-card" data-industry="lodge" onclick="selectIndustry(this,'lodge')">
-            <span class="ic-icon">🏨</span><span class="ic-label">Lodge & B&B</span>
-          </div>
-          <div class="industry-card" data-industry="consulting" onclick="selectIndustry(this,'consulting')">
-            <span class="ic-icon">📊</span><span class="ic-label">Consulting & Finance</span>
-          </div>
-          <div class="industry-card" data-industry="other" onclick="selectIndustry(this,'other')">
-            <span class="ic-icon">🏢</span><span class="ic-label">Other / General</span>
-          </div>
-        </div>
-        <input type="hidden" id="regIndustry" value="electrical">
+        <select id="regIndustry" style="width:100%;padding:12px 14px;border:1px solid var(--border);border-radius:8px;font-family:var(--font-body);font-size:0.95rem;color:var(--dark);background:#fff;cursor:pointer;transition:border-color 0.2s;" onchange="this.parentElement.style.borderColor='var(--border)'">
+          <option value="electrical">⚡ Electrical & Construction</option>
+          <option value="plumbing">🔧 Plumbing & Gas</option>
+          <option value="solar">☀️ Solar & Renewable Energy</option>
+          <option value="auto">🚗 Auto Mechanic & Panel Beating</option>
+          <option value="building">🏗️ Building & Construction</option>
+          <option value="painting">🎨 Painting & Waterproofing</option>
+          <option value="roofing">🏠 Roofing & Gutters</option>
+          <option value="cctv">📹 CCTV & Security</option>
+          <option value="hvac">❄️ Air Conditioning & HVAC</option>
+          <option value="marketing">📱 Marketing & Design</option>
+          <option value="it">💻 IT & Tech Support</option>
+          <option value="cleaning">🧹 Cleaning Services</option>
+          <option value="landscaping">🌿 Landscaping & Garden</option>
+          <option value="events">🎉 Events & Catering</option>
+          <option value="photography">📸 Photography & Videography</option>
+          <option value="lodge">🏨 Lodge & B&B</option>
+          <option value="consulting">📊 Consulting & Finance</option>
+          <option value="legal">⚖️ Legal & Compliance</option>
+          <option value="health">💚 Health & Wellness</option>
+          <option value="general">🏢 General Business</option>
+        </select>
       </div>
       <div class="form-group">
         <label>Password</label>
