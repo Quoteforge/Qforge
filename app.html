@@ -3544,10 +3544,12 @@ function renderInvoices() {
     </div>` :
     invoices.map(inv => {
       const isPaid = inv.status === 'paid';
+      const displayInvNum = extractQuoteNumber(inv.id);
+      const displayRefNum = inv.quote_ref ? extractQuoteNumber(inv.quote_ref) : '';
       return '<div class="inv-row" onclick="viewInvoice(\'' + inv.id + '\')">' +
         '<div class="inv-row-main">' +
         '<div class="qt-client">' + esc(inv.client) + '</div>' +
-        '<div class="qt-num">' + inv.id + (inv.quote_ref ? ' <span style="color:var(--muted);font-size:0.68rem;">ref: ' + esc(inv.quote_ref) + '</span>' : '') + '</div>' +
+        '<div class="qt-num">' + displayInvNum + (displayRefNum ? ' <span style="color:var(--muted);font-size:0.68rem;">ref: ' + esc(displayRefNum) + '</span>' : '') + '</div>' +
         '<div style="font-size:0.78rem;color:var(--muted);margin-top:2px;">' + formatDate(inv.date) + '</div>' +
         '</div>' +
         '<div class="inv-row-right">' +
@@ -3609,9 +3611,10 @@ async function sendInvoiceWhatsApp(id) {
   const dueDate = new Date(inv.date);
   dueDate.setDate(dueDate.getDate() + 30);
   const dueDateStr = dueDate.toLocaleDateString('en-ZA', {day:'numeric',month:'long',year:'numeric'});
-  const invoiceLink = 'https://qforge-eight.vercel.app/invoice.html?id=' + encodeURIComponent(inv.id);
+  const invoiceLink = 'https://qforge-eight.vercel.app/invoice.html?id=' + encodeURIComponent(extractQuoteNumber(inv.id));
   waPhone = inv.contact || '';
-  const msg = 'Hi ' + inv.client + ',\n\n🧾 TAX INVOICE from ' + company + '\n\nInvoice Number: ' + inv.id + '\nAmount Due: R' + (inv.amount||0).toLocaleString('en-ZA') + '\nDue Date: ' + dueDateStr + '\n\n📲 View & Pay your INVOICE here:\n' + invoiceLink + '\n\nPayment Reference: ' + inv.id + '\n\nKind regards,\n' + company;
+  const displayInvNum = extractQuoteNumber(inv.id);
+  const msg = 'Hi ' + inv.client + ',\n\n🧾 TAX INVOICE from ' + company + '\n\nInvoice Number: ' + displayInvNum + '\nAmount Due: R' + (inv.amount||0).toLocaleString('en-ZA') + '\nDue Date: ' + dueDateStr + '\n\n📲 View & Pay your INVOICE here:\n' + invoiceLink + '\n\nPayment Reference: ' + displayInvNum + '\n\nKind regards,\n' + company;
   document.getElementById('waMessage').textContent = msg;
   document.getElementById('waModal').classList.add('show');
 }
@@ -7512,8 +7515,9 @@ async function sendWhatsApp(qid) {
   waQuoteId = qid;
   waPhone = q.contact || '';
   const company = currentUser?.company || 'Our company';
-  const quoteLink = 'https://qforge-eight.vercel.app/quote.html?id=' + encodeURIComponent(q.id);
-  const msg = 'Hi ' + q.client + ',\n\nThank you for your enquiry. Please find your quotation from ' + company + ' below:\n\nQuote: ' + q.id + '\nAmount: R' + q.amount.toLocaleString('en-ZA') + '\nValid: 14 days\n\nView & sign your quote here:\n' + quoteLink + '\n\nKind regards,\n' + company;
+  const displayNum = extractQuoteNumber(q.id);
+  const quoteLink = 'https://qforge-eight.vercel.app/quote.html?id=' + encodeURIComponent(displayNum);
+  const msg = 'Hi ' + q.client + ',\n\nThank you for your enquiry. Please find your quotation from ' + company + ' below:\n\nQuote: ' + displayNum + '\nAmount: R' + q.amount.toLocaleString('en-ZA') + '\nValid: 14 days\n\nView & sign your quote here:\n' + quoteLink + '\n\nKind regards,\n' + company;
   document.getElementById('waMessage').textContent = msg;
   document.getElementById('waModal').classList.add('show');
   // Update quote status to sent in Supabase
@@ -7521,7 +7525,7 @@ async function sendWhatsApp(qid) {
   if (idx > -1 && quotes[idx].status === 'draft') {
     quotes[idx].status = 'sent';
     if (currentUser?.id && currentUser.id !== 'demo') {
-      await sb.from('quotes').update({ status: 'sent' }).eq('id', qid);
+      await sb.from('quotes').update({ status: 'sent' }).eq('id', qid).eq('user_id', currentUser.id);
     }
   }
 }
