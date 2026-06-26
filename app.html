@@ -2883,6 +2883,7 @@ function loadQuoteIntoBuilder(q) {
   // Detect invoice vs quote and update all labels
   const displayNum = extractQuoteNumber(q.id);
   const isInvoice = q.status === 'invoice' || q.status === 'invoiced' || q.status === 'paid' || (displayNum && displayNum.toUpperCase().startsWith('INV-'));
+  isInvoiceMode = isInvoice;  // Set global mode based on loaded document
   setTimeout(() => updateDocTypeLabels(isInvoice), 100);
 }
 
