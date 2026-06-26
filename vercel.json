@@ -2,20 +2,11 @@
   "buildCommand": "",
   "outputDirectory": ".",
   "framework": null,
+  "cleanUrls": true,
   "rewrites": [
     {
-      "source": "/(.*)",
+      "source": "/",
       "destination": "/landing.html"
-    }
-  ],
-  "redirects": [
-    {
-      "source": "/app",
-      "destination": "/app.html"
-    },
-    {
-      "source": "/login",
-      "destination": "/index.html"
     }
   ]
 }
