@@ -1923,6 +1923,32 @@ let builderItemCounter = 0;
 let builderScope = '';
 let editingQuoteId = null;
 let isInvoiceMode = false;  // Track if building invoice or quote
+let builderThemeColor = '#E63946'; // Default red
+
+const THEME_COLORS = {
+  red: { name: 'Red', hex: '#E63946', rgb: '230, 57, 70' },
+  blue: { name: 'Blue', hex: '#2563EB', rgb: '37, 99, 235' },
+  green: { name: 'Green', hex: '#10B981', rgb: '16, 185, 129' },
+  purple: { name: 'Purple', hex: '#A855F7', rgb: '168, 85, 247' },
+  orange: { name: 'Orange', hex: '#F97316', rgb: '249, 115, 22' },
+  pink: { name: 'Pink', hex: '#EC4899', rgb: '236, 72, 153' },
+  indigo: { name: 'Indigo', hex: '#4F46E5', rgb: '79, 70, 229' },
+  teal: { name: 'Teal', hex: '#14B8A6', rgb: '20, 184, 166' },
+  cyan: { name: 'Cyan', hex: '#06B6D4', rgb: '6, 182, 212' },
+  amber: { name: 'Amber', hex: '#F59E0B', rgb: '245, 158, 11' },
+  lime: { name: 'Lime', hex: '#84CC16', rgb: '132, 204, 22' },
+  slate: { name: 'Slate', hex: '#64748B', rgb: '100, 116, 139' }
+};
+
+function setBuilderThemeColor(hexColor) {
+  builderThemeColor = hexColor;
+  updateBuilderPreview();
+}
+
+function hexToRGB(hex) {
+  const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+  return result ? [parseInt(result[1],16), parseInt(result[2],16), parseInt(result[3],16)] : [230, 57, 70];
+}
 let currentClientId = null;
 let customItems = []; // user's saved custom quick-add items
 let productLibrary = []; // imported product catalogue
@@ -2907,6 +2933,7 @@ function loadQuoteIntoBuilder(q) {
   
   builderScope = q.scope||'';
   document.getElementById('previewScope').textContent = builderScope || 'Click "Generate Scope with AI" to add a description.';
+  builderThemeColor = q.theme_color || '#E63946'; // Restore color or default to red
   builderItems = q.items ? q.items.map((i,idx) => ({...i, id:++builderItemCounter})) : [];
   renderBuilderItems();
   updateBuilderPreview();
@@ -3000,6 +3027,12 @@ function renderBuilder() {
   <div class="builder-layout">
 <!-- LEFT -->
     <div class="builder-left">
+
+      <div style="display:flex;gap:8px;margin-bottom:12px;">
+        <button class="btn btn-red" style="color:#fff;flex:1;" onclick="document.getElementById('colorPaletteModal').style.display='flex'">
+          🎨 Theme Color
+        </button>
+      </div>
 
       <div style="display:flex;flex-direction:column;gap:1px;">
         <div class="section-label">Client Details</div>
@@ -3492,6 +3525,7 @@ async function saveQuote() {
     date: new Date().toISOString().split('T')[0],
     valid_days: validDays,
     vat_registered: vatOn,
+    theme_color: builderThemeColor,
     updated_at: new Date().toISOString()
   };
 
@@ -3523,6 +3557,7 @@ async function saveQuote() {
     amount: quoteData.amount,
     items: [...builderItems], 
     date: quoteData.date,
+    theme_color: builderThemeColor,
     // Vehicle details (local only, not in DB)
     vehicle_model: currentUser?.industry === 'automotive' ? (document.getElementById('b_vehicleModel')?.value.trim()||null) : null,
     vehicle_vin: currentUser?.industry === 'automotive' ? (document.getElementById('b_vin')?.value.trim()||null) : null,
@@ -3739,7 +3774,7 @@ function printInvoicePDF(inv) {
   const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
   const pageW = 210;
   const margin = 15;
-  const orange = [230, 57, 70]; // Red #E63946
+  const orange = inv?.theme_color ? hexToRGB(inv.theme_color) : hexToRGB(builderThemeColor);
   const dark = [26, 26, 26];
   const white = [255, 255, 255];
   const midGrey = [120, 120, 120];
@@ -7334,7 +7369,8 @@ function printQuote() {
   let y = margin;
 
   // ── COLORS ──
-  const red = [230, 57, 70];
+  const themeColor = hexToRGB(builderThemeColor);
+  const red = themeColor;
   const redLight = [248, 247, 245];
   const dark = [26, 26, 26];
   const white = [255, 255, 255];
@@ -7975,6 +8011,67 @@ function hideLoadingScreen(showAuth) {
       <button class="btn btn-ghost" onclick="document.getElementById('forgotModal').classList.remove('show')">Cancel</button>
       <button class="btn btn-red" style="color:#fff;" id="forgotBtn" onclick="sendForgotPassword()">Send Reset Link</button>
     </div>
+  </div>
+</div>
+
+<!-- COLOR PALETTE MODAL -->
+<div class="modal-overlay" id="colorPaletteModal" style="display:none;" onclick="if(event.target.id==='colorPaletteModal') event.target.style.display='none'">
+  <div class="modal" style="max-width:400px;">
+    <h3>Select Quote Theme Color</h3>
+    <p style="font-size:0.9rem;color:#666;margin-bottom:16px;">Choose a color that matches your brand</p>
+    
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:16px;">
+      <button onclick="setBuilderThemeColor('#E63946');document.getElementById('colorPaletteModal').style.display='none'" style="display:flex;flex-direction:column;align-items:center;gap:6px;padding:12px;border-radius:8px;border:2px solid #e0e0e0;background:#fff;cursor:pointer;">
+        <div style="width:40px;height:40px;border-radius:6px;background:#E63946;"></div>
+        <span style="font-size:0.75rem;font-weight:600;color:#333;">Red</span>
+      </button>
+      <button onclick="setBuilderThemeColor('#2563EB');document.getElementById('colorPaletteModal').style.display='none'" style="display:flex;flex-direction:column;align-items:center;gap:6px;padding:12px;border-radius:8px;border:2px solid #e0e0e0;background:#fff;cursor:pointer;">
+        <div style="width:40px;height:40px;border-radius:6px;background:#2563EB;"></div>
+        <span style="font-size:0.75rem;font-weight:600;color:#333;">Blue</span>
+      </button>
+      <button onclick="setBuilderThemeColor('#10B981');document.getElementById('colorPaletteModal').style.display='none'" style="display:flex;flex-direction:column;align-items:center;gap:6px;padding:12px;border-radius:8px;border:2px solid #e0e0e0;background:#fff;cursor:pointer;">
+        <div style="width:40px;height:40px;border-radius:6px;background:#10B981;"></div>
+        <span style="font-size:0.75rem;font-weight:600;color:#333;">Green</span>
+      </button>
+      <button onclick="setBuilderThemeColor('#A855F7');document.getElementById('colorPaletteModal').style.display='none'" style="display:flex;flex-direction:column;align-items:center;gap:6px;padding:12px;border-radius:8px;border:2px solid #e0e0e0;background:#fff;cursor:pointer;">
+        <div style="width:40px;height:40px;border-radius:6px;background:#A855F7;"></div>
+        <span style="font-size:0.75rem;font-weight:600;color:#333;">Purple</span>
+      </button>
+      <button onclick="setBuilderThemeColor('#F97316');document.getElementById('colorPaletteModal').style.display='none'" style="display:flex;flex-direction:column;align-items:center;gap:6px;padding:12px;border-radius:8px;border:2px solid #e0e0e0;background:#fff;cursor:pointer;">
+        <div style="width:40px;height:40px;border-radius:6px;background:#F97316;"></div>
+        <span style="font-size:0.75rem;font-weight:600;color:#333;">Orange</span>
+      </button>
+      <button onclick="setBuilderThemeColor('#EC4899');document.getElementById('colorPaletteModal').style.display='none'" style="display:flex;flex-direction:column;align-items:center;gap:6px;padding:12px;border-radius:8px;border:2px solid #e0e0e0;background:#fff;cursor:pointer;">
+        <div style="width:40px;height:40px;border-radius:6px;background:#EC4899;"></div>
+        <span style="font-size:0.75rem;font-weight:600;color:#333;">Pink</span>
+      </button>
+      <button onclick="setBuilderThemeColor('#4F46E5');document.getElementById('colorPaletteModal').style.display='none'" style="display:flex;flex-direction:column;align-items:center;gap:6px;padding:12px;border-radius:8px;border:2px solid #e0e0e0;background:#fff;cursor:pointer;">
+        <div style="width:40px;height:40px;border-radius:6px;background:#4F46E5;"></div>
+        <span style="font-size:0.75rem;font-weight:600;color:#333;">Indigo</span>
+      </button>
+      <button onclick="setBuilderThemeColor('#14B8A6');document.getElementById('colorPaletteModal').style.display='none'" style="display:flex;flex-direction:column;align-items:center;gap:6px;padding:12px;border-radius:8px;border:2px solid #e0e0e0;background:#fff;cursor:pointer;">
+        <div style="width:40px;height:40px;border-radius:6px;background:#14B8A6;"></div>
+        <span style="font-size:0.75rem;font-weight:600;color:#333;">Teal</span>
+      </button>
+      <button onclick="setBuilderThemeColor('#06B6D4');document.getElementById('colorPaletteModal').style.display='none'" style="display:flex;flex-direction:column;align-items:center;gap:6px;padding:12px;border-radius:8px;border:2px solid #e0e0e0;background:#fff;cursor:pointer;">
+        <div style="width:40px;height:40px;border-radius:6px;background:#06B6D4;"></div>
+        <span style="font-size:0.75rem;font-weight:600;color:#333;">Cyan</span>
+      </button>
+      <button onclick="setBuilderThemeColor('#F59E0B');document.getElementById('colorPaletteModal').style.display='none'" style="display:flex;flex-direction:column;align-items:center;gap:6px;padding:12px;border-radius:8px;border:2px solid #e0e0e0;background:#fff;cursor:pointer;">
+        <div style="width:40px;height:40px;border-radius:6px;background:#F59E0B;"></div>
+        <span style="font-size:0.75rem;font-weight:600;color:#333;">Amber</span>
+      </button>
+      <button onclick="setBuilderThemeColor('#84CC16');document.getElementById('colorPaletteModal').style.display='none'" style="display:flex;flex-direction:column;align-items:center;gap:6px;padding:12px;border-radius:8px;border:2px solid #e0e0e0;background:#fff;cursor:pointer;">
+        <div style="width:40px;height:40px;border-radius:6px;background:#84CC16;"></div>
+        <span style="font-size:0.75rem;font-weight:600;color:#333;">Lime</span>
+      </button>
+      <button onclick="setBuilderThemeColor('#64748B');document.getElementById('colorPaletteModal').style.display='none'" style="display:flex;flex-direction:column;align-items:center;gap:6px;padding:12px;border-radius:8px;border:2px solid #e0e0e0;background:#fff;cursor:pointer;">
+        <div style="width:40px;height:40px;border-radius:6px;background:#64748B;"></div>
+        <span style="font-size:0.75rem;font-weight:600;color:#333;">Slate</span>
+      </button>
+    </div>
+    
+    <button class="btn btn-ghost" style="width:100%;" onclick="document.getElementById('colorPaletteModal').style.display='none'">Close</button>
   </div>
 </div>
 
