@@ -86,6 +86,12 @@ function formatDate(dateStr) {
   return new Date(dateStr).toLocaleDateString('en-ZA');
 }
 
+// Extract quote number from composite ID: "userId|INV-001" → "INV-001"
+function extractQuoteNumber(compositeId) {
+  if (!compositeId) return compositeId;
+  return compositeId.includes('|') ? compositeId.split('|')[1] : compositeId;
+}
+
 function getVehicleHTML() {
   if (!invoiceData) return '';
   let html = '<span class="info-label">Vehicle Details</span><div class="client-detail">';
@@ -130,12 +136,12 @@ function renderInvoice() {
   html += '<div class="company-line">' + (userData?.city || '') + ', ' + (userData?.province || '') + '</div>';
   if (userData?.reg_number) html += '<div class="company-line"><strong>Reg nr:</strong> ' + userData.reg_number + '</div>';
   if (userData?.vat_number) html += '<div class="company-line"><strong>VAT:</strong> ' + userData.vat_number + '</div>';
-  html += '</div></div><div class="header-right"><div class="doc-type">Tax Invoice</div><div class="doc-number">' + invoiceData.id + '</div>';
+  html += '</div></div><div class="header-right"><div class="doc-type">Tax Invoice</div><div class="doc-number">' + extractQuoteNumber(invoiceData.id) + '</div>';
   html += '<div class="doc-date"><strong>Date:</strong> ' + formatDate(invoiceData.date) + '<br><strong>Due:</strong> ' + formatDate(invoiceData.date) + '</div></div></div>';
   
   html += '<div class="info-band"><div class="info-col"><span class="info-label">Invoice to</span><div class="client-name">' + (invoiceData.client || '') + '</div>';
   html += '<div class="client-detail">' + (invoiceData.contact || '') + '<br>' + (invoiceData.address || '') + '<br>';
-  html += '<strong style="margin-top:4px;display:block;">Ref Invoice: ' + invoiceData.id + '</strong></div></div>';
+  html += '<strong style="margin-top:4px;display:block;">Ref Invoice: ' + extractQuoteNumber(invoiceData.id) + '</strong></div></div>';
   html += '<div class="info-col">' + getVehicleHTML() + '</div></div>';
   
   html += '<div class="items-section"><table class="items-table"><thead><tr><th>Description</th><th>QTY</th><th>Unit Price</th><th>Amount</th></tr></thead><tbody>';

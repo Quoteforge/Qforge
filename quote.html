@@ -96,6 +96,12 @@ function formatDate(dateStr) {
   return new Date(dateStr).toLocaleDateString('en-ZA');
 }
 
+// Extract quote number from composite ID: "userId|QUA-001" → "QUA-001"
+function extractQuoteNumber(compositeId) {
+  if (!compositeId) return compositeId;
+  return compositeId.includes('|') ? compositeId.split('|')[1] : compositeId;
+}
+
 function getVehicleHTML() {
   if (!quoteData) return '';
   let html = '<span class="info-label">Vehicle Details</span><div class="client-detail">';
@@ -140,12 +146,12 @@ function renderQuote() {
   html += '<div class="company-line">' + (userData?.city || '') + ', ' + (userData?.province || '') + '</div>';
   if (userData?.reg_number) html += '<div class="company-line"><strong>Reg nr:</strong> ' + userData.reg_number + '</div>';
   if (userData?.vat_number) html += '<div class="company-line"><strong>VAT:</strong> ' + userData.vat_number + '</div>';
-  html += '</div></div><div class="header-right"><div class="doc-type">Quotation</div><div class="doc-number">' + quoteData.id + '</div>';
+  html += '</div></div><div class="header-right"><div class="doc-type">Quotation</div><div class="doc-number">' + extractQuoteNumber(quoteData.id) + '</div>';
   html += '<div class="doc-date"><strong>Date:</strong> ' + formatDate(quoteData.date) + '<br><strong>Valid for:</strong> ' + (quoteData.valid_days || 14) + ' days</div></div></div>';
   
   html += '<div class="info-band"><div class="info-col"><span class="info-label">Quoted For</span><div class="client-name">' + (quoteData.client || '') + '</div>';
   html += '<div class="client-detail">' + (quoteData.contact || '') + '<br>' + (quoteData.address || '') + '<br>';
-  html += '<strong style="margin-top:4px;display:block;">Ref Quote: ' + quoteData.id + '</strong></div></div>';
+  html += '<strong style="margin-top:4px;display:block;">Ref Quote: ' + extractQuoteNumber(quoteData.id) + '</strong></div></div>';
   html += '<div class="info-col">' + getVehicleHTML() + '</div></div>';
   
   html += '<div class="items-section"><table class="items-table"><thead><tr><th>Description</th><th>QTY</th><th>Unit Price</th><th>Amount</th></tr></thead><tbody>';

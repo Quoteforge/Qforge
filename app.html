@@ -2822,7 +2822,8 @@ function loadQuoteIntoBuilder(q) {
   sv('b_clientAreaCode', addrParts[3]||'');
   sv('b_clientVat', q.client_vat||'');
   sv('b_clientReg', q.client_reg||'');
-  sv('b_quoteNumber', q.id);
+  // Extract just the quote number from composite ID for display
+  sv('b_quoteNumber', extractQuoteNumber(q.id));
   sv('b_deposit', q.deposit||'');
   sv('b_notes', q.notes||'');
   
@@ -2841,7 +2842,8 @@ function loadQuoteIntoBuilder(q) {
   updateBuilderPreview();
 
   // Detect invoice vs quote and update all labels
-  const isInvoice = q.status === 'invoice' || q.status === 'invoiced' || q.status === 'paid' || (q.id && q.id.toUpperCase().startsWith('INV-'));
+  const displayNum = extractQuoteNumber(q.id);
+  const isInvoice = q.status === 'invoice' || q.status === 'invoiced' || q.status === 'paid' || (displayNum && displayNum.toUpperCase().startsWith('INV-'));
   setTimeout(() => updateDocTypeLabels(isInvoice), 100);
 }
 
@@ -7228,7 +7230,7 @@ function printQuote() {
   doc.setTextColor(150, 150, 150);
   doc.text('QUOTATION', rightX, 4, { align: 'right' });
   
-  const qNum = document.getElementById('b_quoteNumber')?.value || editingQuoteId || 'QUA-001';
+  const qNum = document.getElementById('b_quoteNumber')?.value || extractQuoteNumber(editingQuoteId) || 'QUA-001';
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(9);
   doc.setTextColor(...red);
