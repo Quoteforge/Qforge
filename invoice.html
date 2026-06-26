@@ -192,8 +192,20 @@ async function loadInvoice() {
       if (data) userData = data;
     }
 
-    const { data, error } = await sb.from('quotes').select('*').eq('id', invoiceId).single();
-    if (error || !data) {
+    // Try direct ID first (for backward compatibility)
+    let { data, error } = await sb.from('quotes').select('*').eq('id', invoiceId).single();
+    
+    // If not found and ID doesn't contain pipe, search for invoices containing this number
+    if ((error || !data) && !invoiceId.includes('|')) {
+      // Search for any invoice where the ID ends with the provided invoice number
+      // This handles composite IDs like "userId|INV-001" when searching for "INV-001"
+      const { data: allData } = await sb.from('quotes').select('*');
+      if (allData) {
+        data = allData.find(q => q.id && q.id.endsWith('|' + invoiceId));
+      }
+    }
+
+    if (!data) {
       throw new Error('Invoice not found');
     }
 
