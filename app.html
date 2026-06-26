@@ -3530,7 +3530,6 @@ async function saveQuote() {
     date: new Date().toISOString().split('T')[0],
     valid_days: validDays,
     vat_registered: vatOn,
-    theme_color: builderThemeColor,
     updated_at: new Date().toISOString()
   };
 
@@ -3562,7 +3561,6 @@ async function saveQuote() {
     amount: quoteData.amount,
     items: [...builderItems], 
     date: quoteData.date,
-    theme_color: builderThemeColor,
     // Vehicle details (local only, not in DB)
     vehicle_model: currentUser?.industry === 'automotive' ? (document.getElementById('b_vehicleModel')?.value.trim()||null) : null,
     vehicle_vin: currentUser?.industry === 'automotive' ? (document.getElementById('b_vin')?.value.trim()||null) : null,
