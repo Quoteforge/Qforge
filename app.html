@@ -16,6 +16,8 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+<script src="https://unpkg.com/cropperjs"></script>
+<link rel="stylesheet" href="https://unpkg.com/cropperjs/dist/cropper.css">
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&family=Bebas+Neue&family=Space+Grotesk:wght@400;500;600;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
 <style>
 .stats-4col{grid-template-columns:repeat(4,1fr);}
@@ -4373,17 +4375,48 @@ function showOnboarding() {
   document.getElementById('onboardModal').classList.add('show');
 }
 
+let cropperInstance = null;
+
 function handleOnboardLogo(input) {
   const file = input.files[0];
   if (!file) return;
   if (file.size > 2 * 1024 * 1024) { showToast('Logo must be under 2MB', 'error'); return; }
   const reader = new FileReader();
   reader.onload = (e) => {
-    onboardLogoData = e.target.result;
-    const area = document.getElementById('onboardLogoArea');
-    area.innerHTML = '<img src="'+onboardLogoData+'" class="onboard-logo-preview"><div class="onboard-logo-text"><strong>Logo uploaded!</strong>Click to change</div>';
+    // Show cropper modal
+    const cropperImg = document.getElementById('cropperImage');
+    cropperImg.src = e.target.result;
+    document.getElementById('logoCropModal').classList.add('show');
+    
+    // Initialize cropper
+    if (cropperInstance) cropperInstance.destroy();
+    cropperInstance = new Cropper(cropperImg, {
+      aspectRatio: 1,
+      viewMode: 1,
+      autoCropArea: 1,
+      responsive: true,
+      guides: true,
+      center: true,
+      highlight: true,
+      cropBoxMovable: true,
+      cropBoxResizable: true,
+      toggleDragModeOnDblclick: true,
+    });
   };
   reader.readAsDataURL(file);
+}
+
+function saveCroppedLogo() {
+  if (!cropperInstance) return;
+  const canvas = cropperInstance.getCroppedCanvas({ maxWidth: 200, maxHeight: 200, imageSmoothingEnabled: true, imageSmoothingQuality: 'high' });
+  onboardLogoData = canvas.toDataURL();
+  // Update preview
+  const area = document.getElementById('onboardLogoArea');
+  area.innerHTML = '<img src="'+onboardLogoData+'" class="onboard-logo-preview" style="max-height:80px;"><div class="onboard-logo-text"><strong>Logo uploaded!</strong>Click to change</div>';
+  document.getElementById('logoCropModal').classList.remove('show');
+  cropperInstance.destroy();
+  cropperInstance = null;
+  showToast('Logo cropped and ready!', 'success');
 }
 
 async function completeOnboarding() {
@@ -7898,7 +7931,7 @@ function hideLoadingScreen(showAuth) {
 <!-- ONBOARDING MODAL -->
 <div class="onboard-overlay" id="onboardModal">
   <div class="onboard-card">
-    <div class="onboard-logo">Quote<span>Forge</span></div>
+    <div class="onboard-logo">Q<span>Forge</span></div>
     <div class="onboard-progress">
       <div class="onboard-dot active"></div>
       <div class="onboard-dot active"></div>
@@ -8009,6 +8042,23 @@ function hideLoadingScreen(showAuth) {
       Secure payment via PayFast &middot; Cancel anytime &middot; No hidden fees<br>
       <a onclick="contactSupport()">Need help? WhatsApp us</a> &middot;
       <a onclick="doLogout()">Sign out</a>
+    </div>
+  </div>
+</div>
+
+<!-- LOGO CROP MODAL -->
+<div class="modal-overlay" id="logoCropModal" onclick="if(event.target.id==='logoCropModal') document.getElementById('logoCropModal').classList.remove('show');">
+  <div class="modal" style="max-width:600px;">
+    <div style="font-family:'Plus Jakarta Sans',sans-serif;font-size:1.1rem;font-weight:800;color:#111;margin-bottom:4px;">Crop Your Logo</div>
+    <div style="font-size:0.82rem;color:#888;margin-bottom:20px;">Drag to move, scroll to zoom</div>
+    
+    <div style="background:#f5f5f5;border-radius:8px;overflow:hidden;margin-bottom:20px;">
+      <img id="cropperImage" src="" style="max-width:100%;">
+    </div>
+    
+    <div style="display:flex;gap:10px;">
+      <button class="btn btn-ghost" onclick="document.getElementById('logoCropModal').classList.remove('show')">Cancel</button>
+      <button class="btn btn-red" style="color:#fff;flex:1;" onclick="saveCroppedLogo()">Save Logo</button>
     </div>
   </div>
 </div>
