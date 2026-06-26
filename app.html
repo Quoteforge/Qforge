@@ -3803,12 +3803,12 @@ function printInvoicePDF(inv) {
     startY: y,
     head: [['DESCRIPTION', 'QTY', 'UNIT PRICE', 'AMOUNT']],
     body: items,
-    margin: { left: 0, right: 0 },
+    margin: { left: 0, right: 0, top: 0, bottom: 0 },
     styles: { fontSize:8.5, cellPadding:4, textColor:dark, lineColor:borderGrey, lineWidth:0.2 },
     headStyles: { fillColor:dark, textColor:white, fontStyle:'bold', fontSize:7.5, cellPadding:5 },
     columnStyles: {
-      0:{cellWidth:85}, 1:{cellWidth:18,halign:'center'},
-      2:{cellWidth:32,halign:'right'}, 3:{cellWidth:32,halign:'right',fontStyle:'bold'}
+      1:{halign:'center'},
+      2:{halign:'right'}, 3:{halign:'right',fontStyle:'bold'}
     },
     alternateRowStyles: { fillColor:[252,252,252] }
   });
