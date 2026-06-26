@@ -3,498 +3,307 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>QForge — Your Invoice</title>
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&family=Space+Grotesk:wght@500;600;700&family=Bebas+Neue&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<title>QForge - View Quote</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&display=swap" rel="stylesheet">
 <style>
-:root{
-  --orange:#E63946;--orange-dark:#e04d10;
-  --bg:#f4f4f0;--dark:#1a1a1a;--white:#ffffff;
-  --muted:#777;--border:#e8e8e8;--green:#2ecc71;--blue:#3b82f6;
-}
+:root{--red:#E63946;--red-light:rgba(230,57,70,0.08);--dark:#1a1a1a;--white:#ffffff;--border:#e0e0e0;--beige:#f8f7f5;}
 *{margin:0;padding:0;box-sizing:border-box;}
-body{background:var(--bg);font-family:'Plus Jakarta Sans',sans-serif;font-weight:400;min-height:100vh;color:var(--dark);}
+body{background:#f5f5f5;font-family:'Plus Jakarta Sans',sans-serif;min-height:100vh;padding:20px;}
 
-.topbar{background:var(--dark);padding:14px 24px;display:flex;align-items:center;justify-content:space-between;}
-.logo{font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:1.1rem;color:#fff;letter-spacing:-0.5px;display:flex;align-items:center;gap:6px;}
-.logo-box{background:#E63946;width:32px;height:32px;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:1rem;color:#fff;font-weight:900;flex-shrink:0;}
-.logo span{color:var(--orange);}
-.topbar-note{font-size:0.75rem;color:#888;}
+.doc-container{background:var(--white);width:100%;max-width:800px;margin:0 auto;border-radius:8px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,0.1);}
 
-.main{max-width:780px;margin:0 auto;padding:28px 16px 60px;}
+/* ──── HEADER ──── */
+.doc-header{
+  padding:24px;display:flex;align-items:flex-start;justify-content:space-between;
+  border-bottom:3px solid var(--red);gap:24px;
+}
 
-/* Status banners */
-.status-banner{border-radius:10px;padding:10px 14px;margin-bottom:18px;display:flex;align-items:center;gap:8px;font-size:0.64rem;font-weight:500;}
-.status-banner.invoice{background:rgba(59,130,246,0.1);border:1px solid rgba(59,130,246,0.25);color:#2563eb;}
-.status-banner.paid{background:rgba(46,204,113,0.1);border:1px solid rgba(46,204,113,0.3);color:#16a34a;}
-.status-banner.overdue{background:rgba(231,76,60,0.1);border:1px solid rgba(231,76,60,0.25);color:#c0392b;}
-.status-icon{font-size:1.3rem;}
+.header-left{display:flex;align-items:flex-start;gap:20px;flex:1;min-width:0;}
+.doc-logo{max-height:70px;max-width:140px;object-fit:contain;border-radius:4px;}
+.logo-placeholder{width:70px;height:70px;background:#f0f0f0;border:2px dashed #ccc;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:2rem;color:#ccc;}
 
-/* Invoice document */
-.invoice-doc{background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 8px 40px rgba(0,0,0,0.12);margin-bottom:24px;}
+.company-info{font-size:0.75rem;}
+.company-name{font-family:'Plus Jakarta Sans',sans-serif;font-size:0.95rem;font-weight:800;color:var(--dark);margin-bottom:2px;}
+.company-line{font-size:0.68rem;color:#666;margin:2px 0;line-height:1.3;}
+.company-line strong{color:var(--dark);font-weight:600;}
 
-/* Header */
-.doc-header{background:#ffffff;padding:12px 16px;display:flex;flex-direction:row;justify-content:space-between;align-items:flex-start;border-bottom:3px solid var(--orange);gap:20px;flex-wrap:nowrap;}
-.doc-header > div:first-child{display:flex;align-items:flex-start;justify-content:flex-start;flex-shrink:0;gap:16px;}
-.doc-header > div:last-child{text-align:right;flex-shrink:0;}
-.doc-header-logo-col{display:flex;align-items:center;justify-content:flex-start;min-width:80px;}
-.doc-logo-img{max-height:48px;max-width:100px;object-fit:contain;display:block;flex-shrink:0;}
-.doc-logo-placeholder{width:40px;height:40px;border-radius:6px;background:#f0f0f0;border:1px dashed #ccc;display:flex;align-items:center;justify-content:center;font-size:0.9rem;}
-.doc-invoice-meta{text-align:right;}
-.doc-invoice-label{font-family:'Plus Jakarta Sans',sans-serif;font-size:0.48rem;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;color:#999;margin-bottom:2px;}
-.doc-invoice-number{font-family:'Plus Jakarta Sans',sans-serif;font-size:1.2rem;font-weight:800;color:var(--orange);letter-spacing:1px;}
-.doc-invoice-date{font-size:0.58rem;color:#555;margin-top:3px;}
-.doc-invoice-due{font-size:0.58rem;font-weight:600;margin-top:1px;}
-.due-ok{color:#16a34a;}
-.due-warn{color:#d97706;}
-.due-late{color:#dc2626;}
+.header-right{text-align:right;flex-shrink:0;}
+.doc-type{font-size:0.50rem;font-weight:700;letter-spacing:0.15em;text-transform:uppercase;color:#999;margin-bottom:4px;}
+.doc-number{font-family:'Plus Jakarta Sans',sans-serif;font-size:0.85rem;font-weight:700;color:var(--red);letter-spacing:0.5px;}
+.doc-date{font-size:0.65rem;color:#666;margin-top:8px;line-height:1.3;}
 
-/* Info band */
-.doc-info-band{background:#fff;display:grid;grid-template-columns:1fr;border-bottom:1px solid #eee;}
-.doc-info-col{padding:10px 16px;}
-.doc-info-col:first-child{display:none;}
-.doc-info-col:nth-child(2){border-right:none;}
-.doc-info-col-label{font-size:0.48rem;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:#aaa;margin-bottom:4px;display:block;}
-.doc-company-name{font-family:'Plus Jakarta Sans',sans-serif;font-size:0.82rem;font-weight:800;color:var(--dark);margin-bottom:1px;}
-.doc-company-sub{font-size:0.54rem;color:#999;text-transform:uppercase;letter-spacing:0.12em;margin-top:2px;}
-.doc-company-details{font-size:0.63rem;color:#666;margin-top:6px;line-height:1.5;}
-.doc-client-name{font-family:'Plus Jakarta Sans',sans-serif;font-size:0.78rem;font-weight:700;color:var(--dark);}
-.doc-client-detail{font-size:0.62rem;color:#666;line-height:1.5;margin-top:3px;}
+/* ──── INFO BAND (Invoice To) ──── */
+.info-band{display:grid;grid-template-columns:1fr 1fr;background:var(--beige);border-bottom:1px solid #eee;gap:0;}
+.info-col{padding:16px 20px;border-left:4px solid var(--red);border-right:1px solid #eee;}
+.info-col:last-child{border-right:none;}
+.info-label{font-size:0.50rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--red);margin-bottom:4px;display:block;}
+.client-name{font-family:'Plus Jakarta Sans',sans-serif;font-size:0.85rem;font-weight:700;color:var(--dark);}
+.client-detail{font-size:0.65rem;color:#666;margin-top:2px;line-height:1.4;}
 
-/* Reference */
-.doc-ref{background:#f8f7f5;padding:10px 20px;border-bottom:1px solid #eee;font-size:0.78rem;color:#888;}
-.doc-ref span{color:#555;font-weight:500;}
-
-/* Body */
-.doc-body{padding:0;background:#f8f7f5;}
-
-/* Items table */
-.items-table{width:100%;border-collapse:collapse;background:#fff;}
-.items-table th{background:#1a1a1a;font-family:'Plus Jakarta Sans',sans-serif;font-size:0.48rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#ccc;padding:6px 14px;text-align:left;}
-.items-table th:nth-child(2),.items-table td:nth-child(2){text-align:center;}
-.items-table th:nth-child(3),.items-table td:nth-child(3){text-align:right;}
-.items-table th:last-child,.items-table td:last-child{text-align:right;}
-.items-table td{padding:6px 14px;font-size:0.64rem;color:#333;border-bottom:1px solid #f0f0f0;vertical-align:middle;}
+/* ──── ITEMS TABLE ──── */
+.items-section{background:var(--beige);padding:0;}
+.items-table{width:100%;border-collapse:collapse;background:var(--white);}
+.items-table th{background:var(--dark);color:#fff;font-size:0.58rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;padding:10px 16px;text-align:left;}
+.items-table th:nth-child(2){text-align:center;width:50px;}
+.items-table th:nth-child(3){text-align:right;width:90px;}
+.items-table th:nth-child(4){text-align:right;width:90px;padding-right:16px;}
+.items-table td{padding:10px 16px;font-size:0.68rem;border-bottom:1px solid #f5f5f5;color:#333;}
+.items-table td:nth-child(2){text-align:center;color:#999;}
+.items-table td:nth-child(3){text-align:right;}
+.items-table td:nth-child(4){text-align:right;font-weight:600;}
 .items-table tr:last-child td{border-bottom:none;}
-.item-name{font-weight:500;color:#111;}
-.item-desc{font-size:0.54rem;color:#aaa;margin-top:1px;}
+.item-desc{font-size:0.60rem;color:#999;margin-top:2px;}
 
-/* Totals */
-.totals-section{background:rgba(230, 57, 70, 0.08);padding:8px 16px;border-top:1px solid #eee;}
-.totals-grid{display:flex;flex-direction:column;align-items:flex-end;gap:3px;}
-.totals-row{display:flex;gap:28px;align-items:center;font-size:0.64rem;color:#666;min-width:220px;justify-content:space-between;}
-.totals-row span:last-child{font-weight:500;min-width:70px;text-align:right;}
-.totals-row.total{font-family:'Plus Jakarta Sans',sans-serif;font-size:0.82rem;font-weight:700;color:#111;border-top:2px solid #111;padding-top:5px;margin-top:2px;}
+.empty-state{padding:30px 20px;text-align:center;color:#bbb;font-size:0.75rem;}
 
-/* Banking details */
-.banking-section{background:#f8f7f5;border-top:1px solid #eee;padding:8px 12px;}
-.banking-title{font-family:'Plus Jakarta Sans',sans-serif;font-size:0.48rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--orange);margin-bottom:4px;}
-.banking-detail{font-size:0.58rem;color:#555;margin-bottom:1px;line-height:1.3;}
-.banking-detail strong{color:#333;}
+/* ──── TOTALS ──── */
+.totals-section{background:rgba(230,57,70,0.08);padding:12px 20px;display:flex;flex-direction:column;align-items:flex-end;gap:4px;border-top:1px solid #eee;}
+.totals-row{display:flex;gap:32px;font-size:0.72rem;color:#666;min-width:250px;justify-content:space-between;}
+.totals-row span:last-child{font-weight:600;text-align:right;min-width:80px;}
+.totals-row.total{font-family:'Plus Jakarta Sans',sans-serif;font-size:0.85rem;font-weight:700;color:var(--dark);border-top:2px solid #111;padding-top:6px;margin-top:2px;}
+.totals-row.total span:last-child{color:var(--red);}
 
-/* Footer */
-.doc-footer{background:#1a1a1a;border-top:3px solid var(--orange);padding:10px 16px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;}
-.doc-footer-note{font-size:0.58rem;color:#ccc;max-width:300px;line-height:1.4;font-style:italic;}
-.doc-footer-terms{font-size:0.56rem;color:#aaa;text-align:right;line-height:1.4;}
+/* ──── BANKING SECTION ──── */
+.banking-section{background:var(--beige);border-top:1px solid #eee;padding:10px 20px;}
+.banking-title{font-family:'Plus Jakarta Sans',sans-serif;font-size:0.58rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--red);margin-bottom:4px;}
+.banking-line{font-size:0.68rem;color:#666;line-height:1.3;margin-bottom:1px;}
+.banking-line strong{color:var(--dark);font-weight:600;}
 
-/* Payment action card */
-.action-card{background:#fff;border-radius:12px;padding:16px;box-shadow:0 4px 20px rgba(0,0,0,0.08);margin-bottom:18px;}
-.action-card h3{font-family:'Plus Jakarta Sans',sans-serif;font-size:0.78rem;font-weight:700;margin-bottom:5px;}
-.action-card p{font-size:0.68rem;color:var(--muted);line-height:1.4;margin-bottom:12px;}
-.pay-options{display:flex;gap:6px;flex-wrap:wrap;}
-.btn-pay-deposit{background:var(--orange);color:#fff;border:none;border-radius:8px;font-family:'Plus Jakarta Sans',sans-serif;font-size:0.7rem;font-weight:700;padding:10px 16px;cursor:pointer;transition:all 0.18s;flex:1;}
-.btn-pay-deposit:hover{background:var(--orange-dark);transform:translateY(-1px);}
-.btn-pay-full{background:transparent;color:var(--orange);border:1px solid var(--orange);border-radius:8px;font-family:'Plus Jakarta Sans',sans-serif;font-size:0.7rem;font-weight:700;padding:10px 16px;cursor:pointer;transition:all 0.18s;flex:1;}
-.btn-pay-full:hover{background:rgba(255,92,26,0.08);}
-.pay-note{font-size:0.56rem;color:#aaa;margin-top:6px;width:100%;text-align:center;}
+/* ──── FOOTER ──── */
+.doc-footer{background:var(--dark);color:#fff;padding:12px 20px;font-size:0.72rem;line-height:1.5;display:flex;justify-content:space-between;gap:20px;}
+.footer-left{flex:1;}
+.footer-right{text-align:right;flex-shrink:0;font-size:0.65rem;color:#999;}
 
-/* Paid block */
-.paid-block{background:rgba(46,204,113,0.08);border:1px solid rgba(46,204,113,0.3);border-radius:10px;padding:20px;text-align:center;}
-.paid-block h3{font-family:'Plus Jakarta Sans',sans-serif;font-size:0.9rem;font-weight:700;color:#16a34a;margin-bottom:4px;}
-.paid-block p{font-size:0.75rem;color:#555;line-height:1.5;}
+/* ──── SIGNATURE ──── */
+.signature-section{padding:20px;border-top:1px solid #eee;display:grid;grid-template-columns:1fr 1fr;gap:32px;}
+.sig-field{padding:8px 0;}
+.sig-line{border-bottom:1px solid #333;height:35px;margin-bottom:8px;}
+.sig-label{font-size:0.58rem;font-weight:700;color:#666;text-transform:uppercase;letter-spacing:0.08em;}
 
-/* Loading / Error */
-.loading{text-align:center;padding:80px 20px;}
-.spinner{width:40px;height:40px;border:3px solid #eee;border-top-color:var(--orange);border-radius:50%;animation:spin 0.8s linear infinite;margin:0 auto 16px;}
-@keyframes spin{to{transform:rotate(360deg);}}
-.loading p{font-size:0.88rem;color:#999;}
-.error-state{text-align:center;padding:80px 20px;}
-.error-state h2{font-family:'Plus Jakarta Sans',sans-serif;font-size:1.3rem;font-weight:800;margin-bottom:10px;}
-.error-state p{font-size:0.86rem;color:#999;}
+/* ──── ACTION BUTTONS ──── */
+.action-buttons{width:100%;max-width:800px;margin:20px auto;padding:0 20px;display:flex;flex-direction:column;gap:12px;}
+.btn-pay-now{padding:14px 28px;background:#27ae60;color:white;border:none;border-radius:6px;font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;cursor:pointer;font-size:0.95rem;transition:background 0.2s;text-align:center;}
+.btn-pay-now:hover{background:#229954;}
+.btn-save-pdf{padding:14px 28px;background:var(--red);color:white;border:none;border-radius:6px;font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;cursor:pointer;font-size:0.95rem;transition:background 0.2s;text-align:center;}
+.btn-save-pdf:hover{background:#c41e3a;}
 
-/* Toast */
-.toast{position:fixed;bottom:24px;right:24px;z-index:100;font-family:'Plus Jakarta Sans',sans-serif;font-size:0.82rem;font-weight:700;padding:11px 18px;border-radius:8px;transform:translateY(60px);opacity:0;transition:all 0.25s;pointer-events:none;}
-.toast.show{transform:translateY(0);opacity:1;}
-.toast.success{background:var(--green);color:#fff;}
-.toast.error{background:#e74c3c;color:#fff;}
-
-/* Mobile */
-@media(max-width:600px){
-  .main{padding:12px 8px 70px;}
-  .doc-header{padding:10px 10px;gap:6px;flex-direction:row;justify-content:space-between;align-items:flex-start;}
-  .doc-header > div:first-child{flex-shrink:0;}
-  .doc-header > div:last-child{flex-shrink:0;}
-  .doc-logo-img{max-height:40px;max-width:80px;}
-  .doc-invoice-number{font-size:1rem;letter-spacing:0.5px;}
-  .doc-info-band{grid-template-columns:1fr;}
-  .doc-info-col:first-child{border-right:none;border-bottom:none;}
-  .doc-info-col{padding:8px 10px;word-break:break-word;}
-  .items-table{table-layout:fixed;width:100%;}
-  .items-table th:nth-child(3),.items-table td:nth-child(3){display:none;}
-  .items-table th:nth-child(1),.items-table td:nth-child(1){width:50%;padding-left:10px;}
-  .items-table th:nth-child(2),.items-table td:nth-child(2){width:13%;}
-  .items-table th:nth-child(4),.items-table td:nth-child(4){width:37%;padding-right:10px;white-space:nowrap;}
-  .items-table th{font-size:0.44rem;padding:5px 6px;}
-  .items-table td{font-size:0.58rem;padding:6px 6px;}
-  .totals-section{padding:8px 10px;}
-  .totals-row{min-width:unset;font-size:0.58rem;}
-  .doc-footer{padding:10px;flex-direction:column;text-align:center;gap:6px;}
-  .doc-footer-note,.doc-footer-terms{max-width:100%;text-align:center;}
-  .banking-section{padding:8px 10px;}
-  .action-card{padding:14px 12px;}
-  .pay-options{flex-direction:column;}
-  .btn-pay-deposit,.btn-pay-full{width:100%;text-align:center;}
+/* ──── PRINT ──── */
+@media print{
+  body{padding:0;background:white;}
+  .doc-container{border-radius:0;box-shadow:none;}
+  .print-only{display:block;}
+  .action-buttons{display:none;}
 }
 
-/* ── MOBILE RESPONSIVE ── */
-@media(max-width:600px){
-  body { padding:6px 8px 32px; }
-  .doc-wrap { border-radius:8px; box-shadow:0 2px 16px rgba(0,0,0,0.08); }
-  .doc-header { flex-direction:row; gap:6px; padding:6px 6px; justify-content:space-between; align-items:flex-start; }
-  .doc-header > div:first-child { display:flex !important; align-items:flex-start !important; gap:6px !important; flex:1; }
-  .doc-header > div:last-child { text-align:right; display:flex; flex-direction:column; align-items:flex-end; gap:0; }
-  .doc-quote-label { font-size:0.45rem; color:#666; text-align:right; margin:0; line-height:1; }
-  .doc-quote-number { text-align:right; font-size:0.75rem; letter-spacing:0.4px; font-weight:700; font-family:'DM Sans',sans-serif; margin:0; line-height:1.1; color:#E63946; }
-  .doc-quote-date, .doc-quote-valid { text-align:right; font-size:0.54rem; margin:0; line-height:1; }
-  .doc-company { font-size:0.74rem !important; font-weight:700; line-height:1.05; margin:0; }
-  .doc-logo { max-height:50px !important; max-width:75px !important; margin:0; flex-shrink:0; }
-  .doc-tagline { font-size:0.54rem; line-height:1; margin:0; }
-  .doc-contact { font-size:0.54rem; margin-top:1px; line-height:1.2; text-align:left; }
-  .doc-info-band { grid-template-columns:1fr !important; gap:0; }
-  .doc-from { display:none !important; }
-  .doc-for { padding:8px 6px; border:none; border-bottom:1px solid #f0f0f0; display:block !important; }
-  .doc-info-label { font-size:0.51rem; margin-bottom:2px; font-weight:700; color:#555; text-transform:uppercase; }
-  .doc-client-name { font-size:0.78rem; font-weight:700; }
-  .doc-client-detail { font-size:0.64rem; line-height:1.25; }
-  .doc-scope { padding:6px 6px; font-size:0.70rem; line-height:1.4; border-left:2px solid #E63946; }
-  .items-table { table-layout:fixed; width:100%; }
-  .items-table th:nth-child(3), .items-table td:nth-child(3) { display:none; }
-  .items-table th:nth-child(1), .items-table td:nth-child(1) { width:50%; padding-left:6px; }
-  .items-table th:nth-child(2), .items-table td:nth-child(2) { width:13%; text-align:center; padding:4px 2px; }
-  .items-table th:nth-child(4), .items-table td:nth-child(4) { width:37%; padding-right:6px; white-space:nowrap; }
-  .items-table th { font-size:0.49rem; padding:4px 4px; font-weight:700; background:#f8f8f8; text-transform:uppercase; letter-spacing:0.25px; }
-  .items-table td { padding:5px 4px; font-size:0.68rem; }
-  .doc-item-desc { font-size:0.58rem; margin-top:1px; }
-  .doc-totals { padding:6px 6px; gap:4px; }
-  .doc-total-row { gap:16px; font-size:0.66rem; }
-  .doc-total-row span:last-child { min-width:70px; font-size:0.66rem; }
-  .doc-total-due { gap:16px; font-size:0.80rem; }
-  .doc-total-due span:last-child { min-width:70px; font-size:0.80rem; }
-  .doc-footer { padding:6px 6px; flex-direction:column; gap:4px; }
-  .doc-footer-note { font-size:0.62rem; text-align:center; }
-  .doc-footer-terms { text-align:center; font-size:0.60rem; }
-  .doc-sig { padding:6px 6px; gap:6px; grid-template-columns:1fr; }
-  .sig-field { margin-top:8px; margin-bottom:2px; border-bottom:1px solid #cccccc; height:0; }
-  .sig-label { font-size:0.50rem; margin-top:0; }
-  .pay-btn { padding:10px 16px; font-size:0.76rem; }
-  .banking-section { padding:6px 6px; }
-  .action-card { padding:12px 10px; }
-  .pay-options { flex-direction:column; gap:6px; }
-  .btn-pay-deposit, .btn-pay-full { width:100%; text-align:center; }
+/* ──── MOBILE ──── */
+@media (max-width:640px){
+  body{padding:12px;}
+  .doc-header{padding:12px 10px;gap:6px;flex-wrap:nowrap;align-items:flex-start;}
+  .header-left{gap:8px;min-width:0;}
+  .doc-logo{max-height:40px;max-width:70px;flex-shrink:0;}
+  .logo-placeholder{width:40px;height:40px;font-size:1.1rem;flex-shrink:0;}
+  .company-info{font-size:0.60rem;overflow:hidden;text-overflow:ellipsis;}
+  .company-name{font-size:0.72rem;}
+  .company-line{font-size:0.52rem;margin:0.5px 0;line-height:1.1;}
+  .header-right{text-align:right;flex-shrink:0;white-space:nowrap;min-width:60px;}
+  .doc-type{font-size:0.38rem;margin-bottom:2px;}
+  .doc-number{font-size:0.60rem;line-height:1;}
+  .doc-date{font-size:0.48rem;margin-top:2px;line-height:1.1;}
+  
+  .info-col{padding:10px 12px;border-left:3px solid var(--red);}
+  .info-label{font-size:0.40rem;margin-bottom:2px;}
+  .client-name{font-size:0.70rem;}
+  .client-detail{font-size:0.53rem;line-height:1.3;}
+  
+  .items-table th{font-size:0.48rem;padding:7px 9px;}
+  .items-table th:nth-child(2){width:32px;}
+  .items-table th:nth-child(3){width:60px;}
+  .items-table th:nth-child(4){width:60px;padding-right:9px;}
+  .items-table td{padding:7px 9px;font-size:0.58rem;}
+  .item-desc{font-size:0.50rem;}
+  
+  .totals-section{padding:10px 12px;gap:2px;}
+  .totals-row{gap:16px;font-size:0.60rem;min-width:160px;}
+  .totals-row span:last-child{min-width:55px;}
+  .totals-row.total{font-size:0.70rem;padding-top:3px;}
+  
+  .banking-section{padding:8px 12px;}
+  .banking-title{font-size:0.48rem;margin-bottom:2px;}
+  .banking-line{font-size:0.57rem;margin-bottom:1px;line-height:1.2;}
+  
+  .doc-footer{padding:10px 12px;font-size:0.60rem;gap:6px;}
+  .footer-right{font-size:0.52rem;}
+  
+  .signature-section{padding:14px;gap:12px;}
+  .sig-line{height:28px;margin-bottom:5px;}
+  .sig-label{font-size:0.48rem;}
+  
+  .print-btn{margin:10px auto;padding:9px 20px;font-size:0.80rem;}
+  
+  .action-buttons{max-width:100%;padding:0 12px;gap:10px;}
+  .btn-pay-now,.btn-save-pdf{padding:12px 20px;font-size:0.85rem;}
 }
-.doc-table{width:100%;border-collapse:collapse;}
-.doc-table th{background:#1a1a1a;color:#fff;font-size:0.68rem;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;padding:10px 14px;text-align:left;font-family:'DM Sans',sans-serif;}
-.doc-table th:nth-child(2){text-align:center;width:42px;}
-.doc-table th:nth-child(3){text-align:right;}
-.doc-table th:nth-child(4){text-align:right;}
-.doc-table td{padding:11px 14px;font-size:0.82rem;border-bottom:1px solid #f0f0f0;vertical-align:top;color:#333;}
-.doc-table td:nth-child(2){text-align:center;color:#888;}
-.doc-table td:nth-child(3){text-align:right;color:#555;}
-.doc-table td:last-child{text-align:right;font-weight:600;color:#111;}
-.doc-table tr:nth-child(even) td{background:#fafafa;}
-.doc-item-desc{font-size:0.72rem;color:#aaa;margin-top:2px;}
 </style>
 </head>
 <body>
 
-<div class="topbar">
-  <div class="logo"><div class="logo-box">Q</div><span>Forge</span></div>
-  <div class="topbar-note">Secure invoice powered by QForge</div>
-</div>
+<div class="doc-container">
 
-<div class="main" id="mainContent">
-  <div class="loading" id="loadingState">
-    <div class="spinner"></div>
-    <p>Loading your invoice...</p>
-  </div>
-</div>
-
-<div class="toast" id="toast"></div>
-
-<!-- PayFast form -->
-<form id="payfastForm" action="https://www.payfast.co.za/eng/process" method="post" style="display:none;">
-  <input type="hidden" name="merchant_id" value="11853484">
-  <input type="hidden" name="merchant_key" value="iqfavcdl7gn8j">
-  <input type="hidden" name="return_url" id="pf_return" value="">
-  <input type="hidden" name="cancel_url" id="pf_cancel" value="">
-  <input type="hidden" name="name_first" id="pf_name" value="">
-  <input type="hidden" name="email_address" id="pf_email" value="">
-  <input type="hidden" name="m_payment_id" id="pf_payment_id" value="">
-  <input type="hidden" name="amount" id="pf_amount" value="">
-  <input type="hidden" name="item_name" id="pf_item" value="">
-  <input type="hidden" name="item_description" id="pf_desc" value="">
-</form>
-
-<script>
-const SUPABASE_URL = 'https://blfhvkbjfhhjsnobvfct.supabase.co';
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJsZmh2a2JqZmhoanNub2J2ZmN0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAyNjA4MjIsImV4cCI6MjA5NTgzNjgyMn0.w0CUm6N52U8OIYWqrpu84QfeFUm1TYpcpTVKCxCl-YM';
-const { createClient } = supabase;
-const sb = createClient(SUPABASE_URL, SUPABASE_KEY);
-
-let invoice = null;
-let profile = null;
-
-function getInvoiceId() {
-  const params = new URLSearchParams(window.location.search);
-  return params.get('id') || params.get('invoice');
-}
-
-function fmt(n) {
-  return 'R' + (n||0).toLocaleString('en-ZA', {minimumFractionDigits:2, maximumFractionDigits:2});
-}
-
-function esc(s) {
-  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-}
-
-function getDueDate() {
-  const d = new Date(invoice.date || Date.now());
-  d.setDate(d.getDate() + 30);
-  return d;
-}
-
-function getDueDateStr() {
-  return getDueDate().toLocaleDateString('en-ZA', {day:'numeric',month:'long',year:'numeric'});
-}
-
-function getDueStatus() {
-  const due = getDueDate();
-  const today = new Date();
-  const daysLeft = Math.ceil((due - today) / (1000*60*60*24));
-  if (invoice.status === 'paid') return {cls:'due-ok', text:'Paid'};
-  if (daysLeft < 0) return {cls:'due-late', text:'Overdue by '+Math.abs(daysLeft)+' days'};
-  if (daysLeft <= 7) return {cls:'due-warn', text:'Due in '+daysLeft+' days'};
-  return {cls:'due-ok', text:'Due '+getDueDateStr()};
-}
-
-async function loadInvoice() {
-  const iid = getInvoiceId();
-  if (!iid) { showError('No invoice ID found in this link.'); return; }
-
-  const { data, error } = await sb.from('quotes')
-    .select('*, profiles(*)')
-    .eq('id', iid)
-    .single();
-
-  if (error || !data) { showError('Invoice not found. The link may be incorrect.'); return; }
-
-  invoice = data;
-  profile = data.profiles;
-
-  // Mark as viewed
-  if (invoice.status === 'invoice' || invoice.status === 'invoiced') {
-    await sb.from('quotes').update({ status: 'invoice', viewed_at: new Date().toISOString() }).eq('id', iid);
-  }
-
-  renderInvoice();
-}
-
-function renderInvoice() {
-  const mc = document.getElementById('mainContent');
-  const items = invoice.items || [];
-  const vatOn = invoice.vat_registered !== false;
-  const isPaid = invoice.status === 'paid';
-  const dueStatus = getDueStatus();
-
-  // Status banner
-  let bannerHtml = '';
-  if (isPaid) {
-    bannerHtml = '<div class="status-banner paid"><span class="status-icon">&#10003;</span> This invoice has been paid. Thank you!</div>';
-  } else if (dueStatus.cls === 'due-late') {
-    bannerHtml = '<div class="status-banner overdue"><span class="status-icon">&#9888;</span> This invoice is overdue. Please arrange payment as soon as possible.</div>';
-  } else {
-    bannerHtml = '<div class="status-banner invoice"><span class="status-icon">&#128196;</span> Tax Invoice — payment due by ' + getDueDateStr() + '.</div>';
-  }
-
-  // Items
-  const itemRows = items.length > 0 ? items.map(item => `
-    <tr>
-      <td><div class="item-name">${esc(item.name||'-')}</div>${item.desc?'<div class="item-desc">'+esc(item.desc)+'</div>':''}</td>
-      <td style="text-align:center">${item.qty||1}</td>
-      <td style="text-align:right">${fmt(item.price)}</td>
-      <td style="text-align:right;font-weight:500">${fmt((item.qty||1)*(item.price||0))}</td>
-    </tr>`).join('') :
-    '<tr><td colspan="4" style="text-align:center;color:#bbb;padding:20px;">No items</td></tr>';
-
-  // Payment action
-  let payHtml = '';
-  if (isPaid) {
-    payHtml = `<div class="action-card"><div class="paid-block">
-      <h3>Payment Received</h3>
-      <p>Thank you for your payment. ${esc(profile?.company||'The company')} has been notified.</p>
-    </div></div>`;
-  } else {
-    payHtml = `<div class="action-card">
-      <h3>Pay This Invoice</h3>
-      <p>Pay securely via credit card, debit card, EFT or SnapScan. Payment is processed by PayFast.</p>
-      <div class="pay-options">
-        <button class="btn-pay-deposit" onclick="payDeposit()">Pay 50% Deposit &mdash; ${fmt(Math.round((invoice.amount||0)*0.5))}</button>
-        <button class="btn-pay-full" onclick="payFull()">Pay Full Amount &mdash; ${fmt(invoice.amount||0)}</button>
-      </div>
-      <div class="pay-note">Secured by PayFast &mdash; South Africa's trusted payment gateway</div>
-    </div>`;
-  }
-
-  mc.innerHTML = `
-    ${bannerHtml}
-    <div class="invoice-doc">
-
-      <!-- HEADER -->
-      <div class="doc-header" style="display:flex!important;flex-direction:row!important;justify-content:space-between!important;align-items:center!important;background:#fff;border-bottom:3px solid #E63946;padding:10px 14px;gap:8px;">
-        <div style="flex-shrink:0;display:flex;align-items:center;">
-          ${profile?.logo
-            ? '<img src="'+profile.logo+'" style="max-height:48px;max-width:100px;object-fit:contain;display:block;">'
-            : '<div style="width:40px;height:40px;border-radius:6px;background:#f0f0f0;border:1px dashed #ccc;display:flex;align-items:center;justify-content:center;font-size:0.9rem;">&#127962;</div>'}
-        </div>
-        <div style="flex:1;text-align:right;">
-          <div style="font-family:Syne,sans-serif;font-size:0.48rem;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;color:#999;margin-bottom:2px;">Tax Invoice</div>
-          <div style="font-family:'Bebas Neue',sans-serif;font-size:1.2rem;color:#E63946;letter-spacing:1px;">${esc(invoice.id)}</div>
-          <div style="font-size:0.58rem;color:#555;margin-top:3px;">Date: ${new Date(invoice.date||Date.now()).toLocaleDateString('en-ZA',{day:'numeric',month:'long',year:'numeric'})}</div>
-          <div class="doc-invoice-due ${dueStatus.cls}" style="font-size:0.58rem;margin-top:1px;">${dueStatus.text}</div>
-        </div>
-      </div>
-
-      <!-- INFO BAND -->
-      <div class="doc-info-band">
-        <div class="doc-info-col">
-          <span class="doc-info-col-label">From</span>
-          <div class="doc-company-name">${esc(profile?.company||'-')}</div>
-          <div class="doc-company-sub">${esc(profile?.industry||'')}</div>
-          <div class="doc-company-details">
-            ${profile?.phone?'<div>Tel: '+esc(profile.phone)+'</div>':''}
-            ${profile?.email?'<div>Email: '+esc(profile.email)+'</div>':''}
-            ${profile?.vat_number?'<div>VAT No: '+esc(profile.vat_number)+'</div>':''}
-          </div>
-        </div>
-        <div class="doc-info-col">
-          <span class="doc-info-col-label">Invoice To</span>
-          <div class="doc-client-name">${esc(invoice.client||'-')}</div>
-          <div class="doc-client-detail">
-            ${invoice.contact?esc(invoice.contact)+'<br>':''}
-            ${invoice.address?esc(invoice.address):''}
-          </div>
-          ${invoice.vehicle_model || invoice.vehicle_reg_no || invoice.vehicle_vin ? 
-            '<div style="margin-top:12px;padding-top:12px;border-top:1px solid #eee;"><span class="doc-info-col-label">Vehicle Details</span><div style="font-size:0.75rem;color:#555;line-height:1.5;">' +
-            (invoice.vehicle_model ? '<strong>' + esc(invoice.vehicle_model) + '</strong><br>' : '') +
-            (invoice.vehicle_reg_no ? 'Reg: ' + esc(invoice.vehicle_reg_no) + '<br>' : '') +
-            (invoice.vehicle_vin ? 'VIN: ' + esc(invoice.vehicle_vin) : '') +
-            '</div></div>'
-          : ''}
-          ${invoice.quote_ref?'<div style="margin-top:10px;"><span class="doc-info-col-label">Quote Reference</span><div style="font-size:0.78rem;color:#555;">'+esc(invoice.quote_ref)+'</div></div>':''}
-        </div>
-      </div>
-
-      <!-- ITEMS TABLE -->
-      <div class="doc-body">
-        <table class="items-table">
-          <thead><tr>
-            <th style="width:44%">Description</th>
-            <th style="width:11%">Qty</th>
-            <th style="width:19%">Unit Price</th>
-            <th style="width:19%">Amount</th>
-          </tr></thead>
-          <tbody>${itemRows}</tbody>
-        </table>
-      </div>
-
-      <!-- TOTALS -->
-      <div class="totals-section">
-        <div class="totals-grid">
-          <div class="totals-row"><span>Subtotal</span><span>${fmt(invoice.subtotal)}</span></div>
-          ${vatOn?'<div class="totals-row"><span>VAT @ 15%</span><span>'+fmt(invoice.vat)+'</span></div>':''}
-          <div class="totals-row total"><span>Total Due</span><span>${fmt(invoice.amount)}</span></div>
-        </div>
-      </div>
-
-      <!-- BANKING DETAILS -->
-      <div class="banking-section">
-        <div class="banking-title">Payment Details</div>
-        <div class="banking-detail">Please use <strong>${esc(invoice.id)}</strong> as your payment reference.</div>
-        ${profile?.bank_name ? `
-          <div style="margin-top:8px;border-top:1px solid #eee;padding-top:8px;">
-            <div class="banking-detail"><strong>Bank:</strong> ${esc(profile.bank_name)}</div>
-            ${profile.account_holder ? '<div class="banking-detail"><strong>Account Holder:</strong> ' + esc(profile.account_holder) + '</div>' : ''}
-            ${profile.account_number ? '<div class="banking-detail"><strong>Account Number:</strong> ' + esc(profile.account_number) + '</div>' : ''}
-            ${profile.branch_code ? '<div class="banking-detail"><strong>Branch Code:</strong> ' + esc(profile.branch_code) + '</div>' : ''}
-          </div>
-        ` : '<div class="banking-detail" style="color:#999;font-size:0.6rem;margin-top:4px;">Banking details not provided. Please contact ' + esc(profile?.company||'us') + ' directly.</div>'}
-        <div class="banking-detail" style="margin-top:4px;color:#E63946;font-size:0.62rem;">Or pay instantly below using the Pay button.</div>
-      </div>
-
-      <!-- FOOTER -->
-      <div class="doc-footer">
-        <div class="doc-footer-note">Thank you for your business. Payment is due within 30 days.</div>
-        <div class="doc-footer-terms">Invoice: ${esc(invoice.id)}<br>Due: ${getDueDateStr()}</div>
+  <!-- HEADER -->
+  <div class="doc-header">
+    <div class="header-left">
+      <div class="logo-placeholder">🏢</div>
+      <div class="company-info">
+        <div class="company-name">ADCUS (PTY) LTD</div>
+        <div class="company-line"><strong>Dries:</strong> 083 465 4413</div>
+        <div class="company-line"><strong>Email:</strong> accounts@adcus.co.za</div>
+        <div class="company-line">Plot 166 Shaw Road, Ivydale</div>
+        <div class="company-line">POLOKWANE, 0699</div>
+        <div class="company-line"><strong>Reg nr:</strong> 2025/733536/07</div>
+        <div class="company-line"><strong>VAT:</strong> 9-0908978787</div>
       </div>
     </div>
+    <div class="header-right">
+      <div class="doc-type">Tax Invoice</div>
+      <div class="doc-number">INA-001</div>
+      <div class="doc-date">
+        <strong>Date:</strong> 24/04/26<br>
+        <strong>Due:</strong> 24/04/26
+      </div>
+    </div>
+  </div>
 
-    ${payHtml}
+  <!-- INFO BAND -->
+  <div class="info-band">
+    <div class="info-col">
+      <span class="info-label">Invoice to</span>
+      <div class="client-name">Novacor Commercials</div>
+      <div class="client-detail">
+        0834654413<br>
+        Blaauwberg Street<br>
+        Ladine<br>
+        POLOKWANE<br>
+        <strong style="margin-top:4px;display:block;">Ref Invoice: INA-001</strong>
+      </div>
+    </div>
+    <div class="info-col">
+      <span class="info-label">Vehicle Details</span>
+      <div class="client-detail">
+        <strong>VIN:</strong> ABC123XYZ789<br>
+        <strong>Reg:</strong> GJN 2020<br>
+        <strong>KM:</strong> 45,200<br>
+        <strong>Make/Model:</strong> Toyota Hilux<br>
+        <strong>Engine:</strong> 2.4L Diesel
+      </div>
+    </div>
+  </div>
 
-    <div style="text-align:center;padding:20px 0;font-size:0.75rem;color:#aaa;">
-      Powered by <strong>QForge</strong> &middot; myquoteforge.co.za
-    </div>`;
+  <!-- ITEMS TABLE -->
+  <div class="items-section">
+    <table class="items-table">
+      <thead>
+        <tr>
+          <th>Description</th>
+          <th>QTY</th>
+          <th>Unit Price</th>
+          <th>Amount</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>
+            <div>Monthly Package</div>
+            <div class="item-desc">Website - 12 Months Fixed, Google Business Profile Management, Review Stand - NFC Tag (QR-Code), 4 Photo upload each Month, Review Monitoring and Management, GBP Optimisation</div>
+          </td>
+          <td>1</td>
+          <td>R1,600.00</td>
+          <td>R1,600.00</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- TOTALS -->
+  <div class="totals-section">
+    <div class="totals-row">
+      <span>Sub Total</span>
+      <span>R1,600.00</span>
+    </div>
+    <div class="totals-row">
+      <span>VAT:</span>
+      <span>R0.00</span>
+    </div>
+    <div class="totals-row total">
+      <span>Total Due</span>
+      <span>R1,600.00</span>
+    </div>
+  </div>
+
+  <!-- BANKING SECTION -->
+  <div class="banking-section">
+    <div class="banking-title">ADCUS (PTY)LTD</div>
+    <div class="banking-line">Capitec Business Account</div>
+    <div class="banking-line"><strong>Account Nr:</strong> 105 429 6626</div>
+    <div class="banking-line"><strong>Branch Code:</strong> 450105</div>
+  </div>
+
+  <!-- FOOTER -->
+  <div class="doc-footer">
+    <div class="footer-left">
+      Thank you for your business. Payment is due within 30 days.<br>
+      <strong style="margin-top:4px;display:block;">Deposit: 50% required on acceptance. Balance due on completion</strong>
+    </div>
+    <div class="footer-right">
+      Powered by QForge | myquoteforge.co.za
+    </div>
+  </div>
+
+  <!-- SIGNATURE -->
+  <div class="signature-section">
+    <div class="sig-field">
+      <div class="sig-line"></div>
+      <div class="sig-label">Received in good order</div>
+    </div>
+    <div class="sig-field">
+      <div class="sig-line"></div>
+      <div class="sig-label">Date</div>
+    </div>
+  </div>
+
+</div>
+
+</div>
+
+<div class="action-buttons">
+  <button class="btn-pay-now" onclick="goToPayFast()">💳 Pay Now with PayFast</button>
+  <button class="btn-save-pdf" onclick="window.print()">📄 Save to PDF</button>
+</div>
+
+<script>
+function goToPayFast() {
+  // PayFast integration - redirect to PayFast payment gateway
+  // Amount should come from invoice total
+  const invoiceAmount = '1600.00'; // Get from actual invoice data
+  const customerName = 'Novacor Commercials'; // Get from actual data
+  const customerEmail = 'client@example.com'; // Get from actual data
+  
+  // PayFast test environment URL
+  const payFastUrl = 'https://www.payfast.co.za/eng/process';
+  
+  // Create form data
+  const formData = new FormData();
+  formData.append('merchant_id', '11853484');
+  formData.append('merchant_key', 'merchant_key_here');
+  formData.append('return_url', window.location.href);
+  formData.append('cancel_url', window.location.href);
+  formData.append('notify_url', 'https://myquoteforge.co.za/webhook/payfast');
+  formData.append('amount', invoiceAmount);
+  formData.append('item_name', 'Invoice Payment');
+  formData.append('name_first', customerName);
+  formData.append('email_address', customerEmail);
+  
+  // For now, just alert user (will be fully implemented in app.html)
+  alert('Redirecting to PayFast payment gateway...\n\nAmount: R' + invoiceAmount);
+  // window.location.href = payFastUrl;
 }
-
-function payDeposit() {
-  const amount = Math.round((invoice.amount||0) * 0.5);
-  submitPayFast(amount, '50% Deposit - ' + invoice.id);
-}
-
-function payFull() {
-  submitPayFast(invoice.amount||0, 'Full Payment - ' + invoice.id);
-}
-
-function submitPayFast(amount, description) {
-  const currentUrl = window.location.href;
-  document.getElementById('pf_return').value = currentUrl + '&paid=true';
-  document.getElementById('pf_cancel').value = currentUrl;
-  document.getElementById('pf_name').value = invoice.client || 'Client';
-  document.getElementById('pf_email').value = profile?.email || '';
-  document.getElementById('pf_payment_id').value = 'QF-PAY-' + invoice.id + '-' + Date.now();
-  document.getElementById('pf_amount').value = parseFloat(amount).toFixed(2);
-  document.getElementById('pf_item').value = 'Invoice ' + invoice.id;
-  document.getElementById('pf_desc').value = description + ' for ' + invoice.client;
-  document.getElementById('payfastForm').submit();
-}
-
-function showError(msg) {
-  document.getElementById('mainContent').innerHTML = `
-    <div class="error-state">
-      <div style="font-size:3rem;margin-bottom:16px;">&#128196;</div>
-      <h2>Invoice Not Found</h2>
-      <p>${msg}</p>
-    </div>`;
-}
-
-function showToast(msg, type) {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.className = 'toast ' + (type||'success') + ' show';
-  clearTimeout(t._t);
-  t._t = setTimeout(() => t.classList.remove('show'), 3000);
-}
-
-loadInvoice();
 </script>
-</body>
-</html>
