@@ -2455,6 +2455,27 @@ function doLogout() {
   });
 }
 
+// ══════════════════════════════════════
+// COMPOSITE ID HELPERS (User Data Isolation)
+// ══════════════════════════════════════
+// Creates a unique ID per user: "userId|QUA-001"
+function createCompositeId(userId, quoteNumber) {
+  if (!userId || !quoteNumber) return quoteNumber;
+  return `${userId}|${quoteNumber}`;
+}
+
+// Extracts just the quote number for display: "userId|QUA-001" → "QUA-001"
+function extractQuoteNumber(compositeId) {
+  if (!compositeId) return compositeId;
+  return compositeId.includes('|') ? compositeId.split('|')[1] : compositeId;
+}
+
+// Extracts user ID from composite: "userId|QUA-001" → "userId"
+function extractUserId(compositeId) {
+  if (!compositeId) return null;
+  return compositeId.includes('|') ? compositeId.split('|')[0] : null;
+}
+
 function loadUserQuotes(uid) { return []; }
 async function saveUserQuotes() {
   // Handled by saveQuote() directly to Supabase
@@ -2618,9 +2639,10 @@ function renderQuoteTable(list, compact) {
   const rows = list.map(q => {
     const isConverted = q.status === 'invoice' || q.status === 'invoiced' || q.status === 'paid';
     const convertedBadge = isConverted ? '<span style="font-size:0.68rem;color:#E63946;font-weight:600;margin-left:8px;">✓ Converted to Invoice</span>' : '';
+    const displayNum = q.quote_number || extractQuoteNumber(q.id);  // Show quote number, not composite ID
     return `
   <div class="qt-row" onclick="viewQuote('${q.id}')" ${isConverted ? 'style="opacity:0.7;"' : ''}>
-    <div><div class="qt-client">${esc(q.client)}</div><div class="qt-num">${q.id}${convertedBadge}</div></div>
+    <div><div class="qt-client">${esc(q.client)}</div><div class="qt-num">${displayNum}${convertedBadge}</div></div>
     <div class="qt-date">${formatDate(q.date)}</div>
     <div><span class="status-badge status-${q.status}">${statusDot(q.status)} ${q.status.charAt(0).toUpperCase()+q.status.slice(1)}</span></div>
     <div class="qt-amount">${q.amount>0?'R'+q.amount.toLocaleString('en-ZA'):'-'}</div>
@@ -2660,9 +2682,9 @@ function editQuote(id) {
 
 async function deleteQuote(id) {
   confirm2('Delete Quote?', 'This quote will be permanently deleted and cannot be recovered.', async () => {
-    // Delete from Supabase first
+    // Delete from Supabase first with user_id verification for security
     if (currentUser?.id && currentUser.id !== 'demo') {
-      const { error } = await sb.from('quotes').delete().eq('id', id);
+      const { error } = await sb.from('quotes').delete().eq('id', id).eq('user_id', currentUser.id);
       if (error) {
         showToast('Delete failed: ' + error.message, 'error');
         return;
@@ -2687,11 +2709,12 @@ async function manualAccept(el, id) {
         quotes[idx].signed_by = 'Manually accepted';
         quotes[idx].signed_at = new Date().toISOString();
         if (currentUser?.id && currentUser.id !== 'demo') {
+          // Add user_id check for security
           await sb.from('quotes').update({
             status: 'signed',
             signed_by: 'Manually accepted',
             signed_at: new Date().toISOString()
-          }).eq('id', id);
+          }).eq('id', id).eq('user_id', currentUser.id);
         }
       }
       showToast('Quote marked as accepted', 'success');
@@ -2706,20 +2729,26 @@ async function convertToInvoice(el, id) {
   
   confirm2(
     'Convert to Invoice?',
-    'This will create a tax invoice from quote ' + q.id + ' for ' + q.client + '. The quote will be kept as a record.\n\nMark this invoice as paid or pending payment?',
+    'This will create a tax invoice from quote ' + extractQuoteNumber(q.id) + ' for ' + q.client + '. The quote will be kept as a record.\n\nMark this invoice as paid or pending payment?',
     async () => {
       // Show dialog to ask if paid or pending
       const isPaid = confirm('Click OK if this invoice is PAID. Click Cancel if PENDING PAYMENT.');
       
-      // Generate invoice number - strip any prefix and use just the number
-      // e.g. ADC-001 -> INV-001, QF-001 -> INV-001
-      const numPart = q.id.replace(/^[A-Z]+-/i, '');
+      // Generate invoice number from the quote number
+      // Extract the quote number from composite ID (e.g., "userId|QUA-001" -> "QUA-001")
+      const quoteNum = extractQuoteNumber(q.id);
+      const numPart = quoteNum.replace(/^[A-Z]+-/i, '');
       const invNum = 'INV-' + numPart;
       const invDate = new Date().toISOString().split('T')[0];
       
+      // Create composite ID for invoice: "userId|INV-001"
+      const userId = currentUser?.id;
+      const compositeInvId = createCompositeId(userId, invNum);
+      
       const invoice = {
-        id: invNum,
-        user_id: currentUser?.id,
+        id: compositeInvId,  // Use composite ID for data isolation
+        user_id: userId,
+        invoice_number: invNum,  // Store display number separately
         client: q.client,
         contact: q.contact,
         address: q.address,
@@ -2733,26 +2762,27 @@ async function convertToInvoice(el, id) {
         date: invDate,
         valid_days: 30,
         vat_registered: true,
-        quote_ref: q.id,
+        quote_ref: id,  // Store the composite quote ID reference
         updated_at: new Date().toISOString()
       };
 
-      // Save to Supabase
+      // Save to Supabase with user_id verification
       if (currentUser?.id && currentUser.id !== 'demo') {
         const { data: { session } } = await sb.auth.getSession();
         if (session) {
           invoice.user_id = session.user.id;
+          invoice.id = createCompositeId(session.user.id, invNum);
           const { error } = await sb.from('quotes').upsert(invoice, { onConflict: 'id' });
           if (error) { showToast('Error creating invoice: ' + error.message, 'error'); return; }
         }
       }
 
-      // Update quote status to invoiced
+      // Update quote status to invoiced with user_id check
       const idx = quotes.findIndex(x => x.id === id);
       if (idx > -1) {
         quotes[idx].status = 'invoiced';
         if (currentUser?.id && currentUser.id !== 'demo') {
-          await sb.from('quotes').update({ status: 'invoiced' }).eq('id', id);
+          await sb.from('quotes').update({ status: 'invoiced' }).eq('id', id).eq('user_id', currentUser.id);
         }
       }
 
@@ -2765,12 +2795,13 @@ async function convertToInvoice(el, id) {
 }
 
 async function markAsPaid(el, id) {
-  confirm2('Mark as Paid?', 'This will mark invoice ' + id + ' as paid.', async () => {
+  confirm2('Mark as Paid?', 'This will mark invoice ' + extractQuoteNumber(id) + ' as paid.', async () => {
     const idx = quotes.findIndex(x => x.id === id);
     if (idx > -1) {
       quotes[idx].status = 'paid';
       if (currentUser?.id && currentUser.id !== 'demo') {
-        await sb.from('quotes').update({ status: 'paid' }).eq('id', id);
+        // Add user_id check for security
+        await sb.from('quotes').update({ status: 'paid' }).eq('id', id).eq('user_id', currentUser.id);
       }
     }
     showToast('Invoice marked as paid!', 'success');
@@ -3356,9 +3387,18 @@ async function saveQuote() {
   const qNum = document.getElementById('b_quoteNumber')?.value.trim()||'QUA-001';
   const vatOn = document.getElementById('b_vat')?.value === 'yes';
   const validDays = parseInt(document.getElementById('b_validDays')?.value||'14');
+  
+  // Get current user ID
+  const userId = currentUser?.id;
+  if (!userId) { showToast('User ID missing - please sign in again', 'error'); return; }
+  
+  // Create composite ID for data isolation: "userId|QUA-001"
+  const compositeId = createCompositeId(userId, editingQuoteId ? extractQuoteNumber(editingQuoteId) : qNum);
+  
   const quoteData = {
-    id: editingQuoteId || qNum,
-    user_id: currentUser?.id,
+    id: compositeId,  // Now includes user_id for uniqueness
+    user_id: userId,
+    quote_number: qNum,  // Store the display number separately
     client: clientName,
     contact: document.getElementById('b_clientContact')?.value.trim()||'',
     email: document.getElementById('b_clientEmail')?.value.trim()||null,
@@ -3391,19 +3431,28 @@ async function saveQuote() {
     // Get fresh session to ensure auth is active
     const { data: { session } } = await sb.auth.getSession();
     if (!session) { showToast('Please sign in again', 'error'); return; }
-    // Force user_id from session
+    // Force user_id from session for security
     quoteData.user_id = session.user.id;
+    quoteData.id = createCompositeId(session.user.id, qNum);
+    // Use composite ID in conflict resolution for data isolation
     const { error } = await sb.from('quotes').upsert(quoteData, { onConflict: 'id' });
     if (error) { showToast('Save failed: ' + error.message, 'error'); return; }
   }
 
   // Update local state
   const localQuote = {
-    id: quoteData.id, client: clientName,
-    contact: quoteData.contact, address: quoteData.address,
-    scope: builderScope, status: quoteData.status,
-    subtotal: quoteData.subtotal, vat: quoteData.vat, amount: quoteData.amount,
-    items: [...builderItems], date: quoteData.date,
+    id: compositeId, 
+    quote_number: qNum,  // Store display number
+    client: clientName,
+    contact: quoteData.contact, 
+    address: quoteData.address,
+    scope: builderScope, 
+    status: quoteData.status,
+    subtotal: quoteData.subtotal, 
+    vat: quoteData.vat, 
+    amount: quoteData.amount,
+    items: [...builderItems], 
+    date: quoteData.date,
     // Vehicle details (local only, not in DB)
     vehicle_model: currentUser?.industry === 'automotive' ? (document.getElementById('b_vehicleModel')?.value.trim()||null) : null,
     vehicle_vin: currentUser?.industry === 'automotive' ? (document.getElementById('b_vin')?.value.trim()||null) : null,
@@ -3417,7 +3466,7 @@ async function saveQuote() {
     if (idx>-1) quotes[idx] = localQuote;
   } else {
     quotes.unshift(localQuote);
-    editingQuoteId = qNum;
+    editingQuoteId = compositeId;
   }
   showToast('Quote saved', 'success');
 }
