@@ -2693,22 +2693,25 @@ function newInvoice() {
   builderItemCounter = 0;
   builderScope = '';
   // Clear builder fields
-  document.getElementById('b_clientName').value = '';
-  document.getElementById('b_clientContact').value = '';
-  document.getElementById('b_clientEmail').value = '';
-  document.getElementById('b_clientStreet').value = '';
-  document.getElementById('b_clientTown').value = '';
-  document.getElementById('b_clientProvince').value = '';
-  document.getElementById('b_clientAreaCode').value = '';
-  document.getElementById('b_clientVat').value = '';
-  document.getElementById('b_clientReg').value = '';
-  document.getElementById('b_invoiceNumber').value = 'INV-001';  // Default invoice number
-  document.getElementById('b_deposit').value = '';
-  document.getElementById('b_notes').value = '';
-  document.getElementById('b_vat').value = 'yes';
-  document.getElementById('b_validDays').value = '30';
+  const setVal = (id, val) => { const el = document.getElementById(id); if(el) el.value = val; };
+  const setText = (id, val) => { const el = document.getElementById(id); if(el) el.textContent = val; };
+  
+  setVal('b_clientName', '');
+  setVal('b_clientContact', '');
+  setVal('b_clientEmail', '');
+  setVal('b_clientStreet', '');
+  setVal('b_clientTown', '');
+  setVal('b_clientProvince', '');
+  setVal('b_clientAreaCode', '');
+  setVal('b_clientVat', '');
+  setVal('b_clientReg', '');
+  setVal('b_quoteNumber', 'INV-001');  // Use correct field name
+  setVal('b_deposit', '');
+  setVal('b_notes', '');
+  setVal('b_vat', 'yes');
+  setVal('b_validDays', '30');
   builderScope = '';
-  document.getElementById('previewScope').textContent = 'Click "Generate Scope with AI" to add a description.';
+  setText('previewScope', 'Click "Generate Scope with AI" to add a description.');
   renderBuilderItems();
   updateBuilderPreview();
   goTo('builder');
