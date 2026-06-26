@@ -1769,45 +1769,42 @@ h1, h2, h3 {
       </div>
       <div class="form-group">
         <label>What type of business are you? <span style="color:var(--orange)">*</span></label>
-        <div class="industry-grid" id="industryGrid">
-          <div class="industry-card selected" data-industry="electrical" onclick="selectIndustry(this,'electrical')">
-            <span class="ic-icon">⚡</span><span class="ic-label">Electrical & Construction</span>
-          </div>
-          <div class="industry-card" data-industry="plumbing" onclick="selectIndustry(this,'plumbing')">
-            <span class="ic-icon">🔧</span><span class="ic-label">Plumbing & Gas</span>
-          </div>
-          <div class="industry-card" data-industry="marketing" onclick="selectIndustry(this,'marketing')">
-            <span class="ic-icon">📱</span><span class="ic-label">Marketing & Design</span>
-          </div>
-          <div class="industry-card" data-industry="it" onclick="selectIndustry(this,'it')">
-            <span class="ic-icon">💻</span><span class="ic-label">IT & Tech Support</span>
-          </div>
-          <div class="industry-card" data-industry="cleaning" onclick="selectIndustry(this,'cleaning')">
-            <span class="ic-icon">🧹</span><span class="ic-label">Cleaning Services</span>
-          </div>
-          <div class="industry-card" data-industry="landscaping" onclick="selectIndustry(this,'landscaping')">
-            <span class="ic-icon">🌿</span><span class="ic-label">Landscaping & Garden</span>
-          </div>
-          <div class="industry-card" data-industry="events" onclick="selectIndustry(this,'events')">
-            <span class="ic-icon">🎉</span><span class="ic-label">Events & Catering</span>
-          </div>
-          <div class="industry-card" data-industry="lodge" onclick="selectIndustry(this,'lodge')">
-            <span class="ic-icon">🏨</span><span class="ic-label">Lodge & B&B</span>
-          </div>
-          <div class="industry-card" data-industry="consulting" onclick="selectIndustry(this,'consulting')">
-            <span class="ic-icon">📊</span><span class="ic-label">Consulting & Finance</span>
-          </div>
-          <div class="industry-card" data-industry="other" onclick="selectIndustry(this,'other')">
-            <span class="ic-icon">🏢</span><span class="ic-label">Other / General</span>
-          </div>
-        </div>
-        <input type="hidden" id="regIndustry" value="electrical">
+        <select id="regIndustry" onchange="document.getElementById('regIndustry').value=this.value">
+          <option value="electrical">Electrical & Construction</option>
+          <option value="plumbing">Plumbing & Gas</option>
+          <option value="marketing">Marketing & Design</option>
+          <option value="it">IT & Tech Support</option>
+          <option value="cleaning">Cleaning Services</option>
+          <option value="landscaping">Landscaping & Garden</option>
+          <option value="events">Events & Catering</option>
+          <option value="lodge">Lodge & B&B</option>
+          <option value="consulting">Consulting & Finance</option>
+          <option value="other">Other / General</option>
+        </select>
       </div>
       <div class="form-group">
         <label>Password</label>
         <div class="password-wrap">
-          <input type="password" id="regPassword" placeholder="Min 6 characters" onkeydown="if(event.key==='Enter')doRegister()">
+          <input type="password" id="regPassword" placeholder="Enter password" onkeyup="checkPasswordStrength(this.value)" onkeydown="if(event.key==='Enter')doRegister()">
           <button class="eye-btn" type="button" onclick="togglePassword('regPassword', this)" tabindex="-1">&#128065;</button>
+        </div>
+        <div style="margin-top:12px;font-size:0.85rem;">
+          <div style="display:flex;align-items:center;gap:8px;margin:6px 0;">
+            <span id="check-length" style="color:#ccc;">✓</span>
+            <span style="color:#888;">At least 6 characters</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;margin:6px 0;">
+            <span id="check-upper" style="color:#ccc;">✓</span>
+            <span style="color:#888;">At least 1 uppercase letter (A-Z)</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;margin:6px 0;">
+            <span id="check-lower" style="color:#ccc;">✓</span>
+            <span style="color:#888;">At least 1 lowercase letter (a-z)</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;margin:6px 0;">
+            <span id="check-special" style="color:#ccc;">✓</span>
+            <span style="color:#888;">At least 1 special character (!@#$%^&*)</span>
+          </div>
         </div>
       </div>
       <button type="button" class="btn-auth" onclick="doRegister()">Create Free Account</button>
@@ -2171,6 +2168,37 @@ const DEMO_QUOTES = [
 // ══════════════════════════════════════
 // AUTH
 // ══════════════════════════════════════
+
+function validateStrongPassword(pass) {
+  if (pass.length < 6) {
+    return { valid: false, message: 'Password must be at least 6 characters.' };
+  }
+  if (!/[A-Z]/.test(pass)) {
+    return { valid: false, message: 'Password must include at least 1 uppercase letter (A-Z).' };
+  }
+  if (!/[a-z]/.test(pass)) {
+    return { valid: false, message: 'Password must include at least 1 lowercase letter (a-z).' };
+  }
+  if (!/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(pass)) {
+    return { valid: false, message: 'Password must include at least 1 special character (!@#$%^&* etc).' };
+  }
+  return { valid: true };
+}
+
+function checkPasswordStrength(pass) {
+  const checks = {
+    length: pass.length >= 6,
+    upper: /[A-Z]/.test(pass),
+    lower: /[a-z]/.test(pass),
+    special: /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(pass)
+  };
+  
+  document.getElementById('check-length').style.color = checks.length ? '#2ecc71' : '#ccc';
+  document.getElementById('check-upper').style.color = checks.upper ? '#2ecc71' : '#ccc';
+  document.getElementById('check-lower').style.color = checks.lower ? '#2ecc71' : '#ccc';
+  document.getElementById('check-special').style.color = checks.special ? '#2ecc71' : '#ccc';
+}
+
 function switchTab(tab) {
   document.getElementById('tabLogin').classList.toggle('active', tab==='login');
   document.getElementById('tabRegister').classList.toggle('active', tab==='register');
@@ -2255,10 +2283,13 @@ async function doRegister() {
     errEl.classList.add('show'); 
     return; 
   }
-  if (pass.length < 6) { 
-    errEl.textContent='Password must be at least 6 characters.'; 
-    errEl.classList.add('show'); 
-    return; 
+  
+  // Strong password validation
+  const passValidation = validateStrongPassword(pass);
+  if (!passValidation.valid) {
+    errEl.textContent = passValidation.message;
+    errEl.classList.add('show');
+    return;
   }
   
   errEl.classList.remove('show');
