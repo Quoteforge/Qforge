@@ -276,17 +276,23 @@ async function loadQuote() {
 
     quoteData = data;
     
-    // Fetch the quote creator's profile to get their brand color
-    if (quoteData.user_id) {
-      const { data: creatorProfile } = await sb.from('profiles').select('*').eq('id', quoteData.user_id).single();
-      if (creatorProfile) {
-        userData = creatorProfile;
+    // Try to fetch the quote creator's profile to get their brand color
+    try {
+      if (quoteData.user_id) {
+        const { data: creatorProfile } = await sb.from('profiles').select('brand_color').eq('id', quoteData.user_id).single();
+        if (creatorProfile?.brand_color) {
+          applyBrandColor(creatorProfile.brand_color);
+        } else {
+          applyBrandColor('#E63946'); // Default red
+        }
+      } else {
+        applyBrandColor('#E63946'); // Default red
       }
+    } catch (err) {
+      console.log('Profile fetch error (OK to ignore):', err.message);
+      applyBrandColor('#E63946'); // Default red on error
     }
     
-    // Apply user's brand color from their profile
-    const brandColor = userData?.brand_color || '#E63946';
-    applyBrandColor(brandColor);
     renderQuote();
   } catch (err) {
     document.getElementById('loadingDiv').style.display = 'none';
