@@ -97,6 +97,14 @@ function hexToRGB(hex) {
   return result ? [parseInt(result[1],16), parseInt(result[2],16), parseInt(result[3],16)] : [230, 57, 70];
 }
 
+function applyBrandColor(hexColor) {
+  document.documentElement.style.setProperty('--red', hexColor);
+  const rgb = hexToRGB(hexColor);
+  document.documentElement.style.setProperty('--red-light', `rgba(${rgb[0]}, ${rgb[1]}, ${rgb[2]}, 0.08)`);
+  const darker = `rgb(${Math.floor(rgb[0] * 0.85)}, ${Math.floor(rgb[1] * 0.85)}, ${Math.floor(rgb[2] * 0.85)})`;
+  document.documentElement.style.setProperty('--red-dark', darker);
+}
+
 function getVehicleHTML() {
   if (!invoiceData) return '';
   let html = '<span class="info-label">Vehicle Details</span><div class="client-detail">';
@@ -217,9 +225,7 @@ async function loadInvoice() {
     invoiceData = data;
     // Apply user's brand color from their profile
     const brandColor = userData?.brand_color || '#E63946';
-    document.documentElement.style.setProperty('--red', brandColor);
-    const rgb = hexToRGB(brandColor);
-    document.documentElement.style.setProperty('--red-light', `rgba(${rgb[0]}, ${rgb[1]}, ${rgb[2]}, 0.08)`);
+    applyBrandColor(brandColor);
     renderInvoice();
   } catch (err) {
     document.getElementById('loadingDiv').style.display = 'none';

@@ -1839,7 +1839,7 @@ h1, h2, h3 {
     </div>
   </div>
 
-  <div id="mobileBanner" style="display:none;background:linear-gradient(90deg,#E63946,#e04d10);padding:10px 16px;text-align:center;cursor:pointer;" onclick="window.open('https://qforge-eight.vercel.app/billing.html','_blank')">
+  <div id="mobileBanner" style="display:none;background:linear-gradient(90deg,var(--red),var(--red-dark));padding:10px 16px;text-align:center;cursor:pointer;" onclick="window.open('https://qforge-eight.vercel.app/billing.html','_blank')">
     <span style="color:#fff;font-size:0.78rem;font-weight:700;font-family:'Plus Jakarta Sans',sans-serif;">&#9889; Your free trial is active — Upgrade to keep access</span>
   </div>
   <div class="dash-body">
@@ -1943,6 +1943,16 @@ const THEME_COLORS = {
 function setBuilderThemeColor(hexColor) {
   builderThemeColor = hexColor;
   updateBuilderPreview();
+}
+
+function applyBrandColor(hexColor) {
+  document.documentElement.style.setProperty('--red', hexColor);
+  const rgb = hexToRGB(hexColor);
+  document.documentElement.style.setProperty('--red-light', `rgba(${rgb[0]}, ${rgb[1]}, ${rgb[2]}, 0.08)`);
+  
+  // Create a darker version for hover states (reduce brightness by ~20%)
+  const darker = `rgb(${Math.floor(rgb[0] * 0.85)}, ${Math.floor(rgb[1] * 0.85)}, ${Math.floor(rgb[2] * 0.85)})`;
+  document.documentElement.style.setProperty('--red-dark', darker);
 }
 
 function hexToRGB(hex) {
@@ -2411,9 +2421,7 @@ async function loadAndLoginUser(authUser) {
 
     // Apply user's brand color globally
     builderThemeColor = currentUser.brandColor;
-    document.documentElement.style.setProperty('--red', currentUser.brandColor);
-    const rgb = hexToRGB(currentUser.brandColor);
-    document.documentElement.style.setProperty('--red-light', `rgba(${rgb[0]}, ${rgb[1]}, ${rgb[2]}, 0.08)`);
+    applyBrandColor(currentUser.brandColor);
 
     // Grant lifetime free access to specific emails
     if (LIFETIME_FREE_EMAILS.includes(authUser.email)) {
@@ -3182,7 +3190,7 @@ function renderBuilder() {
       <div class="quote-doc" id="quoteDocPreview">
 
           <!-- HEADER: Logo + Company LEFT | Quote number RIGHT -->
-          <div class="doc-header" style="display:flex!important;flex-direction:row!important;justify-content:space-between!important;align-items:flex-start!important;background:#fff;border-bottom:3px solid #E63946;padding:14px 16px;gap:1px;">
+          <div class="doc-header" style="display:flex!important;flex-direction:row!important;justify-content:space-between!important;align-items:flex-start!important;background:#fff;border-bottom:3px solid var(--red);padding:14px 16px;gap:1px;">
             <!-- LEFT: Logo + Company Info -->
             <div style="display:flex;gap:1px;align-items:flex-start;flex:1;">
               <!-- Logo -->
@@ -3205,7 +3213,7 @@ function renderBuilder() {
             <!-- RIGHT: Quote Info -->
             <div style="flex-shrink:0;text-align:right;">
               <div id="pv_doctype" style="font-family:Syne,sans-serif;font-size:0.58rem;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;color:#999;margin-bottom:3px;">Quotation</div>
-              <div id="pv_qnum" style="font-family:'Plus Jakarta Sans',sans-serif;font-size:0.68rem;font-weight:600;color:#E63946;letter-spacing:0.5px;text-transform:uppercase;">${nextNum}</div>
+              <div id="pv_qnum" style="font-family:'Plus Jakarta Sans',sans-serif;font-size:0.68rem;font-weight:600;color:var(--red);letter-spacing:0.5px;text-transform:uppercase;">${nextNum}</div>
               <div style="font-size:0.68rem;color:#555;margin-top:3px;">Date: ${new Date().toLocaleDateString('en-ZA',{day:'numeric',month:'long',year:'numeric'})}</div>
               <div id="pv_valid" style="font-size:0.65rem;color:#888;margin-top:2px;">Valid for 14 days</div>
             </div>
@@ -3405,9 +3413,7 @@ function calcBuilderTotals() {
 
 function updateBuilderPreview() {
   // Update CSS variable for theme color
-  document.documentElement.style.setProperty('--red', builderThemeColor);
-  const rgb = hexToRGB(builderThemeColor);
-  document.documentElement.style.setProperty('--red-light', `rgba(${rgb[0]}, ${rgb[1]}, ${rgb[2]}, 0.08)`);
+  applyBrandColor(builderThemeColor);
   
   const gv = id => { const e=document.getElementById(id); return e?e.value.trim():''; };
   const si = (id, html) => { const e=document.getElementById(id); if(e) e.innerHTML=html; };
@@ -7372,9 +7378,7 @@ function removeLogo() {
 function saveBrandColor(hexColor) {
   currentUser.brandColor = hexColor;
   builderThemeColor = hexColor; // Update builder theme instantly
-  document.documentElement.style.setProperty('--red', hexColor);
-  const rgb = hexToRGB(hexColor);
-  document.documentElement.style.setProperty('--red-light', `rgba(${rgb[0]}, ${rgb[1]}, ${rgb[2]}, 0.08)`);
+  applyBrandColor(hexColor);
   updateBuilderPreview();
   goTo('profile'); // Refresh profile page to show updated selection
   saveProfile(); // Auto-save to database
@@ -7404,7 +7408,7 @@ async function saveProfile() {
   const branchCode = document.getElementById('pf_branch_code')?.value.trim() || '';
 
   if (currentUser.id !== 'demo') {
-    const { error } = await sb.from('profiles').upsert({
+    const profileData = {
       id: currentUser.id,
       first_name: currentUser.firstName,
       last_name: currentUser.lastName,
@@ -7414,13 +7418,28 @@ async function saveProfile() {
       vat_number: currentUser.vatNumber,
       industry: currentUser.industry,
       logo: currentUser.logo || null,
-      brand_color: currentUser.brandColor || '#E63946',
       bank_name: bankName || null,
       account_holder: accountHolder || null,
       account_number: accountNumber || null,
       branch_code: branchCode || null
-    }, { onConflict: 'id' });
-    if (error) { showToast('Save failed: ' + error.message, 'error'); return; }
+    };
+    
+    // Try to save with brand_color, but don't fail if column doesn't exist
+    try {
+      profileData.brand_color = currentUser.brandColor || '#E63946';
+      const { error } = await sb.from('profiles').upsert(profileData, { onConflict: 'id' });
+      if (error) throw error;
+    } catch (err) {
+      // If brand_color column doesn't exist, save without it
+      if (err.message?.includes('brand_color')) {
+        delete profileData.brand_color;
+        const { error } = await sb.from('profiles').upsert(profileData, { onConflict: 'id' });
+        if (error) { showToast('Save failed: ' + error.message, 'error'); return; }
+      } else {
+        showToast('Save failed: ' + err.message, 'error'); 
+        return;
+      }
+    }
   }
   document.getElementById('userAvatar').textContent = (currentUser.firstName[0]||'U').toUpperCase();
   document.getElementById('userNameChip').textContent = currentUser.firstName;
