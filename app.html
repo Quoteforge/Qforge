@@ -7620,17 +7620,17 @@ function printQuote() {
   
   // Table header - BLACK
   doc.setFillColor(...dark);
-  doc.rect(0, y + 1, pageW, 6, 'F');
+  doc.rect(0, y + 1, pageW, 8, 'F');
   
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(11);
   doc.setTextColor(255, 255, 255);
-  doc.text('DESCRIPTION', margin, y + 4);
-  doc.text('QTY', pageW/2 + 10, y + 4);
-  doc.text('UNIT PRICE', pageW/2 + 35, y + 4, { align: 'right' });
-  doc.text('AMOUNT', pageW - margin, y + 4, { align: 'right' });
+  doc.text('DESCRIPTION', margin, y + 3.5);
+  doc.text('QTY', pageW/2 + 10, y + 3.5);
+  doc.text('UNIT PRICE', pageW/2 + 35, y + 3.5, { align: 'right' });
+  doc.text('AMOUNT', pageW - margin, y + 3.5, { align: 'right' });
   
-  y = y + 7;
+  y = y + 9;
   
   // Items
   doc.setFont('helvetica', 'normal');
