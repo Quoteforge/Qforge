@@ -223,6 +223,15 @@ async function loadInvoice() {
     }
 
     invoiceData = data;
+    
+    // Fetch the invoice creator's profile to get their brand color
+    if (invoiceData.user_id) {
+      const { data: creatorProfile } = await sb.from('profiles').select('*').eq('id', invoiceData.user_id).single();
+      if (creatorProfile) {
+        userData = creatorProfile;
+      }
+    }
+    
     // Apply user's brand color from their profile
     const brandColor = userData?.brand_color || '#E63946';
     applyBrandColor(brandColor);

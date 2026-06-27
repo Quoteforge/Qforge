@@ -275,6 +275,15 @@ async function loadQuote() {
     }
 
     quoteData = data;
+    
+    // Fetch the quote creator's profile to get their brand color
+    if (quoteData.user_id) {
+      const { data: creatorProfile } = await sb.from('profiles').select('*').eq('id', quoteData.user_id).single();
+      if (creatorProfile) {
+        userData = creatorProfile;
+      }
+    }
+    
     // Apply user's brand color from their profile
     const brandColor = userData?.brand_color || '#E63946';
     applyBrandColor(brandColor);
