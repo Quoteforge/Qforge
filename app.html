@@ -518,7 +518,7 @@ select option{background:#ffffff;color:#111111;}
 .doc-info-col{padding:14px 20px;}
 .doc-info-col:first-child{border-right:1px solid #eeeeee;}
 .doc-info-col-label{
-  font-size:0.58rem;font-weight:700;letter-spacing:0.12em;
+  font-family:'Syne',sans-serif;font-size:0.58rem;font-weight:700;letter-spacing:0.12em;
   text-transform:uppercase;color:#bbbbbb;
   margin-bottom:6px;display:block;
 }
@@ -526,10 +526,10 @@ select option{background:#ffffff;color:#111111;}
   font-family:'Syne',sans-serif;font-size:1rem;
   font-weight:800;color:#111111;letter-spacing:-0.3px;
 }
-.doc-company-sub{font-size:0.68rem;color:#888888;margin-top:2px;text-transform:uppercase;letter-spacing:0.06em;}
-.doc-company-details{font-size:0.72rem;color:#555555;margin-top:6px;line-height:1.6;}
+.doc-company-sub{font-family:'Plus Jakarta Sans',sans-serif;font-size:0.68rem;color:#888888;margin-top:2px;text-transform:uppercase;letter-spacing:0.06em;}
+.doc-company-details{font-family:'Plus Jakarta Sans',sans-serif;font-size:0.72rem;color:#555555;margin-top:6px;line-height:1.6;}
 .doc-client-name{font-family:'Syne',sans-serif;font-size:0.95rem;font-weight:700;color:#111111;}
-.doc-client-detail{font-size:0.76rem;color:#555555;line-height:1.5;margin-top:3px;}
+.doc-client-detail{font-family:'Plus Jakarta Sans',sans-serif;font-size:0.76rem;color:#555555;line-height:1.5;margin-top:3px;}
 
 /* BODY */
 .doc-body{padding:0;background:#f8f7f5;}
@@ -537,7 +537,7 @@ select option{background:#ffffff;color:#111111;}
 /* SCOPE */
 .doc-scope{
   background:#ffffff;padding:12px 20px;
-  font-size:0.84rem;color:#333333;line-height:1.7;
+  font-family:'Plus Jakarta Sans',sans-serif;font-size:0.84rem;color:#333333;line-height:1.7;
   border-left:3px solid #000000;
   border-bottom:1px solid #eeeeee;
   margin:0;border-radius:0;
@@ -3083,7 +3083,7 @@ function renderBuilder() {
         </div></div>
 
       ${currentUser?.industry === 'automotive' ? `
-      <div style="display:flex;flex-direction:column;gap:1px;background:linear-gradient(135deg,rgba(230,57,70,0.05) 0%,rgba(230,57,70,0.1) 100%);padding:12px;border-radius:8px;border:2px solid var(--border);">
+      <div style="display:flex;flex-direction:column;gap:1px;background:linear-gradient(135deg,rgba(0,0,0,0.02) 0%,rgba(0,0,0,0.04) 100%);padding:12px;border-radius:8px;border:2px solid var(--border);">
         <div class="section-label">Vehicle Details</div>
         <div class="input-row">
           <div class="input-group"><label>Make & Model *</label>
@@ -3167,9 +3167,9 @@ function renderBuilder() {
           </div>
           <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 14px;border-bottom:1px solid rgba(0,0,0,0.05);">
             <span style="font-size:0.72rem;color:#E63946;text-transform:uppercase;letter-spacing:0.08em;font-weight:600;font-family:'Plus Jakarta Sans',sans-serif;">VAT 15%</span>
-            <span id="bs_vat" style="font-family:'Plus Jakarta Sans',sans-serif;font-size:0.88rem;font-weight:700;color:#E63946;">R0.00</span>
+            <span id="bs_vat" style="font-family:'Plus Jakarta Sans',sans-serif;font-size:0.88rem;font-weight:700;color:#000000;">R0.00</span>
           </div>
-          <div style="display:flex;justify-content:space-between;align-items:center;padding:14px 14px;background:#E63946;border-top:none;">
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:14px 14px;background:#1a1a1a;border-top:none;">
             <span style="font-family:'Plus Jakarta Sans',sans-serif;font-size:0.75rem;font-weight:700;color:#fff;text-transform:uppercase;letter-spacing:0.1em;">Total Due</span>
             <span id="bs_total" style="font-family:'Plus Jakarta Sans',sans-serif;font-size:1.2rem;font-weight:700;color:#fff;">R0.00</span>
           </div>
@@ -3190,7 +3190,7 @@ function renderBuilder() {
       <div class="quote-doc" id="quoteDocPreview">
 
           <!-- HEADER: Logo + Company LEFT | Quote number RIGHT -->
-          <div class="doc-header" style="display:flex!important;flex-direction:row!important;justify-content:space-between!important;align-items:flex-start!important;background:#fff;border-bottom:3px solid var(--red);padding:14px 16px;gap:1px;">
+          <div class="doc-header" style="display:flex!important;flex-direction:row!important;justify-content:space-between!important;align-items:flex-start!important;background:#fff;border-bottom:3px solid #000000;padding:14px 16px;gap:1px;">
             <!-- LEFT: Logo + Company Info -->
             <div style="display:flex;gap:1px;align-items:flex-start;flex:1;">
               <!-- Logo -->
@@ -3201,7 +3201,7 @@ function renderBuilder() {
               </div>
               <!-- Company Info -->
               <div style="flex:1;">
-                <div class="doc-company-name" id="pv_company" style="font-size:0.62rem;font-weight:700;color:#111;margin:0;">${esc(currentUser?.company||'Your Company')}</div>
+                <div class="doc-company-name" id="pv_company" style="font-family:'Syne',sans-serif;font-size:0.62rem;font-weight:700;color:#111;margin:0;">${esc(currentUser?.company||'Your Company')}</div>
                 <div class="doc-company-sub" id="pv_industrySub" style="font-size:0.48rem;color:#666;margin:1px 0 3px 0;">${INDUSTRY_LABELS[currentUser?.industry||'other']||'Professional Services'}</div>
                 <div class="doc-company-details" id="pv_companyDetails" style="font-size:0.46rem;color:#555;line-height:1.2;">
                   ${currentUser?.phone?'<div style=\"margin:0;\">Tel: '+currentUser.phone+'</div>':''}
@@ -3213,7 +3213,7 @@ function renderBuilder() {
             <!-- RIGHT: Quote Info -->
             <div style="flex-shrink:0;text-align:right;">
               <div id="pv_doctype" style="font-family:Syne,sans-serif;font-size:0.58rem;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;color:#999;margin-bottom:3px;">Quotation</div>
-              <div id="pv_qnum" style="font-family:'Plus Jakarta Sans',sans-serif;font-size:0.68rem;font-weight:600;color:var(--red);letter-spacing:0.5px;text-transform:uppercase;">${nextNum}</div>
+              <div id="pv_qnum" style="font-family:'Plus Jakarta Sans',sans-serif;font-size:0.68rem;font-weight:600;color:#000000;letter-spacing:0.5px;text-transform:uppercase;">${nextNum}</div>
               <div style="font-size:0.68rem;color:#555;margin-top:3px;">Date: ${new Date().toLocaleDateString('en-ZA',{day:'numeric',month:'long',year:'numeric'})}</div>
               <div id="pv_valid" style="font-size:0.65rem;color:#888;margin-top:2px;">Valid for 14 days</div>
             </div>
@@ -3799,15 +3799,15 @@ function printInvoicePDF(inv) {
 
   // Company name
   doc.setFont('helvetica', 'bold');
-  doc.setFontSize(14);
+  doc.setFontSize(18.2);
   doc.setTextColor(...dark);
   doc.text(currentUser?.company || 'Your Company', margin, 12);
   doc.setFont('helvetica', 'normal');
-  doc.setFontSize(7.5);
+  doc.setFontSize(9.75);
   doc.setTextColor(130, 130, 130);
   const industry = INDUSTRY_LABELS[currentUser?.industry||'other'] || 'Professional Services';
   doc.text(industry.toUpperCase(), margin, 18);
-  doc.setFontSize(7.5);
+  doc.setFontSize(9.75);
   doc.setTextColor(80, 80, 80);
   let cy = 23;
   if (currentUser?.phone) { doc.text('Tel: ' + currentUser.phone, margin, cy); cy += 4; }
@@ -3816,15 +3816,15 @@ function printInvoicePDF(inv) {
 
   // INVOICE label and number
   doc.setFont('helvetica', 'normal');
-  doc.setFontSize(6.5);
+  doc.setFontSize(8.4);
   doc.setTextColor(150, 150, 150);
   doc.text('TAX INVOICE', pageW - margin, 10, { align: 'right' });
   doc.setFont('helvetica', 'bold');
-  doc.setFontSize(14);
+  doc.setFontSize(18.2);
   doc.setTextColor(...orange);
   doc.text(inv.id, pageW - margin, 20, { align: 'right' });
   doc.setFont('helvetica', 'normal');
-  doc.setFontSize(7.5);
+  doc.setFontSize(9.75);
   doc.setTextColor(80, 80, 80);
   const dateStr = new Date(inv.date||Date.now()).toLocaleDateString('en-ZA',{day:'numeric',month:'long',year:'numeric'});
   const dueDate = new Date(inv.date||Date.now());
@@ -7507,13 +7507,13 @@ function printQuote() {
   
   // Company name
   doc.setFont('helvetica', 'bold');
-  doc.setFontSize(9);
+  doc.setFontSize(11.7);
   doc.setTextColor(...dark);
   doc.text(currentUser?.company || 'COMPANY', infoX, 4);
   
   // Contact details
   doc.setFont('helvetica', 'normal');
-  doc.setFontSize(6.5);
+  doc.setFontSize(8.4);
   doc.setTextColor(...grey);
   let infoY = 8;
   if (currentUser?.owner_name) { doc.text(currentUser.owner_name + ': ' + (currentUser.phone || ''), infoX, infoY); infoY += 3; }
@@ -7532,12 +7532,12 @@ function printQuote() {
   
   const qNum = document.getElementById('b_quoteNumber')?.value || extractQuoteNumber(editingQuoteId) || 'QUA-001';
   doc.setFont('helvetica', 'bold');
-  doc.setFontSize(9);
+  doc.setFontSize(11.7);
   doc.setTextColor(...red);
   doc.text(qNum, rightX, 10, { align: 'right' });
   
   doc.setFont('helvetica', 'normal');
-  doc.setFontSize(6);
+  doc.setFontSize(7.8);
   doc.setTextColor(...grey);
   const dateStr = new Date().toLocaleDateString('en-ZA');
   doc.text('Date: ' + dateStr, rightX, 16, { align: 'right' });
@@ -7560,18 +7560,18 @@ function printQuote() {
   const col1W = contentW / 2 - 0.5;
   
   doc.setFont('helvetica', 'bold');
-  doc.setFontSize(5);
+  doc.setFontSize(6.5);
   doc.setTextColor(...red);
   doc.text('QUOTED FOR', col1X, y + 2);
   
   doc.setFont('helvetica', 'bold');
-  doc.setFontSize(7);
+  doc.setFontSize(9.1);
   doc.setTextColor(...dark);
   const clientName = document.getElementById('b_clientName')?.value || 'Client';
   doc.text(clientName, col1X, y + 6);
   
   doc.setFont('helvetica', 'normal');
-  doc.setFontSize(5.5);
+  doc.setFontSize(7.1);
   doc.setTextColor(...grey);
   let clientY = y + 10;
   const clientContact = document.getElementById('b_clientContact')?.value || '';
