@@ -7,7 +7,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&display=swap" rel="stylesheet">
 <style>
-:root{--red:#E63946;--red-light:rgba(230,57,70,0.08);--dark:#1a1a1a;--white:#ffffff;--border:#e0e0e0;--beige:#f8f7f5;}
+:root{--red:#000000;--red-light:rgba(0,0,0,0.08);--dark:#1a1a1a;--white:#ffffff;--border:#e0e0e0;--beige:#f8f7f5;}
 *{margin:0;padding:0;box-sizing:border-box;}
 body{background:#f5f5f5;font-family:'Plus Jakarta Sans',sans-serif;min-height:100vh;padding:20px;}
 .loading{text-align:center;padding:40px;color:#999;font-size:1.1rem;}
@@ -43,7 +43,7 @@ body{background:#f5f5f5;font-family:'Plus Jakarta Sans',sans-serif;min-height:10
 .items-table td:nth-child(4){text-align:right;font-weight:600;}
 .items-table tr:last-child td{border-bottom:none;}
 .item-desc{font-size:0.60rem;color:#999;margin-top:2px;}
-.totals-section{background:rgba(230,57,70,0.08);padding:12px 20px;display:flex;flex-direction:column;align-items:flex-end;gap:4px;border-top:1px solid #eee;}
+.totals-section{background:rgba(0,0,0,0.04);padding:12px 20px;display:flex;flex-direction:column;align-items:flex-end;gap:4px;border-top:1px solid #eee;}
 .totals-row{display:flex;gap:32px;font-size:0.72rem;color:#666;min-width:250px;justify-content:space-between;}
 .totals-row span:last-child{font-weight:600;text-align:right;min-width:80px;}
 .totals-row.total{font-family:'Plus Jakarta Sans',sans-serif;font-size:0.85rem;font-weight:700;color:var(--dark);border-top:2px solid #111;padding-top:6px;margin-top:2px;}
@@ -224,8 +224,8 @@ async function loadInvoice() {
 
     invoiceData = data;
     
-    // Apply default brand color
-    applyBrandColor('#E63946');
+    // Apply default brand color (black for all companies)
+    applyBrandColor('#000000');
     
     // Render the invoice
     renderInvoice();
