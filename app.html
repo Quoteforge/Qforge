@@ -3799,15 +3799,15 @@ function printInvoicePDF(inv) {
 
   // Company name
   doc.setFont('helvetica', 'bold');
-  doc.setFontSize(18.2);
+  doc.setFontSize(27.3);
   doc.setTextColor(...dark);
   doc.text(currentUser?.company || 'Your Company', margin, 12);
   doc.setFont('helvetica', 'normal');
-  doc.setFontSize(9.75);
+  doc.setFontSize(14.625);
   doc.setTextColor(130, 130, 130);
   const industry = INDUSTRY_LABELS[currentUser?.industry||'other'] || 'Professional Services';
   doc.text(industry.toUpperCase(), margin, 18);
-  doc.setFontSize(9.75);
+  doc.setFontSize(14.625);
   doc.setTextColor(80, 80, 80);
   let cy = 23;
   if (currentUser?.phone) { doc.text('Tel: ' + currentUser.phone, margin, cy); cy += 4; }
@@ -3816,15 +3816,15 @@ function printInvoicePDF(inv) {
 
   // INVOICE label and number
   doc.setFont('helvetica', 'normal');
-  doc.setFontSize(8.4);
+  doc.setFontSize(12.6);
   doc.setTextColor(150, 150, 150);
   doc.text('TAX INVOICE', pageW - margin, 10, { align: 'right' });
   doc.setFont('helvetica', 'bold');
-  doc.setFontSize(18.2);
+  doc.setFontSize(27.3);
   doc.setTextColor(...orange);
   doc.text(inv.id, pageW - margin, 20, { align: 'right' });
   doc.setFont('helvetica', 'normal');
-  doc.setFontSize(9.75);
+  doc.setFontSize(14.625);
   doc.setTextColor(80, 80, 80);
   const dateStr = new Date(inv.date||Date.now()).toLocaleDateString('en-ZA',{day:'numeric',month:'long',year:'numeric'});
   const dueDate = new Date(inv.date||Date.now());
@@ -7507,13 +7507,13 @@ function printQuote() {
   
   // Company name
   doc.setFont('helvetica', 'bold');
-  doc.setFontSize(11.7);
+  doc.setFontSize(17.5);
   doc.setTextColor(...dark);
   doc.text(currentUser?.company || 'COMPANY', infoX, 4);
   
   // Contact details
   doc.setFont('helvetica', 'normal');
-  doc.setFontSize(8.4);
+  doc.setFontSize(12.6);
   doc.setTextColor(...grey);
   let infoY = 8;
   if (currentUser?.owner_name) { doc.text(currentUser.owner_name + ': ' + (currentUser.phone || ''), infoX, infoY); infoY += 3; }
@@ -7532,12 +7532,12 @@ function printQuote() {
   
   const qNum = document.getElementById('b_quoteNumber')?.value || extractQuoteNumber(editingQuoteId) || 'QUA-001';
   doc.setFont('helvetica', 'bold');
-  doc.setFontSize(11.7);
+  doc.setFontSize(17.5);
   doc.setTextColor(...red);
   doc.text(qNum, rightX, 10, { align: 'right' });
   
   doc.setFont('helvetica', 'normal');
-  doc.setFontSize(7.8);
+  doc.setFontSize(11.7);
   doc.setTextColor(...grey);
   const dateStr = new Date().toLocaleDateString('en-ZA');
   doc.text('Date: ' + dateStr, rightX, 16, { align: 'right' });
@@ -7560,18 +7560,18 @@ function printQuote() {
   const col1W = contentW / 2 - 0.5;
   
   doc.setFont('helvetica', 'bold');
-  doc.setFontSize(6.5);
+  doc.setFontSize(9.75);
   doc.setTextColor(...red);
   doc.text('QUOTED FOR', col1X, y + 2);
   
   doc.setFont('helvetica', 'bold');
-  doc.setFontSize(9.1);
+  doc.setFontSize(13.65);
   doc.setTextColor(...dark);
   const clientName = document.getElementById('b_clientName')?.value || 'Client';
   doc.text(clientName, col1X, y + 6);
   
   doc.setFont('helvetica', 'normal');
-  doc.setFontSize(7.1);
+  doc.setFontSize(10.65);
   doc.setTextColor(...grey);
   let clientY = y + 10;
   const clientContact = document.getElementById('b_clientContact')?.value || '';
