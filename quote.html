@@ -267,10 +267,10 @@ async function loadQuote() {
     }
 
     quoteData = data;
-    // Apply theme color from quote (default to red if not set)
-    const themeColor = quoteData.theme_color || '#E63946';
-    document.documentElement.style.setProperty('--red', themeColor);
-    const rgb = hexToRGB(themeColor);
+    // Apply user's brand color from their profile
+    const brandColor = userData?.brand_color || '#E63946';
+    document.documentElement.style.setProperty('--red', brandColor);
+    const rgb = hexToRGB(brandColor);
     document.documentElement.style.setProperty('--red-light', `rgba(${rgb[0]}, ${rgb[1]}, ${rgb[2]}, 0.08)`);
     renderQuote();
   } catch (err) {

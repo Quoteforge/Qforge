@@ -2404,9 +2404,16 @@ async function loadAndLoginUser(authUser) {
       vatNumber: profile?.vat_number || '',
       industry: profile?.industry || 'other',
       logo: profile?.logo || null,
+      brandColor: profile?.brand_color || '#E63946',
       plan: profile?.plan || 'trial',
       createdAt: authUser.created_at || null
     };
+
+    // Apply user's brand color globally
+    builderThemeColor = currentUser.brandColor;
+    document.documentElement.style.setProperty('--red', currentUser.brandColor);
+    const rgb = hexToRGB(currentUser.brandColor);
+    document.documentElement.style.setProperty('--red-light', `rgba(${rgb[0]}, ${rgb[1]}, ${rgb[2]}, 0.08)`);
 
     // Grant lifetime free access to specific emails
     if (LIFETIME_FREE_EMAILS.includes(authUser.email)) {
@@ -3027,12 +3034,6 @@ function renderBuilder() {
   <div class="builder-layout">
 <!-- LEFT -->
     <div class="builder-left">
-
-      <div style="display:flex;gap:8px;margin-bottom:12px;">
-        <button class="btn btn-red" style="color:#fff;flex:1;" onclick="document.getElementById('colorPaletteModal').style.display='flex'">
-          🎨 Theme Color
-        </button>
-      </div>
 
       <div style="display:flex;flex-direction:column;gap:1px;">
         <div class="section-label">Client Details</div>
@@ -7024,6 +7025,62 @@ function renderProfile() {
       </div>
     </div>
     <div class="profile-card">
+      <h3>Brand Color</h3>
+      <div class="profile-form">
+        <p style="font-size:0.8rem;color:var(--muted);margin-bottom:16px;">Choose your brand color - it will be applied to all your quotes, invoices, and PDFs</p>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:16px;">
+          <button onclick="saveBrandColor('#E63946')" style="display:flex;flex-direction:column;align-items:center;gap:6px;padding:12px;border-radius:8px;border:2px solid ${u.brandColor==='#E63946'?'#E63946':'#e0e0e0'};background:#fff;cursor:pointer;">
+            <div style="width:40px;height:40px;border-radius:6px;background:#E63946;"></div>
+            <span style="font-size:0.75rem;font-weight:600;">Red</span>
+          </button>
+          <button onclick="saveBrandColor('#2563EB')" style="display:flex;flex-direction:column;align-items:center;gap:6px;padding:12px;border-radius:8px;border:2px solid ${u.brandColor==='#2563EB'?'#2563EB':'#e0e0e0'};background:#fff;cursor:pointer;">
+            <div style="width:40px;height:40px;border-radius:6px;background:#2563EB;"></div>
+            <span style="font-size:0.75rem;font-weight:600;">Blue</span>
+          </button>
+          <button onclick="saveBrandColor('#10B981')" style="display:flex;flex-direction:column;align-items:center;gap:6px;padding:12px;border-radius:8px;border:2px solid ${u.brandColor==='#10B981'?'#10B981':'#e0e0e0'};background:#fff;cursor:pointer;">
+            <div style="width:40px;height:40px;border-radius:6px;background:#10B981;"></div>
+            <span style="font-size:0.75rem;font-weight:600;">Green</span>
+          </button>
+          <button onclick="saveBrandColor('#A855F7')" style="display:flex;flex-direction:column;align-items:center;gap:6px;padding:12px;border-radius:8px;border:2px solid ${u.brandColor==='#A855F7'?'#A855F7':'#e0e0e0'};background:#fff;cursor:pointer;">
+            <div style="width:40px;height:40px;border-radius:6px;background:#A855F7;"></div>
+            <span style="font-size:0.75rem;font-weight:600;">Purple</span>
+          </button>
+          <button onclick="saveBrandColor('#F97316')" style="display:flex;flex-direction:column;align-items:center;gap:6px;padding:12px;border-radius:8px;border:2px solid ${u.brandColor==='#F97316'?'#F97316':'#e0e0e0'};background:#fff;cursor:pointer;">
+            <div style="width:40px;height:40px;border-radius:6px;background:#F97316;"></div>
+            <span style="font-size:0.75rem;font-weight:600;">Orange</span>
+          </button>
+          <button onclick="saveBrandColor('#EC4899')" style="display:flex;flex-direction:column;align-items:center;gap:6px;padding:12px;border-radius:8px;border:2px solid ${u.brandColor==='#EC4899'?'#EC4899':'#e0e0e0'};background:#fff;cursor:pointer;">
+            <div style="width:40px;height:40px;border-radius:6px;background:#EC4899;"></div>
+            <span style="font-size:0.75rem;font-weight:600;">Pink</span>
+          </button>
+          <button onclick="saveBrandColor('#4F46E5')" style="display:flex;flex-direction:column;align-items:center;gap:6px;padding:12px;border-radius:8px;border:2px solid ${u.brandColor==='#4F46E5'?'#4F46E5':'#e0e0e0'};background:#fff;cursor:pointer;">
+            <div style="width:40px;height:40px;border-radius:6px;background:#4F46E5;"></div>
+            <span style="font-size:0.75rem;font-weight:600;">Indigo</span>
+          </button>
+          <button onclick="saveBrandColor('#14B8A6')" style="display:flex;flex-direction:column;align-items:center;gap:6px;padding:12px;border-radius:8px;border:2px solid ${u.brandColor==='#14B8A6'?'#14B8A6':'#e0e0e0'};background:#fff;cursor:pointer;">
+            <div style="width:40px;height:40px;border-radius:6px;background:#14B8A6;"></div>
+            <span style="font-size:0.75rem;font-weight:600;">Teal</span>
+          </button>
+          <button onclick="saveBrandColor('#06B6D4')" style="display:flex;flex-direction:column;align-items:center;gap:6px;padding:12px;border-radius:8px;border:2px solid ${u.brandColor==='#06B6D4'?'#06B6D4':'#e0e0e0'};background:#fff;cursor:pointer;">
+            <div style="width:40px;height:40px;border-radius:6px;background:#06B6D4;"></div>
+            <span style="font-size:0.75rem;font-weight:600;">Cyan</span>
+          </button>
+          <button onclick="saveBrandColor('#F59E0B')" style="display:flex;flex-direction:column;align-items:center;gap:6px;padding:12px;border-radius:8px;border:2px solid ${u.brandColor==='#F59E0B'?'#F59E0B':'#e0e0e0'};background:#fff;cursor:pointer;">
+            <div style="width:40px;height:40px;border-radius:6px;background:#F59E0B;"></div>
+            <span style="font-size:0.75rem;font-weight:600;">Amber</span>
+          </button>
+          <button onclick="saveBrandColor('#84CC16')" style="display:flex;flex-direction:column;align-items:center;gap:6px;padding:12px;border-radius:8px;border:2px solid ${u.brandColor==='#84CC16'?'#84CC16':'#e0e0e0'};background:#fff;cursor:pointer;">
+            <div style="width:40px;height:40px;border-radius:6px;background:#84CC16;"></div>
+            <span style="font-size:0.75rem;font-weight:600;">Lime</span>
+          </button>
+          <button onclick="saveBrandColor('#64748B')" style="display:flex;flex-direction:column;align-items:center;gap:6px;padding:12px;border-radius:8px;border:2px solid ${u.brandColor==='#64748B'?'#64748B':'#e0e0e0'};background:#fff;cursor:pointer;">
+            <div style="width:40px;height:40px;border-radius:6px;background:#64748B;"></div>
+            <span style="font-size:0.75rem;font-weight:600;">Slate</span>
+          </button>
+        </div>
+      </div>
+    </div>
+    <div class="profile-card">
       <h3>Banking Details</h3>
       <div class="profile-form">
         <p style="font-size:0.8rem;color:var(--muted);margin-bottom:12px;">These details will appear on your invoices. Leave blank if not needed.</p>
@@ -7312,6 +7369,17 @@ function removeLogo() {
   showToast('Logo removed', 'info');
 }
 
+function saveBrandColor(hexColor) {
+  currentUser.brandColor = hexColor;
+  builderThemeColor = hexColor; // Update builder theme instantly
+  document.documentElement.style.setProperty('--red', hexColor);
+  const rgb = hexToRGB(hexColor);
+  document.documentElement.style.setProperty('--red-light', `rgba(${rgb[0]}, ${rgb[1]}, ${rgb[2]}, 0.08)`);
+  updateBuilderPreview();
+  goTo('profile'); // Refresh profile page to show updated selection
+  saveProfile(); // Auto-save to database
+}
+
 async function saveProfile() {
   if (!currentUser) return;
   currentUser.firstName = document.getElementById('pf_first')?.value.trim()||currentUser.firstName;
@@ -7346,6 +7414,7 @@ async function saveProfile() {
       vat_number: currentUser.vatNumber,
       industry: currentUser.industry,
       logo: currentUser.logo || null,
+      brand_color: currentUser.brandColor || '#E63946',
       bank_name: bankName || null,
       account_holder: accountHolder || null,
       account_number: accountNumber || null,
