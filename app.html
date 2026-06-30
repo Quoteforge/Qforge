@@ -2726,7 +2726,7 @@ function renderQuoteTable(list, compact) {
     <div class="qt-actions" onclick="event.stopPropagation()">
       ${isConverted ? '<button class="btn btn-ghost btn-sm" onclick="event.stopPropagation();viewInvoice(\''+q.id+'\')" style="color:#E63946;border-color:#E63946;">View Invoice</button>' : '<button class="btn btn-ghost btn-sm" onclick="editQuote(\''+q.id+'\')">Edit</button>'}
       ${!isConverted ? '<button class="btn btn-ghost btn-sm" onclick="event.stopPropagation();openFollowUp(\''+q.id+'\')" title="Follow Up" style="color:#e8b84b;border-color:#e8b84b;">F/U</button>' : ''}
-      ${!isConverted ? '<button class="btn btn-wa btn-sm" onclick="event.stopPropagation();sendWhatsApp(\''+q.id+'\')" title="Send via WhatsApp">WA</button>' : ''}
+      ${!isConverted ? '<button class="btn btn-wa btn-sm" onclick="event.stopPropagation();sendWhatsApp(\''+q.id+'\')" title="Send via WhatsApp" style="display:flex;align-items:center;justify-content:center;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg></button>' : ''}
       ${!isConverted ? '<button class="btn btn-red btn-sm" onclick="event.stopPropagation();convertToInvoice(this,\''+q.id+'\')">Invoice</button>' : ''}
       ${q.status==='invoice'||q.status==='invoiced' ? '<button class="btn btn-red btn-sm" onclick="event.stopPropagation();markAsPaid(this,\''+q.id+'\')">Paid</button>' : ''}
       ${!isConverted ? '<button class="btn btn-red btn-sm" onclick="deleteQuote(\''+q.id+'\')">X</button>' : ''}
@@ -3672,7 +3672,7 @@ function renderInvoices() {
         '<div class="qt-amount" style="margin-bottom:6px;">' + (inv.amount > 0 ? 'R' + inv.amount.toLocaleString('en-ZA') : '-') + '</div>' +
         '<span class="status-badge status-' + inv.status + '" style="margin-bottom:8px;display:inline-block;">' + (isPaid ? 'Paid' : 'Invoice') + '</span>' +
         '<div class="inv-actions" onclick="event.stopPropagation()">' +
-        '<button class="btn btn-wa btn-sm" onclick="event.stopPropagation();sendInvoiceWhatsApp(\'' + inv.id + '\')" title="WhatsApp">WA</button>' +
+        '<button class="btn btn-wa btn-sm" onclick="event.stopPropagation();sendInvoiceWhatsApp(\'' + inv.id + '\')" title="WhatsApp" style="display:flex;align-items:center;justify-content:center;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg></button>' +
         (!isPaid ? '<button class="btn btn-red btn-sm" onclick="event.stopPropagation();markAsPaid(this,\'' + inv.id + '\')">Paid</button>' : '') +
         '<button class="btn btn-ghost btn-sm" onclick="event.stopPropagation();downloadInvoicePDF(\'' + inv.id + '\')">PDF</button>' +
         '</div></div></div>';
@@ -4099,7 +4099,7 @@ function renderClientDetail(clientName) {
       ${c.address ? '<div style="font-size:0.82rem;color:var(--muted);">'+esc(c.address)+'</div>' : ''}
     </div>
     <div style="display:flex;gap:1px;flex-wrap:wrap;">
-      <button class="btn btn-ghost" onclick="sendClientWhatsApp('${esc(c.name.replace(/'/g,"\'"))}')">WA</button>
+      <button class="btn btn-ghost" onclick="sendClientWhatsApp('${esc(c.name.replace(/'/g,"\'"))}')" style="display:flex;align-items:center;justify-content:center;gap:6px;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg> WhatsApp</button>
       <button class="btn btn-red" style="color:#fff;" onclick="downloadStatement('${esc(c.name.replace(/'/g,"\'"))}')">Download Statement</button>
       <button class="btn btn-ghost" onclick="exportClientCSV(c.name)">Export CSV</button>
       <button class="btn btn-ghost" onclick="newQuoteForClient('${esc(c.name.replace(/'/g,"\'"))}')">+ New Quote</button>
