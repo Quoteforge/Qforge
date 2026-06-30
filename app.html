@@ -2671,7 +2671,7 @@ function renderRecentAcceptances() {
       <div style="background:#fff;border:1px solid var(--border);border-radius:8px;padding:12px;display:flex;justify-content:space-between;align-items:center;">
         <div>
           <div style="font-weight:600;color:var(--dark);">${esc(q.client)}</div>
-          <div style="font-size:0.75rem;color:var(--muted);">${q.id} • R${(q.amount||0).toLocaleString('en-ZA')}</div>
+          <div style="font-size:0.75rem;color:var(--muted);">${extractQuoteNumber(q.id)} • R${(q.amount||0).toLocaleString('en-ZA')}</div>
         </div>
         <div style="display:flex;gap:8px;">
           <span style="background:#4CAF50;color:#fff;padding:4px 8px;border-radius:4px;font-size:0.7rem;font-weight:600;">✓ Accepted</span>
