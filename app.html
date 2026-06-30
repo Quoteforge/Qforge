@@ -4549,12 +4549,12 @@ function getTrialDaysLeft(createdAt) {
 
 function getPlanLimits(plan) {
   const limits = {
-    'starter':  { quotes: 10,         label: 'Starter',  price: 99 },
-    'growth':   { quotes: Infinity,   label: 'Growth',   price: 299 },
-    'agency':   { quotes: Infinity,   label: 'Agency',   price: 599 },
-    'active':   { quotes: Infinity,   label: 'Growth',   price: 299 },
-    'paid':     { quotes: Infinity,   label: 'Growth',   price: 299 },
-    'trial':    { quotes: Infinity,   label: 'Trial',    price: 0 },
+    'starter':  { quotes: 5,          label: 'Starter',     price: 0 },
+    'growth':   { quotes: Infinity,   label: 'Growth',      price: 249 },
+    'enterprise':   { quotes: Infinity,   label: 'Enterprise',  price: 499 },
+    'active':   { quotes: Infinity,   label: 'Growth',      price: 249 },
+    'paid':     { quotes: Infinity,   label: 'Growth',      price: 249 },
+    'trial':    { quotes: Infinity,   label: 'Trial',       price: 0 },
   };
   return limits[plan] || limits['trial'];
 }
@@ -8184,30 +8184,31 @@ function hideLoadingScreen(showAuth) {
     </div>
 
     <div class="paywall-plans">
-      <div class="paywall-plan" onclick="selectPaywallPlan('starter',99,this)">
-        <span class="paywall-plan-badge">Starter</span>
+      <div class="paywall-plan" onclick="goTo('builder')">
+        <span class="paywall-plan-badge">Free</span>
         <div class="paywall-plan-name">Starter</div>
-        <div class="paywall-plan-price">R99</div>
-        <div class="paywall-plan-period">per month</div>
-        <div style="font-size:0.62rem;color:#888;margin-top:6px;">Up to 10 quotes/month</div>
+        <div class="paywall-plan-price">FREE</div>
+        <div class="paywall-plan-period">14-day trial</div>
+        <div style="font-size:0.62rem;color:#888;margin-top:6px;">Up to 5 quotes/invoices per month</div>
       </div>
-      <div class="paywall-plan popular selected" onclick="selectPaywallPlan('growth',299,this)">
+      <div class="paywall-plan popular selected" onclick="selectPaywallPlan('growth',249,this)">
         <span class="paywall-plan-badge" style="color:#2ecc71;">Most Popular</span>
         <div class="paywall-plan-name">Growth</div>
-        <div class="paywall-plan-price">R299</div>
+        <div class="paywall-plan-price">R249</div>
         <div class="paywall-plan-period">per month</div>
-        <div style="font-size:0.62rem;color:#888;margin-top:6px;">Unlimited quotes</div>
+        <div style="font-size:0.62rem;color:#888;margin-top:6px;">Unlimited quotes & invoices</div>
       </div>
-      <div class="paywall-plan" onclick="selectPaywallPlan('agency',599,this)">
-        <span class="paywall-plan-badge">Agency</span>
-        <div class="paywall-plan-name">Agency</div>
-        <div class="paywall-plan-price">R1,799</div>
+      <div class="paywall-plan" onclick="selectPaywallPlan('enterprise',499,this)">
+        <span class="paywall-plan-badge">Enterprise</span>
+        <div class="paywall-plan-name">Enterprise</div>
+        <div class="paywall-plan-price">R499</div>
         <div class="paywall-plan-period">per month</div>
+        <div style="font-size:0.62rem;color:#888;margin-top:6px;">QB & Sage 50 integration, Multi-user</div>
       </div>
     </div>
 
     <button class="paywall-cta" id="paywallCta" onclick="goToPayment()">
-      Subscribe Now - R699/month
+      Subscribe Now - R249/month
     </button>
 
     <div class="paywall-note">
