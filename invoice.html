@@ -97,6 +97,17 @@ function hexToRGB(hex) {
   return result ? [parseInt(result[1],16), parseInt(result[2],16), parseInt(result[3],16)] : [230, 57, 70];
 }
 
+function escapeHtml(text) {
+  const map = {
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#039;'
+  };
+  return text.replace(/[&<>"']/g, m => map[m]);
+}
+
 function applyBrandColor(hexColor) {
   document.documentElement.style.setProperty('--red', hexColor);
   const rgb = hexToRGB(hexColor);
