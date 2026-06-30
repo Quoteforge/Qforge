@@ -2195,10 +2195,10 @@ const TEMPLATES = {
 
 // Demo quotes
 const DEMO_QUOTES = [
-  {id:'QUA-001',client:'ABC Property Management',address:'12 Main Rd, Sandton',contact:'011 000 1111',amount:4600,subtotal:4000,vat:600,status:'signed',date:'2026-05-20',items:[{name:'LED Globe (9W)',desc:'Supply and install',qty:3,price:200},{name:'Socket Rewire',desc:'Rewire and replace',qty:5,price:400},{name:'Call-Out Fee',desc:'',qty:1,price:350},{name:'Labour (hourly)',desc:'',qty:2,price:450}],scope:'This quotation covers the supply and installation of LED globes, rewiring of wall sockets, and associated electrical labour at the specified premises. All work will be performed by a qualified electrician in accordance with SANS 10142 standards.'},
-  {id:'QUA-002',client:'Sunshine Developments',address:'45 Oak Ave, Rosebank',contact:'083 222 3333',amount:2875,subtotal:2500,vat:375,status:'viewed',date:'2026-05-25',items:[{name:'DB Board Inspection',desc:'Full safety check',qty:1,price:650},{name:'COC Inspection',desc:'Certificate of Compliance',qty:1,price:950},{name:'Labour (hourly)',desc:'',qty:2,price:450}],scope:'This quotation covers a comprehensive DB board safety inspection and the issuing of a Certificate of Compliance (COC) for the premises.'},
-  {id:'QUA-003',client:'TechVentures (Pty) Ltd',address:'8 Rivonia Blvd, Johannesburg',contact:'info@techventures.co.za',amount:1725,subtotal:1500,vat:225,status:'sent',date:'2026-05-28',items:[{name:'Travel / Transport',desc:'Site visit and fuel',qty:1,price:200},{name:'Call-Out Fee',desc:'',qty:1,price:350},{name:'Labour (hourly)',desc:'',qty:2,price:450}],scope:'This quotation covers a site visit, call-out fee, and electrical labour for diagnostic and repair work at the specified commercial premises.'},
-  {id:'QUA-004',client:'Greenfield Estate',address:'32 Palm Street, Pretoria',contact:'greenfield@estate.co.za',amount:0,subtotal:0,vat:0,status:'draft',date:'2026-05-30',items:[],scope:''},
+  {id:'QUO-001',client:'ABC Property Management',address:'12 Main Rd, Sandton',contact:'011 000 1111',amount:4600,subtotal:4000,vat:600,status:'signed',date:'2026-05-20',items:[{name:'LED Globe (9W)',desc:'Supply and install',qty:3,price:200},{name:'Socket Rewire',desc:'Rewire and replace',qty:5,price:400},{name:'Call-Out Fee',desc:'',qty:1,price:350},{name:'Labour (hourly)',desc:'',qty:2,price:450}],scope:'This quotation covers the supply and installation of LED globes, rewiring of wall sockets, and associated electrical labour at the specified premises. All work will be performed by a qualified electrician in accordance with SANS 10142 standards.'},
+  {id:'QUO-002',client:'Sunshine Developments',address:'45 Oak Ave, Rosebank',contact:'083 222 3333',amount:2875,subtotal:2500,vat:375,status:'viewed',date:'2026-05-25',items:[{name:'DB Board Inspection',desc:'Full safety check',qty:1,price:650},{name:'COC Inspection',desc:'Certificate of Compliance',qty:1,price:950},{name:'Labour (hourly)',desc:'',qty:2,price:450}],scope:'This quotation covers a comprehensive DB board safety inspection and the issuing of a Certificate of Compliance (COC) for the premises.'},
+  {id:'QUO-003',client:'TechVentures (Pty) Ltd',address:'8 Rivonia Blvd, Johannesburg',contact:'info@techventures.co.za',amount:1725,subtotal:1500,vat:225,status:'sent',date:'2026-05-28',items:[{name:'Travel / Transport',desc:'Site visit and fuel',qty:1,price:200},{name:'Call-Out Fee',desc:'',qty:1,price:350},{name:'Labour (hourly)',desc:'',qty:2,price:450}],scope:'This quotation covers a site visit, call-out fee, and electrical labour for diagnostic and repair work at the specified commercial premises.'},
+  {id:'QUO-004',client:'Greenfield Estate',address:'32 Palm Street, Pretoria',contact:'greenfield@estate.co.za',amount:0,subtotal:0,vat:0,status:'draft',date:'2026-05-30',items:[],scope:''},
 ];
 
 // ══════════════════════════════════════
@@ -2534,19 +2534,19 @@ function doLogout() {
 // ══════════════════════════════════════
 // COMPOSITE ID HELPERS (User Data Isolation)
 // ══════════════════════════════════════
-// Creates a unique ID per user: "userId|QUA-001"
+// Creates a unique ID per user: "userId|QUO-001"
 function createCompositeId(userId, quoteNumber) {
   if (!userId || !quoteNumber) return quoteNumber;
   return `${userId}|${quoteNumber}`;
 }
 
-// Extracts just the quote number for display: "userId|QUA-001" → "QUA-001"
+// Extracts just the quote number for display: "userId|QUO-001" → "QUO-001"
 function extractQuoteNumber(compositeId) {
   if (!compositeId) return compositeId;
   return compositeId.includes('|') ? compositeId.split('|')[1] : compositeId;
 }
 
-// Extracts user ID from composite: "userId|QUA-001" → "userId"
+// Extracts user ID from composite: "userId|QUO-001" → "userId"
 function extractUserId(compositeId) {
   if (!compositeId) return null;
   return compositeId.includes('|') ? compositeId.split('|')[0] : null;
@@ -2846,7 +2846,7 @@ async function convertToInvoice(el, id) {
       const isPaid = confirm('Click OK if this invoice is PAID. Click Cancel if PENDING PAYMENT.');
       
       // Generate invoice number from the quote number
-      // Extract the quote number from composite ID (e.g., "userId|QUA-001" -> "QUA-001")
+      // Extract the quote number from composite ID (e.g., "userId|QUO-001" -> "QUO-001")
       const quoteNum = extractQuoteNumber(q.id);
       const numPart = quoteNum.replace(/^[A-Z]+-/i, '');
       const invNum = 'INV-' + numPart;
@@ -3440,7 +3440,7 @@ function updateBuilderPreview() {
       vehicleSection.style.display = 'none';
     }
   }
-  const currentQnum = gv('b_quoteNumber')||'QUA-001';
+  const currentQnum = gv('b_quoteNumber')||'QUO-001';
   st('pv_qnum', currentQnum);
   // Auto-update doc type based on number prefix
   const pvDt = document.getElementById('pv_doctype');
@@ -3501,7 +3501,7 @@ async function saveQuote() {
   const clientName = document.getElementById('b_clientName')?.value.trim();
   if (!clientName) { showToast('Please enter a client name', 'error'); return; }
   const {subtotal,vat,total} = calcBuilderTotals();
-  const qNum = document.getElementById('b_quoteNumber')?.value.trim()||'QUA-001';
+  const qNum = document.getElementById('b_quoteNumber')?.value.trim()||'QUO-001';
   const vatOn = document.getElementById('b_vat')?.value === 'yes';
   const validDays = parseInt(document.getElementById('b_validDays')?.value||'14');
   
@@ -3509,7 +3509,7 @@ async function saveQuote() {
   const userId = currentUser?.id;
   if (!userId) { showToast('User ID missing - please sign in again', 'error'); return; }
   
-  // Create composite ID for data isolation: "userId|QUA-001" or "userId|INV-001"
+  // Create composite ID for data isolation: "userId|QUO-001" or "userId|INV-001"
   const compositeId = createCompositeId(userId, editingQuoteId ? extractQuoteNumber(editingQuoteId) : qNum);
   
   const quoteData = {
@@ -7475,7 +7475,7 @@ function printQuote() {
   doc.setTextColor(150, 150, 150);
   doc.text('QUOTATION', rightX, 4, { align: 'right' });
   
-  const qNum = document.getElementById('b_quoteNumber')?.value || extractQuoteNumber(editingQuoteId) || 'QUA-001';
+  const qNum = document.getElementById('b_quoteNumber')?.value || extractQuoteNumber(editingQuoteId) || 'QUO-001';
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(8);
   doc.setTextColor(...red);
@@ -7796,7 +7796,7 @@ async function sendWhatsAppFromBuilder() {
   await saveQuote();
   const clientName = document.getElementById('b_clientName')?.value.trim() || 'Client';
   const clientContact = document.getElementById('b_clientContact')?.value.trim() || '';
-  const qNum = document.getElementById('b_quoteNumber')?.value.trim() || 'QUA-001';
+  const qNum = document.getElementById('b_quoteNumber')?.value.trim() || 'QUO-001';
   const {total} = calcBuilderTotals();
   const company = currentUser?.company || 'Our company';
   waPhone = clientContact;
