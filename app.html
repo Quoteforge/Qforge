@@ -1848,7 +1848,7 @@ h1, h2, h3 {
       <button class="sidebar-link active" id="nav-dashboard" onclick="goTo('dashboard')">
         <span class="icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg></span> Dashboard
       </button>
-      <button class="sidebar-link" id="nav-new" onclick="goTo('builder')">
+      <button class="sidebar-link" id="nav-new" onclick="isInvoiceMode=false; goTo('builder')">
         <span class="icon">➕</span> New Quote
       </button>
       <button class="sidebar-link" id="nav-newinvoice" onclick="newInvoice()">
@@ -2582,9 +2582,9 @@ function goTo(page) {
   });
   const mc = document.getElementById('mainContent');
   if (page==='dashboard') mc.innerHTML = renderDashboard();
-  else if (page==='quotes') mc.innerHTML = renderQuotes();
+  else if (page==='quotes') { isInvoiceMode = false; mc.innerHTML = renderQuotes(); }
   else if (page==='builder') { mc.innerHTML = renderBuilder(); initBuilder(); }
-  else if (page==='invoices') mc.innerHTML = renderInvoices();
+  else if (page==='invoices') { isInvoiceMode = false; mc.innerHTML = renderInvoices(); }
   else if (page==='clients') mc.innerHTML = renderClients();
   else if (page==='client-detail') mc.innerHTML = renderClientDetail(currentClientId);
   else if (page==='stats') mc.innerHTML = renderStats();
@@ -2622,7 +2622,7 @@ function renderDashboard() {
       <div style="font-size:0.82rem;color:var(--muted);margin-top:3px;">${currentUser.company || 'Your Company'}</div>
     </div>
     <div style="display:flex;gap:10px;flex-wrap:nowrap;">
-      <button class="btn btn-red" style="color:#fff;" onclick="goTo('builder')">+ New Quote</button>
+      <button class="btn btn-red" style="color:#fff;" onclick="isInvoiceMode=false; goTo('builder')">+ New Quote</button>
     </div>
   </div>
 
@@ -2695,7 +2695,7 @@ function renderQuotes() {
       <div style="font-size:0.82rem;color:var(--muted);margin-top:3px;">${onlyQuotes.length} quote${onlyQuotes.length!==1?'s':''}</div>
     </div>
     <div style="display:flex;gap:10px;flex-wrap:nowrap;">
-      <button class="btn btn-red" style="color:#fff;" onclick="goTo('builder')">+ New Quote</button>
+      <button class="btn btn-red" style="color:#fff;" onclick="isInvoiceMode=false; goTo('builder')">+ New Quote</button>
     </div>
   </div>
   ${renderQuoteTable(onlyQuotes, false)}`;
@@ -2708,7 +2708,7 @@ function renderQuoteTable(list, compact) {
       <div class="empty-icon">[ ]</div>
       <h3>No quotes yet</h3>
       <p>Create your first quote and start winning clients</p>
-      <button class="btn btn-red" style="color:#fff;" onclick="goTo('builder')">+ Create First Quote</button>
+      <button class="btn btn-red" style="color:#fff;" onclick="isInvoiceMode=false; goTo('builder')">+ Create First Quote</button>
     </div>
   </div>`;
 
@@ -4153,6 +4153,7 @@ function renderClientDetail(clientName) {
 
 function newQuoteForClient(clientName) {
   const c = getClients().find(x => x.name === clientName);
+  isInvoiceMode = false;
   goTo('builder');
   setTimeout(() => {
     const nameEl = document.getElementById('b_clientName');
@@ -7031,62 +7032,6 @@ function renderProfile() {
       </div>
     </div>
     <div class="profile-card">
-      <h3>Brand Color</h3>
-      <div class="profile-form">
-        <p style="font-size:0.8rem;color:var(--muted);margin-bottom:16px;">Choose your brand color - it will be applied to all your quotes, invoices, and PDFs</p>
-        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:16px;">
-          <button onclick="saveBrandColor('#E63946')" style="display:flex;flex-direction:column;align-items:center;gap:6px;padding:12px;border-radius:8px;border:2px solid ${u.brandColor==='#E63946'?'#E63946':'#e0e0e0'};background:#fff;cursor:pointer;">
-            <div style="width:40px;height:40px;border-radius:6px;background:#E63946;"></div>
-            <span style="font-size:0.75rem;font-weight:600;">Red</span>
-          </button>
-          <button onclick="saveBrandColor('#2563EB')" style="display:flex;flex-direction:column;align-items:center;gap:6px;padding:12px;border-radius:8px;border:2px solid ${u.brandColor==='#2563EB'?'#2563EB':'#e0e0e0'};background:#fff;cursor:pointer;">
-            <div style="width:40px;height:40px;border-radius:6px;background:#2563EB;"></div>
-            <span style="font-size:0.75rem;font-weight:600;">Blue</span>
-          </button>
-          <button onclick="saveBrandColor('#10B981')" style="display:flex;flex-direction:column;align-items:center;gap:6px;padding:12px;border-radius:8px;border:2px solid ${u.brandColor==='#10B981'?'#10B981':'#e0e0e0'};background:#fff;cursor:pointer;">
-            <div style="width:40px;height:40px;border-radius:6px;background:#10B981;"></div>
-            <span style="font-size:0.75rem;font-weight:600;">Green</span>
-          </button>
-          <button onclick="saveBrandColor('#A855F7')" style="display:flex;flex-direction:column;align-items:center;gap:6px;padding:12px;border-radius:8px;border:2px solid ${u.brandColor==='#A855F7'?'#A855F7':'#e0e0e0'};background:#fff;cursor:pointer;">
-            <div style="width:40px;height:40px;border-radius:6px;background:#A855F7;"></div>
-            <span style="font-size:0.75rem;font-weight:600;">Purple</span>
-          </button>
-          <button onclick="saveBrandColor('#F97316')" style="display:flex;flex-direction:column;align-items:center;gap:6px;padding:12px;border-radius:8px;border:2px solid ${u.brandColor==='#F97316'?'#F97316':'#e0e0e0'};background:#fff;cursor:pointer;">
-            <div style="width:40px;height:40px;border-radius:6px;background:#F97316;"></div>
-            <span style="font-size:0.75rem;font-weight:600;">Orange</span>
-          </button>
-          <button onclick="saveBrandColor('#EC4899')" style="display:flex;flex-direction:column;align-items:center;gap:6px;padding:12px;border-radius:8px;border:2px solid ${u.brandColor==='#EC4899'?'#EC4899':'#e0e0e0'};background:#fff;cursor:pointer;">
-            <div style="width:40px;height:40px;border-radius:6px;background:#EC4899;"></div>
-            <span style="font-size:0.75rem;font-weight:600;">Pink</span>
-          </button>
-          <button onclick="saveBrandColor('#4F46E5')" style="display:flex;flex-direction:column;align-items:center;gap:6px;padding:12px;border-radius:8px;border:2px solid ${u.brandColor==='#4F46E5'?'#4F46E5':'#e0e0e0'};background:#fff;cursor:pointer;">
-            <div style="width:40px;height:40px;border-radius:6px;background:#4F46E5;"></div>
-            <span style="font-size:0.75rem;font-weight:600;">Indigo</span>
-          </button>
-          <button onclick="saveBrandColor('#14B8A6')" style="display:flex;flex-direction:column;align-items:center;gap:6px;padding:12px;border-radius:8px;border:2px solid ${u.brandColor==='#14B8A6'?'#14B8A6':'#e0e0e0'};background:#fff;cursor:pointer;">
-            <div style="width:40px;height:40px;border-radius:6px;background:#14B8A6;"></div>
-            <span style="font-size:0.75rem;font-weight:600;">Teal</span>
-          </button>
-          <button onclick="saveBrandColor('#06B6D4')" style="display:flex;flex-direction:column;align-items:center;gap:6px;padding:12px;border-radius:8px;border:2px solid ${u.brandColor==='#06B6D4'?'#06B6D4':'#e0e0e0'};background:#fff;cursor:pointer;">
-            <div style="width:40px;height:40px;border-radius:6px;background:#06B6D4;"></div>
-            <span style="font-size:0.75rem;font-weight:600;">Cyan</span>
-          </button>
-          <button onclick="saveBrandColor('#F59E0B')" style="display:flex;flex-direction:column;align-items:center;gap:6px;padding:12px;border-radius:8px;border:2px solid ${u.brandColor==='#F59E0B'?'#F59E0B':'#e0e0e0'};background:#fff;cursor:pointer;">
-            <div style="width:40px;height:40px;border-radius:6px;background:#F59E0B;"></div>
-            <span style="font-size:0.75rem;font-weight:600;">Amber</span>
-          </button>
-          <button onclick="saveBrandColor('#84CC16')" style="display:flex;flex-direction:column;align-items:center;gap:6px;padding:12px;border-radius:8px;border:2px solid ${u.brandColor==='#84CC16'?'#84CC16':'#e0e0e0'};background:#fff;cursor:pointer;">
-            <div style="width:40px;height:40px;border-radius:6px;background:#84CC16;"></div>
-            <span style="font-size:0.75rem;font-weight:600;">Lime</span>
-          </button>
-          <button onclick="saveBrandColor('#64748B')" style="display:flex;flex-direction:column;align-items:center;gap:6px;padding:12px;border-radius:8px;border:2px solid ${u.brandColor==='#64748B'?'#64748B':'#e0e0e0'};background:#fff;cursor:pointer;">
-            <div style="width:40px;height:40px;border-radius:6px;background:#64748B;"></div>
-            <span style="font-size:0.75rem;font-weight:600;">Slate</span>
-          </button>
-        </div>
-      </div>
-    </div>
-    <div class="profile-card">
       <h3>Banking Details</h3>
       <div class="profile-form">
         <p style="font-size:0.8rem;color:var(--muted);margin-bottom:12px;">These details will appear on your invoices. Leave blank if not needed.</p>
@@ -7736,6 +7681,26 @@ function printQuote() {
   }
 
   // ═══════════════════════════════════════════════════════════════════════
+  // NOTES SECTION
+  // ═══════════════════════════════════════════════════════════════════════
+  const notesVal = document.getElementById('b_notes')?.value?.trim() || '';
+  if (notesVal) {
+    y += 2; // spacing
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(7);
+    doc.setTextColor(...red);
+    doc.text('NOTES:', margin, y);
+    
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(6.5);
+    doc.setTextColor(...dark);
+    const notesLines = doc.splitTextToSize(notesVal, contentW);
+    doc.text(notesLines, margin, y + 3);
+    
+    y += (notesLines.length * 2.5) + 4;
+  }
+
+  // ═══════════════════════════════════════════════════════════════════════
   // FOOTER
   // ═══════════════════════════════════════════════════════════════════════
   
@@ -8104,8 +8069,6 @@ function hideLoadingScreen(showAuth) {
     </div>
   </div>
 </div>
-
-<!-- COLOR PALETTE MODAL -->
 
 <!-- LOGO CROPPER MODAL -->
 <div class="modal-overlay" id="logoCropperModal" style="display:none;">
