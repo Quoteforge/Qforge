@@ -167,6 +167,12 @@ function renderInvoice() {
   
   html += getBankingHTML();
   
+  // Add notes if present
+  if (invoiceData.notes && invoiceData.notes.trim()) {
+    html += '<div style="padding:12px 20px;border-top:1px solid #e0e0e0;margin-top:8px;"><div style="font-size:0.70rem;font-weight:700;color:#E63946;text-transform:uppercase;margin-bottom:6px;letter-spacing:0.05em;">Notes</div>';
+    html += '<div style="font-size:0.75rem;color:#555;line-height:1.6;white-space:pre-wrap;">' + escapeHtml(invoiceData.notes) + '</div></div>';
+  }
+  
   html += '<div class="doc-footer"><div class="footer-left">Thank you for your business. Payment is due within 30 days.<br>';
   if (invoiceData.deposit) html += '<strong style="margin-top:4px;display:block;">Deposit: ' + invoiceData.deposit + ' required on acceptance. Balance due on completion</strong>';
   html += '</div><div class="footer-right">Powered by QForge | myquoteforge.co.za</div></div>';
