@@ -513,7 +513,7 @@ select option{background:#ffffff;color:#111111;}
 .doc-info-band{
   background:#ffffff;display:grid;
   grid-template-columns:1fr 1fr;
-  border-bottom:1px solid #eeeeee;
+  border-bottom:0.5px solid #d0d0d0;
 }
 .doc-info-col{padding:14px 20px;}
 .doc-info-col:first-child{border-right:1px solid #eeeeee;}
@@ -538,7 +538,6 @@ select option{background:#ffffff;color:#111111;}
 .doc-scope{
   background:#ffffff;padding:12px 20px;
   font-family:'Plus Jakarta Sans',sans-serif;font-size:0.84rem;color:#333333;line-height:1.7;
-  border-left:3px solid #000000;
   border-bottom:1px solid #eeeeee;
   margin:0;border-radius:0;
 }
@@ -7426,9 +7425,9 @@ function printQuote() {
   doc.setFillColor(255, 255, 255);
   doc.rect(0, 1.5, pageW, 32, 'F');
   
-  // Red bottom border
-  doc.setFillColor(...red);
-  doc.rect(0, 33.5, pageW, 0.8, 'F');
+  // Thin grey bottom border
+  doc.setFillColor(208, 208, 208);
+  doc.rect(0, 33.5, pageW, 0.3, 'F');
   
   // Left side - logo + company info
   const logoX = margin;
