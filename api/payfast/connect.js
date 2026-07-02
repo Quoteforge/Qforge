@@ -1,0 +1,69 @@
+// /api/payfast/connect.js
+// Saves a user's own PayFast merchant credentials so their invoices
+// can generate a "Pay Now" button that pays directly into their account.
+// This is a form submission, not an OAuth redirect — PayFast doesn't
+// offer a connect-and-authorize flow for third-party platforms.
+
+module.exports = async (req, res) => {
+  if (req.method !== 'POST') {
+    return res.status(405).json({ error: 'Use POST' });
+  }
+
+  let body = req.body;
+  if (typeof body === 'string') {
+    try { body = JSON.parse(body); } catch (e) { return res.status(400).json({ error: 'Invalid JSON body' }); }
+  }
+
+  const { access_token, merchant_id, merchant_key, passphrase } = body || {};
+  if (!access_token) return res.status(400).json({ error: 'Missing access_token' });
+  if (!merchant_id || !merchant_key || !passphrase) {
+    return res.status(400).json({ error: 'Merchant ID, Merchant Key, and Passphrase are all required' });
+  }
+
+  let userId;
+  try {
+    const userRes = await fetch(`${process.env.SUPABASE_URL}/auth/v1/user`, {
+      headers: {
+        Authorization: `Bearer ${access_token}`,
+        apikey: process.env.SUPABASE_ANON_KEY
+      }
+    });
+    if (!userRes.ok) throw new Error('Session invalid');
+    const user = await userRes.json();
+    userId = user.id;
+    if (!userId) throw new Error('No user id on session');
+  } catch (e) {
+    return res.status(401).json({ error: 'Your session has expired. Please log in again.' });
+  }
+
+  try {
+    const upsertRes = await fetch(
+      `${process.env.SUPABASE_URL}/rest/v1/payfast_settings?on_conflict=user_id`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          apikey: process.env.SUPABASE_SERVICE_ROLE_KEY,
+          Authorization: `Bearer ${process.env.SUPABASE_SERVICE_ROLE_KEY}`,
+          Prefer: 'resolution=merge-duplicates'
+        },
+        body: JSON.stringify({
+          user_id: userId,
+          merchant_id: merchant_id.trim(),
+          merchant_key: merchant_key.trim(),
+          passphrase: passphrase.trim(),
+          connected_at: new Date().toISOString()
+        })
+      }
+    );
+    if (!upsertRes.ok) {
+      const errText = await upsertRes.text();
+      throw new Error(errText);
+    }
+  } catch (e) {
+    console.error('PayFast connect failed:', e.message);
+    return res.status(500).json({ error: 'Failed to save PayFast details' });
+  }
+
+  return res.status(200).json({ success: true });
+};
