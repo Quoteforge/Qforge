@@ -7587,17 +7587,29 @@ function printQuote() {
   (builderItems || []).forEach((item, idx) => {
     const amount = (item.qty || 0) * (item.price || 0);
     
-    // Alternate row colors
+    // Description - work out how many lines it wraps to BEFORE drawing the row
+    const desc = (item.name || '') + (item.desc ? ' (' + item.desc + ')' : '');
+    const descLines = doc.splitTextToSize(desc, 50);
+    const lineHeight = 3.2; // mm, matches fontSize 7 in this section
+    const rowHeight = Math.max(5, descLines.length * lineHeight + 1.5);
+    
+    // Page break if this row won't fit
+    if (y + rowHeight > pageH - 40) {
+      doc.addPage();
+      y = margin;
+    }
+    
+    // Alternate row colors - sized to fit the wrapped description
     if (idx % 2 === 0) {
       doc.setFillColor(255, 255, 255);
     } else {
       doc.setFillColor(250, 250, 250);
     }
-    doc.rect(0, y - 1, pageW, 5, 'F');
+    doc.rect(0, y - 1, pageW, rowHeight, 'F');
     
-    // Description
-    const desc = (item.name || '') + (item.desc ? ' (' + item.desc + ')' : '');
-    const descLines = doc.splitTextToSize(desc, 50);
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(7);
+    doc.setTextColor(...dark);
     doc.text(descLines, margin, y + 1);
     
     // QTY
@@ -7609,13 +7621,7 @@ function printQuote() {
     // Amount
     doc.text('R' + amount.toFixed(2), pageW - margin, y + 1, { align: 'right' });
     
-    y += 5;
-    
-    // Page break if needed
-    if (y > pageH - 40) {
-      doc.addPage();
-      y = margin;
-    }
+    y += rowHeight;
   });
   
   // Border under items
