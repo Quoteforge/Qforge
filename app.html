@@ -7526,31 +7526,34 @@ function printQuote() {
     doc.text(addressLines, col1X, clientY);
   }
   
-  // Right column - VEHICLE
+  // Right column - VEHICLE (only for automotive)
   const col2X = margin + col1W + 1;
   
-  doc.setFont('helvetica', 'bold');
-  doc.setFontSize(5);
-  doc.setTextColor(...red);
-  doc.text('VEHICLE DETAILS', col2X, y + 2);
-  
-  doc.setFont('helvetica', 'normal');
-  doc.setFontSize(5.5);
-  doc.setTextColor(...grey);
-  let vehicleY = y + 6;
-  
-  // Get vehicle data from builder
-  const vehicle_vin = document.getElementById('b_vin')?.value || '';
-  const vehicle_reg = document.getElementById('b_regNo')?.value || '';
-  const vehicle_km = document.getElementById('b_km')?.value || '';
-  const vehicle_model = document.getElementById('b_vehicleModel')?.value || '';
-  const vehicle_engine = document.getElementById('b_engineType')?.value || '';
-  
-  if (vehicle_vin) { doc.text('VIN: ' + vehicle_vin, col2X, vehicleY); vehicleY += 3; }
-  if (vehicle_reg) { doc.text('Reg: ' + vehicle_reg, col2X, vehicleY); vehicleY += 3; }
-  if (vehicle_km) { doc.text('KM: ' + vehicle_km, col2X, vehicleY); vehicleY += 3; }
-  if (vehicle_model) { doc.text('Make/Model: ' + vehicle_model, col2X, vehicleY); vehicleY += 3; }
-  if (vehicle_engine) { doc.text('Engine: ' + vehicle_engine, col2X, vehicleY); }
+  const isAutomotive = currentUser?.industry === 'automotive';
+  if (isAutomotive) {
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(5);
+    doc.setTextColor(...red);
+    doc.text('VEHICLE DETAILS', col2X, y + 2);
+    
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(5.5);
+    doc.setTextColor(...grey);
+    let vehicleY = y + 6;
+    
+    // Get vehicle data from builder
+    const vehicle_vin = document.getElementById('b_vin')?.value || '';
+    const vehicle_reg = document.getElementById('b_regNo')?.value || '';
+    const vehicle_km = document.getElementById('b_km')?.value || '';
+    const vehicle_model = document.getElementById('b_vehicleModel')?.value || '';
+    const vehicle_engine = document.getElementById('b_engineType')?.value || '';
+    
+    if (vehicle_vin) { doc.text('VIN: ' + vehicle_vin, col2X, vehicleY); vehicleY += 3; }
+    if (vehicle_reg) { doc.text('Reg: ' + vehicle_reg, col2X, vehicleY); vehicleY += 3; }
+    if (vehicle_km) { doc.text('KM: ' + vehicle_km, col2X, vehicleY); vehicleY += 3; }
+    if (vehicle_model) { doc.text('Make/Model: ' + vehicle_model, col2X, vehicleY); vehicleY += 3; }
+    if (vehicle_engine) { doc.text('Engine: ' + vehicle_engine, col2X, vehicleY); }
+  }
   
   y = y + 26;
 
@@ -7684,7 +7687,6 @@ function printQuote() {
   // ═══════════════════════════════════════════════════════════════════════
   const notesVal = document.getElementById('b_notes')?.value?.trim() || '';
   if (notesVal) {
-    y += 2; // spacing
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(7);
     doc.setTextColor(...red);
@@ -7694,9 +7696,9 @@ function printQuote() {
     doc.setFontSize(6.5);
     doc.setTextColor(...dark);
     const notesLines = doc.splitTextToSize(notesVal, contentW);
-    doc.text(notesLines, margin, y + 3);
+    doc.text(notesLines, margin, y + 2.5);
     
-    y += (notesLines.length * 2.5) + 4;
+    y += (notesLines.length * 2.5);
   }
 
   // ═══════════════════════════════════════════════════════════════════════
@@ -7709,16 +7711,16 @@ function printQuote() {
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(7);
   doc.setTextColor(220, 220, 220);
-  doc.text('Thank you for your business. Payment is due within 30 days.', margin, y + 2);
+  doc.text('Thank you for your business. Payment is due within 30 days.', margin, y + 0.8);
   
   const deposit = document.getElementById('b_deposit')?.value || '';
   if (deposit) {
-    doc.text('Deposit: ' + deposit + ' required on acceptance. Balance due on completion.', margin, y + 4);
+    doc.text('Deposit: ' + deposit + ' required on acceptance. Balance due on completion.', margin, y + 2.5);
   }
   
   doc.setTextColor(150, 150, 150);
   doc.setFontSize(7);
-  doc.text('Powered by QForge | myquoteforge.co.za', pageW - margin, y + 6, { align: 'right' });
+  doc.text('Powered by QForge | myquoteforge.co.za', pageW - margin, y + 4.5, { align: 'right' });
   
   // ═══════════════════════════════════════════════════════════════════════
   // SIGNATURE AREA
