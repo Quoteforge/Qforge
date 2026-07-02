@@ -3792,79 +3792,95 @@ function printInvoicePDF(inv) {
 
   // White header
   doc.setFillColor(255, 255, 255);
-  doc.rect(0, 0, pageW, 34, 'F');
+  doc.rect(0, 0, pageW, 46, 'F');
   doc.setFillColor(...orange);
-  doc.rect(0, 34, pageW, 1.5, 'F');
+  doc.rect(0, 46, pageW, 1.5, 'F');
+
+  // Logo
+  const logoSize = 30;
+  if (currentUser?.logo) {
+    try {
+      doc.addImage(currentUser.logo, 'JPEG', margin, 6, logoSize, logoSize, undefined, 'FAST');
+    } catch(e) { console.log('Logo error:', e); }
+  } else {
+    doc.setFillColor(245, 245, 245);
+    doc.rect(margin, 6, logoSize, logoSize, 'F');
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(9);
+    doc.setTextColor(...dark);
+    doc.text('LOGO', margin + logoSize/2, 22.5, { align: 'center' });
+  }
+  const infoX = margin + logoSize + 6;
 
   // Company name
   doc.setFont('helvetica', 'bold');
-  doc.setFontSize(27.3);
+  doc.setFontSize(19);
   doc.setTextColor(...dark);
-  doc.text(currentUser?.company || 'Your Company', margin, 12);
+  doc.text(currentUser?.company || 'Your Company', infoX, 13);
   doc.setFont('helvetica', 'normal');
-  doc.setFontSize(14.625);
+  doc.setFontSize(10.5);
   doc.setTextColor(130, 130, 130);
   const industry = INDUSTRY_LABELS[currentUser?.industry||'other'] || 'Professional Services';
-  doc.text(industry.toUpperCase(), margin, 18);
-  doc.setFontSize(14.625);
+  doc.text(industry.toUpperCase(), infoX, 19);
+  doc.setFontSize(10.5);
   doc.setTextColor(80, 80, 80);
-  let cy = 23;
-  if (currentUser?.phone) { doc.text('Tel: ' + currentUser.phone, margin, cy); cy += 4; }
-  if (currentUser?.email) { doc.text('Email: ' + currentUser.email, margin, cy); }
-  if (currentUser?.vatNumber) { doc.text('VAT: ' + currentUser.vatNumber, margin, cy + 4); }
+  let cy = 25;
+  if (currentUser?.phone) { doc.text('Tel: ' + currentUser.phone, infoX, cy); cy += 4.5; }
+  if (currentUser?.email) { doc.text('Email: ' + currentUser.email, infoX, cy); }
+  if (currentUser?.vatNumber) { doc.text('VAT: ' + currentUser.vatNumber, infoX, cy + 4.5); }
 
   // INVOICE label and number
   doc.setFont('helvetica', 'normal');
-  doc.setFontSize(12.6);
+  doc.setFontSize(11);
   doc.setTextColor(150, 150, 150);
   doc.text('TAX INVOICE', pageW - margin, 10, { align: 'right' });
   doc.setFont('helvetica', 'bold');
-  doc.setFontSize(27.3);
+  doc.setFontSize(19);
   doc.setTextColor(...orange);
   doc.text(inv.id, pageW - margin, 20, { align: 'right' });
   doc.setFont('helvetica', 'normal');
-  doc.setFontSize(14.625);
+  doc.setFontSize(10.5);
   doc.setTextColor(80, 80, 80);
   const dateStr = new Date(inv.date||Date.now()).toLocaleDateString('en-ZA',{day:'numeric',month:'long',year:'numeric'});
   const dueDate = new Date(inv.date||Date.now());
   dueDate.setDate(dueDate.getDate() + 30);
   const dueDateStr = dueDate.toLocaleDateString('en-ZA',{day:'numeric',month:'long',year:'numeric'});
-  doc.text('Date: ' + dateStr, pageW - margin, 27, { align: 'right' });
-  doc.text('Due: ' + dueDateStr, pageW - margin, 32, { align: 'right' });
-  y = 40;
+  doc.text('Date: ' + dateStr, pageW - margin, 30, { align: 'right' });
+  doc.text('Due: ' + dueDateStr, pageW - margin, 36, { align: 'right' });
+  y = 52;
 
   // Client info - just INVOICE TO (remove FROM section)
   doc.setFillColor(250, 249, 247);
-  doc.rect(0, y, pageW, 24, 'F');
+  doc.rect(0, y, pageW, 28, 'F');
   doc.setDrawColor(230, 230, 230);
   doc.setLineWidth(0.3);
-  doc.line(0, y+24, pageW, y+24);
+  doc.line(0, y+28, pageW, y+28);
 
   doc.setFont('helvetica', 'bold');
-  doc.setFontSize(6);
+  doc.setFontSize(8);
   doc.setTextColor(170, 170, 170);
-  doc.text('INVOICE TO', margin, y+6);
+  doc.text('INVOICE TO', margin, y+7);
   doc.setFont('helvetica', 'bold');
-  doc.setFontSize(10);
+  doc.setFontSize(12.5);
   doc.setTextColor(...dark);
-  doc.text(inv.client || 'Client', margin, y+12);
+  doc.text(inv.client || 'Client', margin, y+15);
   doc.setFont('helvetica', 'normal');
-  doc.setFontSize(7.5);
+  doc.setFontSize(9.5);
   doc.setTextColor(100, 100, 100);
-  cy = y+17;
-  if (inv.contact) { doc.text(inv.contact, margin, cy); cy += 4; }
+  cy = y+21;
+  if (inv.contact) { doc.text(inv.contact, margin, cy); cy += 5; }
   if (inv.address) { doc.text(inv.address, margin, cy); }
-  y += 28;
+  y += 32;
 
   // Quote ref
   if (inv.quote_ref) {
     doc.setFillColor(248, 247, 245);
-    doc.rect(0, y, pageW, 8, 'F');
+    doc.rect(0, y, pageW, 10, 'F');
     doc.setFont('helvetica', 'normal');
-    doc.setFontSize(7.5);
+    doc.setFontSize(9.5);
     doc.setTextColor(120, 120, 120);
-    doc.text('Reference Quote: ' + inv.quote_ref, margin, y+5.5);
-    y += 10;
+    doc.text('Reference Quote: ' + inv.quote_ref, margin, y+6.5);
+    y += 12;
   }
 
   // Items table
@@ -3880,8 +3896,8 @@ function printInvoicePDF(inv) {
     head: [['DESCRIPTION', 'QTY', 'UNIT PRICE', 'AMOUNT']],
     body: items,
     margin: { left: 0, right: 0, top: 0, bottom: 0 },
-    styles: { fontSize:8.5, cellPadding:4, textColor:dark, lineColor:borderGrey, lineWidth:0.2 },
-    headStyles: { fillColor:dark, textColor:white, fontStyle:'bold', fontSize:7.5, cellPadding:5 },
+    styles: { fontSize:10.5, cellPadding:5, textColor:dark, lineColor:borderGrey, lineWidth:0.2 },
+    headStyles: { fillColor:dark, textColor:white, fontStyle:'bold', fontSize:9.5, cellPadding:6 },
     columnStyles: {
       1:{halign:'center'},
       2:{halign:'right'}, 3:{halign:'right',fontStyle:'bold'}
@@ -3889,72 +3905,73 @@ function printInvoicePDF(inv) {
     alternateRowStyles: { fillColor:[252,252,252] }
   });
 
-  y = doc.lastAutoTable.finalY + 4;
+  y = doc.lastAutoTable.finalY + 5;
 
   // Totals
   const subtotal = inv.subtotal || 0;
   // Totals section with light red background
   doc.setFillColor(254, 240, 240); // Light red background
-  doc.rect(0, y-2, pageW, 28, 'F'); // Background for entire totals
+  doc.rect(0, y-2, pageW, 34, 'F'); // Background for entire totals
   
   const vat = inv.vat || 0;
   const total = inv.amount || 0;
   const fmt = n => 'R ' + n.toLocaleString('en-ZA',{minimumFractionDigits:2,maximumFractionDigits:2});
-  const totalsX = pageW - 85;
+  const totalsX = pageW - 95;
 
   doc.setFont('helvetica', 'normal');
-  doc.setFontSize(8.5);
+  doc.setFontSize(10.5);
   doc.setTextColor(...midGrey);
-  doc.text('Subtotal', totalsX+4, y+5.5);
-  doc.text(fmt(subtotal), pageW-2, y+5.5, {align:'right'});
-  y += 8;
+  doc.text('Subtotal', totalsX+4, y+7);
+  doc.text(fmt(subtotal), pageW-2, y+7, {align:'right'});
+  y += 10;
 
   if (vat > 0) {
     doc.setFont('helvetica', 'normal');
-    doc.setFontSize(8.5);
+    doc.setFontSize(10.5);
     doc.setTextColor(...midGrey);
-    doc.text('VAT @ 15%', totalsX+4, y+5.5);
-    doc.text(fmt(vat), pageW-2, y+5.5, {align:'right'});
-    y += 8;
+    doc.text('VAT @ 15%', totalsX+4, y+7);
+    doc.text(fmt(vat), pageW-2, y+7, {align:'right'});
+    y += 10;
   }
 
   doc.setFillColor(...dark);
-  doc.rect(totalsX, y, 85, 10, 'F');
+  doc.rect(totalsX, y, 95, 13, 'F');
   doc.setFont('helvetica', 'bold');
-  doc.setFontSize(10);
+  doc.setFontSize(13);
   doc.setTextColor(...white);
-  doc.text('TOTAL DUE', totalsX+6, y+7);
-  doc.text(fmt(total), pageW-2, y+7, {align:'right'});
-  y += 14;
+  doc.text('TOTAL DUE', totalsX+7, y+9);
+  doc.text(fmt(total), pageW-2, y+9, {align:'right'});
+  y += 18;
 
   // Banking details
   doc.setFillColor(248, 247, 245);
-  doc.rect(0, y, pageW, 22, 'F');
+  doc.rect(0, y, pageW, 27, 'F');
   doc.setFillColor(...orange);
-  doc.rect(0, y, 1.5, 22, 'F');
+  doc.rect(0, y, 1.5, 27, 'F');
   doc.setFont('helvetica', 'bold');
-  doc.setFontSize(7.5);
+  doc.setFontSize(9.5);
   doc.setTextColor(...dark);
-  doc.text('PAYMENT DETAILS', margin, y+6);
+  doc.text('PAYMENT DETAILS', margin, y+7);
   doc.setFont('helvetica', 'normal');
+  doc.setFontSize(9.5);
   doc.setTextColor(80, 80, 80);
-  doc.text('Please use invoice number ' + inv.id + ' as payment reference', margin, y+12);
-  doc.text('EFT payments preferred | Contact us for banking details', margin, y+18);
-  y += 26;
+  doc.text('Please use invoice number ' + inv.id + ' as payment reference', margin, y+14);
+  doc.text('EFT payments preferred | Contact us for banking details', margin, y+21);
+  y += 31;
 
   // Footer
   doc.setFillColor(26, 26, 26);
-  doc.rect(0, y, pageW, 20, 'F');
+  doc.rect(0, y, pageW, 24, 'F');
   doc.setFillColor(...orange);
   doc.rect(0, y, pageW, 1.5, 'F');
   doc.setFont('helvetica', 'italic');
-  doc.setFontSize(8);
+  doc.setFontSize(10);
   doc.setTextColor(180, 180, 180);
-  doc.text('Thank you for your business. Payment is due within 30 days.', margin, y+8);
+  doc.text('Thank you for your business. Payment is due within 30 days.', margin, y+10);
   doc.setFont('helvetica', 'normal');
-  doc.setFontSize(7.5);
+  doc.setFontSize(9.5);
   doc.setTextColor(130, 130, 130);
-  doc.text('Powered by QForge | myquoteforge.co.za', pageW-margin, y+14, {align:'right'});
+  doc.text('Powered by QForge | myquoteforge.co.za', pageW-margin, y+17, {align:'right'});
 
   const fileName = inv.id + '-' + (inv.client||'Invoice').replace(/[^a-z0-9]/gi,'-') + '.pdf';
   doc.save(fileName);
@@ -7423,73 +7440,73 @@ function printQuote() {
   
   // Header background
   doc.setFillColor(255, 255, 255);
-  doc.rect(0, 1.5, pageW, 32, 'F');
+  doc.rect(0, 1.5, pageW, 42, 'F');
   
   // Thin grey bottom border
   doc.setFillColor(208, 208, 208);
-  doc.rect(0, 33.5, pageW, 0.3, 'F');
+  doc.rect(0, 43.5, pageW, 0.3, 'F');
   
   // Left side - logo + company info
   const logoX = margin;
-  const logoSize = 12;
+  const logoSize = 24;
   
   // Logo placeholder (if available)
   if (currentUser?.logo) {
     try {
-      doc.addImage(currentUser.logo, 'JPEG', logoX, 2, logoSize, logoSize, undefined, 'FAST');
+      doc.addImage(currentUser.logo, 'JPEG', logoX, 3, logoSize, logoSize, undefined, 'FAST');
     } catch(e) { console.log('Logo error:', e); }
   } else {
     doc.setFillColor(245, 245, 245);
-    doc.rect(logoX, 2, logoSize, logoSize, 'F');
+    doc.rect(logoX, 3, logoSize, logoSize, 'F');
     doc.setFont('helvetica', 'bold');
-    doc.setFontSize(6);
+    doc.setFontSize(8);
     doc.setTextColor(...dark);
-    doc.text('LOGO', logoX + 6, 8.5, { align: 'center' });
+    doc.text('LOGO', logoX + logoSize/2, 16.5, { align: 'center' });
   }
   
-  const infoX = logoX + logoSize + 2;
+  const infoX = logoX + logoSize + 4;
   
   // Company name
   doc.setFont('helvetica', 'bold');
-  doc.setFontSize(6);
+  doc.setFontSize(10);
   doc.setTextColor(...dark);
-  doc.text(currentUser?.company || 'COMPANY', infoX, 4);
+  doc.text(currentUser?.company || 'COMPANY', infoX, 7);
   
   // Contact details
   doc.setFont('helvetica', 'normal');
-  doc.setFontSize(5);
+  doc.setFontSize(7);
   doc.setTextColor(...grey);
-  let infoY = 8;
-  if (currentUser?.owner_name) { doc.text(currentUser.owner_name + ': ' + (currentUser.phone || ''), infoX, infoY); infoY += 3; }
-  if (currentUser?.email) { doc.text('Email: ' + currentUser.email, infoX, infoY); infoY += 3; }
-  if (currentUser?.street) { doc.text(currentUser.street + ' ' + (currentUser.area || ''), infoX, infoY); infoY += 3; }
-  if (currentUser?.city) { doc.text(currentUser.city + ', ' + (currentUser.province || ''), infoX, infoY); infoY += 3; }
-  if (currentUser?.reg_number) { doc.text('Reg nr: ' + currentUser.reg_number, infoX, infoY); infoY += 3; }
+  let infoY = 12;
+  if (currentUser?.owner_name) { doc.text(currentUser.owner_name + ': ' + (currentUser.phone || ''), infoX, infoY); infoY += 4; }
+  if (currentUser?.email) { doc.text('Email: ' + currentUser.email, infoX, infoY); infoY += 4; }
+  if (currentUser?.street) { doc.text(currentUser.street + ' ' + (currentUser.area || ''), infoX, infoY); infoY += 4; }
+  if (currentUser?.city) { doc.text(currentUser.city + ', ' + (currentUser.province || ''), infoX, infoY); infoY += 4; }
+  if (currentUser?.reg_number) { doc.text('Reg nr: ' + currentUser.reg_number, infoX, infoY); infoY += 4; }
   if (currentUser?.vat_number) { doc.text('VAT: ' + currentUser.vat_number, infoX, infoY); }
   
   // Right side - quote number and date
   const rightX = pageW - margin;
   doc.setFont('helvetica', 'normal');
-  doc.setFontSize(5);
+  doc.setFontSize(7);
   doc.setTextColor(150, 150, 150);
-  doc.text('QUOTATION', rightX, 4, { align: 'right' });
+  doc.text('QUOTATION', rightX, 7, { align: 'right' });
   
   const qNum = document.getElementById('b_quoteNumber')?.value || extractQuoteNumber(editingQuoteId) || 'QUO-001';
   doc.setFont('helvetica', 'bold');
-  doc.setFontSize(8);
+  doc.setFontSize(12);
   doc.setTextColor(...red);
-  doc.text(qNum, rightX, 10, { align: 'right' });
+  doc.text(qNum, rightX, 15, { align: 'right' });
   
   doc.setFont('helvetica', 'normal');
-  doc.setFontSize(5);
+  doc.setFontSize(7);
   doc.setTextColor(...grey);
   const dateStr = new Date().toLocaleDateString('en-ZA');
-  doc.text('Date: ' + dateStr, rightX, 16, { align: 'right' });
+  doc.text('Date: ' + dateStr, rightX, 22, { align: 'right' });
   
   const validDays = document.getElementById('b_validDays')?.value || '14';
-  doc.text('Valid for: ' + validDays + ' days', rightX, 20, { align: 'right' });
+  doc.text('Valid for: ' + validDays + ' days', rightX, 28, { align: 'right' });
   
-  y = 36;
+  y = 46;
 
   // ═══════════════════════════════════════════════════════════════════════
   // CLIENT + VEHICLE INFO SECTION
@@ -7497,30 +7514,30 @@ function printQuote() {
   
   // Beige background
   doc.setFillColor(...redLight);
-  doc.rect(0, y, pageW, 24, 'F');
+  doc.rect(0, y, pageW, 30, 'F');
   
   // Left column - CLIENT
   const col1X = margin;
   const col1W = contentW / 2 - 0.5;
   
   doc.setFont('helvetica', 'bold');
-  doc.setFontSize(4.5);
+  doc.setFontSize(6.5);
   doc.setTextColor(...red);
-  doc.text('QUOTED FOR', col1X, y + 2);
+  doc.text('QUOTED FOR', col1X, y + 3);
   
   doc.setFont('helvetica', 'bold');
-  doc.setFontSize(7);
+  doc.setFontSize(10);
   doc.setTextColor(...dark);
   const clientName = document.getElementById('b_clientName')?.value || 'Client';
-  doc.text(clientName, col1X, y + 6);
+  doc.text(clientName, col1X, y + 9);
   
   doc.setFont('helvetica', 'normal');
-  doc.setFontSize(5);
+  doc.setFontSize(7);
   doc.setTextColor(...grey);
-  let clientY = y + 10;
+  let clientY = y + 14;
   const clientContact = document.getElementById('b_clientContact')?.value || '';
   const clientAddress = document.getElementById('b_clientAddress')?.value || '';
-  if (clientContact) { doc.text(clientContact, col1X, clientY); clientY += 3; }
+  if (clientContact) { doc.text(clientContact, col1X, clientY); clientY += 4; }
   if (clientAddress) {
     const addressLines = doc.splitTextToSize(clientAddress, col1W - 1);
     doc.text(addressLines, col1X, clientY);
@@ -7532,14 +7549,14 @@ function printQuote() {
   const isAutomotive = currentUser?.industry === 'automotive';
   if (isAutomotive) {
     doc.setFont('helvetica', 'bold');
-    doc.setFontSize(5);
+    doc.setFontSize(7);
     doc.setTextColor(...red);
-    doc.text('VEHICLE DETAILS', col2X, y + 2);
+    doc.text('VEHICLE DETAILS', col2X, y + 3);
     
     doc.setFont('helvetica', 'normal');
-    doc.setFontSize(5.5);
+    doc.setFontSize(7.5);
     doc.setTextColor(...grey);
-    let vehicleY = y + 6;
+    let vehicleY = y + 8;
     
     // Get vehicle data from builder
     const vehicle_vin = document.getElementById('b_vin')?.value || '';
@@ -7548,14 +7565,14 @@ function printQuote() {
     const vehicle_model = document.getElementById('b_vehicleModel')?.value || '';
     const vehicle_engine = document.getElementById('b_engineType')?.value || '';
     
-    if (vehicle_vin) { doc.text('VIN: ' + vehicle_vin, col2X, vehicleY); vehicleY += 3; }
-    if (vehicle_reg) { doc.text('Reg: ' + vehicle_reg, col2X, vehicleY); vehicleY += 3; }
-    if (vehicle_km) { doc.text('KM: ' + vehicle_km, col2X, vehicleY); vehicleY += 3; }
-    if (vehicle_model) { doc.text('Make/Model: ' + vehicle_model, col2X, vehicleY); vehicleY += 3; }
+    if (vehicle_vin) { doc.text('VIN: ' + vehicle_vin, col2X, vehicleY); vehicleY += 4; }
+    if (vehicle_reg) { doc.text('Reg: ' + vehicle_reg, col2X, vehicleY); vehicleY += 4; }
+    if (vehicle_km) { doc.text('KM: ' + vehicle_km, col2X, vehicleY); vehicleY += 4; }
+    if (vehicle_model) { doc.text('Make/Model: ' + vehicle_model, col2X, vehicleY); vehicleY += 4; }
     if (vehicle_engine) { doc.text('Engine: ' + vehicle_engine, col2X, vehicleY); }
   }
   
-  y = y + 26;
+  y = y + 33;
 
   // ═══════════════════════════════════════════════════════════════════════
   // ITEMS TABLE
@@ -7567,21 +7584,21 @@ function printQuote() {
   
   // Table header - BLACK
   doc.setFillColor(...dark);
-  doc.rect(0, y + 1, pageW, 8, 'F');
+  doc.rect(0, y + 1, pageW, 10, 'F');
   
   doc.setFont('helvetica', 'bold');
-  doc.setFontSize(11);
+  doc.setFontSize(13);
   doc.setTextColor(255, 255, 255);
-  doc.text('DESCRIPTION', margin, y + 5);
-  doc.text('QTY', pageW/2 - 20, y + 5);
-  doc.text('UNIT PRICE', pageW/2 + 20, y + 5);
-  doc.text('AMOUNT', pageW - margin, y + 5, { align: 'right' });
+  doc.text('DESCRIPTION', margin, y + 7);
+  doc.text('QTY', pageW/2 - 20, y + 7);
+  doc.text('UNIT PRICE', pageW/2 + 20, y + 7);
+  doc.text('AMOUNT', pageW - margin, y + 7, { align: 'right' });
   
-  y = y + 10;
+  y = y + 13;
   
   // Items
   doc.setFont('helvetica', 'normal');
-  doc.setFontSize(7);
+  doc.setFontSize(9);
   doc.setTextColor(...dark);
   
   (builderItems || []).forEach((item, idx) => {
@@ -7590,11 +7607,11 @@ function printQuote() {
     // Description - work out how many lines it wraps to BEFORE drawing the row
     const desc = (item.name || '') + (item.desc ? ' (' + item.desc + ')' : '');
     const descLines = doc.splitTextToSize(desc, 50);
-    const lineHeight = 3.2; // mm, matches fontSize 7 in this section
-    const rowHeight = Math.max(5, descLines.length * lineHeight + 1.5);
+    const lineHeight = 4.2; // mm, matches fontSize 9 in this section
+    const rowHeight = Math.max(7, descLines.length * lineHeight + 2);
     
     // Page break if this row won't fit
-    if (y + rowHeight > pageH - 40) {
+    if (y + rowHeight > pageH - 65) {
       doc.addPage();
       y = margin;
     }
@@ -7608,18 +7625,18 @@ function printQuote() {
     doc.rect(0, y - 1, pageW, rowHeight, 'F');
     
     doc.setFont('helvetica', 'normal');
-    doc.setFontSize(7);
+    doc.setFontSize(9);
     doc.setTextColor(...dark);
-    doc.text(descLines, margin, y + 1);
+    doc.text(descLines, margin, y + 2);
     
     // QTY
-    doc.text((item.qty || 0).toString(), pageW/2 - 20, y + 1);
+    doc.text((item.qty || 0).toString(), pageW/2 - 20, y + 2);
     
     // Unit Price
-    doc.text('R' + (item.price || 0).toFixed(2), pageW/2 + 20, y + 1);
+    doc.text('R' + (item.price || 0).toFixed(2), pageW/2 + 20, y + 2);
     
     // Amount
-    doc.text('R' + amount.toFixed(2), pageW - margin, y + 1, { align: 'right' });
+    doc.text('R' + amount.toFixed(2), pageW - margin, y + 2, { align: 'right' });
     
     y += rowHeight;
   });
@@ -7637,33 +7654,33 @@ function printQuote() {
   
   // Pink background
   doc.setFillColor(...redLight);
-  doc.rect(0, y, pageW, 14, 'F');
+  doc.rect(0, y, pageW, 18, 'F');
   
   const {subtotal, vat, total} = calcBuilderTotals();
   
   doc.setFont('helvetica', 'normal');
-  doc.setFontSize(8);
+  doc.setFontSize(10);
   doc.setTextColor(...grey);
   
   // Sub Total
-  doc.text('Sub Total', margin, y + 2);
-  doc.text('R' + subtotal.toFixed(2), pageW - margin, y + 2, { align: 'right' });
+  doc.text('Sub Total', margin, y + 3);
+  doc.text('R' + subtotal.toFixed(2), pageW - margin, y + 3, { align: 'right' });
   
   // VAT (if enabled)
   const vatOn = document.getElementById('b_vat')?.value === 'yes';
   if (vatOn) {
-    doc.text('VAT:', margin, y + 5);
-    doc.text('R' + vat.toFixed(2), pageW - margin, y + 5, { align: 'right' });
+    doc.text('VAT:', margin, y + 7);
+    doc.text('R' + vat.toFixed(2), pageW - margin, y + 7, { align: 'right' });
   }
   
   // Total - BOLD RED
   doc.setFont('helvetica', 'bold');
-  doc.setFontSize(15);
+  doc.setFontSize(18);
   doc.setTextColor(...red);
-  doc.text('TOTAL DUE', margin, y + 10);
-  doc.text('R' + total.toFixed(2), pageW - margin, y + 10, { align: 'right' });
+  doc.text('TOTAL DUE', margin, y + 14);
+  doc.text('R' + total.toFixed(2), pageW - margin, y + 14, { align: 'right' });
   
-  y += 16;
+  y += 21;
 
   // ═══════════════════════════════════════════════════════════════════════
   // BANKING DETAILS
@@ -7671,21 +7688,21 @@ function printQuote() {
   
   if (currentUser?.bank_name) {
     doc.setFillColor(...redLight);
-    doc.rect(0, y, pageW, 10, 'F');
+    doc.rect(0, y, pageW, 13, 'F');
     
     doc.setFont('helvetica', 'bold');
-    doc.setFontSize(5);
+    doc.setFontSize(7);
     doc.setTextColor(...red);
-    doc.text((currentUser.company || 'COMPANY').toUpperCase(), margin, y + 2);
+    doc.text((currentUser.company || 'COMPANY').toUpperCase(), margin, y + 3);
     
     doc.setFont('helvetica', 'normal');
-    doc.setFontSize(5.5);
+    doc.setFontSize(7.5);
     doc.setTextColor(...grey);
-    doc.text(currentUser.bank_name, margin, y + 4);
-    if (currentUser.bank_account) doc.text('Account: ' + currentUser.bank_account, margin, y + 6);
-    if (currentUser.bank_branch) doc.text('Branch: ' + currentUser.bank_branch, margin, y + 8);
+    doc.text(currentUser.bank_name, margin, y + 6);
+    if (currentUser.bank_account) doc.text('Account: ' + currentUser.bank_account, margin, y + 9);
+    if (currentUser.bank_branch) doc.text('Branch: ' + currentUser.bank_branch, margin, y + 12);
     
-    y += 12;
+    y += 16;
   }
 
   // ═══════════════════════════════════════════════════════════════════════
@@ -7695,17 +7712,17 @@ function printQuote() {
   if (notesVal) {
     y += 2; // spacing before notes
     doc.setFont('helvetica', 'bold');
-    doc.setFontSize(7);
+    doc.setFontSize(9);
     doc.setTextColor(...red);
     doc.text('NOTES:', margin, y);
     
     doc.setFont('helvetica', 'normal');
-    doc.setFontSize(6.5);
+    doc.setFontSize(8.5);
     doc.setTextColor(...dark);
     const notesLines = doc.splitTextToSize(notesVal, contentW);
-    doc.text(notesLines, margin, y + 3);
+    doc.text(notesLines, margin, y + 4);
     
-    y += (notesLines.length * 2.5) + 8; // spacing after notes
+    y += (notesLines.length * 3.3) + 10; // spacing after notes
   }
 
   // ═══════════════════════════════════════════════════════════════════════
@@ -7713,42 +7730,42 @@ function printQuote() {
   // ═══════════════════════════════════════════════════════════════════════
   
   doc.setFillColor(...dark);
-  doc.rect(0, y, pageW, 11, 'F');
+  doc.rect(0, y, pageW, 14, 'F');
   
   doc.setFont('helvetica', 'normal');
-  doc.setFontSize(6.5);
+  doc.setFontSize(8.5);
   doc.setTextColor(220, 220, 220);
-  doc.text('Thank you for your business. Payment is due within 30 days.', margin, y + 3.5);
+  doc.text('Thank you for your business. Payment is due within 30 days.', margin, y + 4.5);
   
   const deposit = document.getElementById('b_deposit')?.value || '';
   if (deposit) {
-    doc.text('Deposit: ' + deposit + ' required on acceptance. Balance due on completion.', margin, y + 5.5);
+    doc.text('Deposit: ' + deposit + ' required on acceptance. Balance due on completion.', margin, y + 7.5);
   }
   
   doc.setTextColor(150, 150, 150);
-  doc.setFontSize(6);
-  doc.text('Powered by QForge | myquoteforge.co.za', pageW - margin, y + 6.8, { align: 'right' });
+  doc.setFontSize(8);
+  doc.text('Powered by QForge | myquoteforge.co.za', pageW - margin, y + 10, { align: 'right' });
   
   // ═══════════════════════════════════════════════════════════════════════
   // SIGNATURE AREA
   // ═══════════════════════════════════════════════════════════════════════
   
-  y = pageH - 25;
+  y = pageH - 30;
   
   doc.setFillColor(255, 255, 255);
-  doc.rect(0, y, pageW, 25, 'F');
+  doc.rect(0, y, pageW, 30, 'F');
   
   doc.setFont('helvetica', 'normal');
-  doc.setFontSize(6);
+  doc.setFontSize(8);
   doc.setTextColor(...grey);
-  doc.text('Client Signature & Date', margin, y + 8);
-  doc.text('Authorised Signatory', pageW/2 + 10, y + 8);
+  doc.text('Client Signature & Date', margin, y + 10);
+  doc.text('Authorised Signatory', pageW/2 + 10, y + 10);
   
   // Signature lines
   doc.setDrawColor(...dark);
   doc.setLineWidth(0.5);
-  doc.line(margin, y + 10, margin + 35, y + 10);
-  doc.line(pageW/2 + 10, y + 10, pageW - margin, y + 10);
+  doc.line(margin, y + 13, margin + 40, y + 13);
+  doc.line(pageW/2 + 10, y + 13, pageW - margin, y + 13);
 
   // ═══════════════════════════════════════════════════════════════════════
   // SAVE PDF
