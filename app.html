@@ -2589,7 +2589,7 @@ function goTo(page) {
   else if (page==='stats') mc.innerHTML = renderStats();
   else if (page==='admin') { renderAdmin(); return; }
   else if (page==='products') mc.innerHTML = renderProducts();
-  else if (page==='profile') { mc.innerHTML = renderProfile(); setTimeout(loadNotificationSettings, 50); setTimeout(loadIntegrationStatus, 50); }
+  else if (page==='profile') { mc.innerHTML = renderProfile(); setTimeout(loadNotificationSettings, 50); setTimeout(loadIntegrationStatus, 50); setTimeout(loadPayfastStatus, 50); }
   else if (page==='expenses') { mc.innerHTML = renderExpenses(); }
   else if (page==='pandl') { mc.innerHTML = renderPandL(); }
   else if (page==='jobcards') { mc.innerHTML = renderJobCards(); }
@@ -7069,6 +7069,11 @@ function renderProfile() {
       <div id="integrationsCard">
         <p style="font-size:0.83rem;color:var(--muted);">Checking connection status...</p>
       </div>
+      <hr style="margin:16px 0;border:none;border-top:1px solid var(--border);">
+      <h3 style="margin-bottom:10px;">Get Paid Online</h3>
+      <div id="payfastCard">
+        <p style="font-size:0.83rem;color:var(--muted);">Checking connection status...</p>
+      </div>
     </div>
     <div class="profile-card">
       <div class="plan-badge">Free Trial - 14 days remaining</div>
@@ -7140,6 +7145,106 @@ async function disconnectQuickBooks() {
     if (!res.ok || !result.success) throw new Error(result.error || 'Failed to disconnect');
     showToast('QuickBooks disconnected', 'success');
     loadIntegrationStatus();
+  } catch (e) {
+    showToast('Could not disconnect: ' + e.message, 'error');
+  }
+}
+
+async function loadPayfastStatus() {
+  const card = document.getElementById('payfastCard');
+  if (!card) return;
+
+  try {
+    const { data: { session } } = await sb.auth.getSession();
+    if (!session) { card.innerHTML = '<p style="font-size:0.83rem;color:var(--muted);">Please log in to manage this.</p>'; return; }
+
+    const { data, error } = await sb.from('payfast_status').select('*').maybeSingle();
+    if (error) throw error;
+
+    if (data) {
+      const connectedDate = new Date(data.connected_at).toLocaleDateString('en-ZA');
+      card.innerHTML = `
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
+          <span style="width:10px;height:10px;border-radius:50%;background:#22c55e;display:inline-block;flex-shrink:0;"></span>
+          <div>
+            <div style="font-weight:600;font-size:0.9rem;">Connected to PayFast</div>
+            <div style="font-size:0.78rem;color:var(--muted);">Merchant ID: ${esc(data.merchant_id)} - Connected ${connectedDate}</div>
+          </div>
+        </div>
+        <p style="font-size:0.8rem;color:var(--muted);line-height:1.5;margin-bottom:14px;">Clients can now pay your invoices online directly into your PayFast account.</p>
+        <button class="btn btn-outline" onclick="disconnectPayfast()">Disconnect PayFast</button>
+      `;
+    } else {
+      card.innerHTML = `
+        <p style="font-size:0.8rem;color:var(--muted);line-height:1.5;margin-bottom:12px;">Connect your own PayFast account so clients can pay your invoices online. Payments go straight to your account - QForge never touches the money.</p>
+        <p style="font-size:0.75rem;color:var(--muted);margin-bottom:10px;">Don't have a PayFast account yet? <a href="https://www.payfast.co.za" target="_blank" style="color:var(--red);">Sign up here</a>, then find your Merchant ID, Merchant Key, and Passphrase under Settings.</p>
+        <div class="input-group"><label>Merchant ID</label><input type="text" id="pf_merchant_id" placeholder="e.g. 10000100"></div>
+        <div class="input-group"><label>Merchant Key</label><input type="text" id="pf_merchant_key" placeholder="e.g. 46f0cd694581a"></div>
+        <div class="input-group"><label>Passphrase</label><input type="password" id="pf_passphrase" placeholder="Your PayFast security passphrase"></div>
+        <button class="btn btn-red" style="color:#fff;" id="payfastConnectBtn" onclick="connectPayfast()">Save & Connect</button>
+      `;
+    }
+  } catch (e) {
+    console.error('Failed to load PayFast status:', e);
+    card.innerHTML = '<p style="font-size:0.83rem;color:var(--muted);">Could not check connection status. Refresh to try again.</p>';
+  }
+}
+
+async function connectPayfast() {
+  const merchantId = document.getElementById('pf_merchant_id').value.trim();
+  const merchantKey = document.getElementById('pf_merchant_key').value.trim();
+  const passphrase = document.getElementById('pf_passphrase').value.trim();
+
+  if (!merchantId || !merchantKey || !passphrase) {
+    showToast('Please fill in all three fields', 'error');
+    return;
+  }
+
+  const { data: { session } } = await sb.auth.getSession();
+  if (!session) { showToast('Please log in first', 'error'); return; }
+
+  const btn = document.getElementById('payfastConnectBtn');
+  btn.disabled = true;
+  btn.textContent = 'Connecting...';
+
+  try {
+    const res = await fetch('/api/payfast/connect', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        access_token: session.access_token,
+        merchant_id: merchantId,
+        merchant_key: merchantKey,
+        passphrase: passphrase
+      })
+    });
+    const result = await res.json();
+    if (!res.ok || !result.success) throw new Error(result.error || 'Failed to connect');
+    showToast('PayFast connected!', 'success');
+    loadPayfastStatus();
+  } catch (e) {
+    showToast('Could not connect: ' + e.message, 'error');
+    btn.disabled = false;
+    btn.textContent = 'Save & Connect';
+  }
+}
+
+async function disconnectPayfast() {
+  if (!confirm('Disconnect PayFast? Clients will no longer be able to pay your invoices online.')) return;
+
+  const { data: { session } } = await sb.auth.getSession();
+  if (!session) { showToast('Please log in first', 'error'); return; }
+
+  try {
+    const res = await fetch('/api/payfast/disconnect', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ access_token: session.access_token })
+    });
+    const result = await res.json();
+    if (!res.ok || !result.success) throw new Error(result.error || 'Failed to disconnect');
+    showToast('PayFast disconnected', 'success');
+    loadPayfastStatus();
   } catch (e) {
     showToast('Could not disconnect: ' + e.message, 'error');
   }
