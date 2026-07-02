@@ -7712,11 +7712,11 @@ function printQuote() {
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(6.5);
   doc.setTextColor(220, 220, 220);
-  doc.text('Thank you for your business. Payment is due within 30 days.', margin, y + 1.5);
+  doc.text('Thank you for your business. Payment is due within 30 days.', margin, y + 3.5);
   
   const deposit = document.getElementById('b_deposit')?.value || '';
   if (deposit) {
-    doc.text('Deposit: ' + deposit + ' required on acceptance. Balance due on completion.', margin, y + 3.2);
+    doc.text('Deposit: ' + deposit + ' required on acceptance. Balance due on completion.', margin, y + 4.8);
   }
   
   doc.setTextColor(150, 150, 150);
