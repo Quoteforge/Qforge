@@ -2589,7 +2589,7 @@ function goTo(page) {
   else if (page==='stats') mc.innerHTML = renderStats();
   else if (page==='admin') { renderAdmin(); return; }
   else if (page==='products') mc.innerHTML = renderProducts();
-  else if (page==='profile') { mc.innerHTML = renderProfile(); setTimeout(loadNotificationSettings, 50); }
+  else if (page==='profile') { mc.innerHTML = renderProfile(); setTimeout(loadNotificationSettings, 50); setTimeout(loadIntegrationStatus, 50); }
   else if (page==='expenses') { mc.innerHTML = renderExpenses(); }
   else if (page==='pandl') { mc.innerHTML = renderPandL(); }
   else if (page==='jobcards') { mc.innerHTML = renderJobCards(); }
@@ -7065,6 +7065,12 @@ function renderProfile() {
       </div>
     </div>
     <div class="profile-card">
+      <h3>Integrations</h3>
+      <div id="integrationsCard">
+        <p style="font-size:0.83rem;color:var(--muted);">Checking connection status...</p>
+      </div>
+    </div>
+    <div class="profile-card">
       <div class="plan-badge">Free Trial - 14 days remaining</div>
       <p style="font-size:0.83rem;color:var(--muted);line-height:1.6;margin-bottom:16px;">Upgrade to unlock unlimited quotes, e-signature, proposal tracking, and WhatsApp notifications.</p>
       <button class="btn btn-red" style="color:#fff;" onclick="window.open('https://qforge-eight.vercel.app/billing.html','_blank')">Upgrade to Growth - R699/mo</button>
@@ -7074,6 +7080,69 @@ function renderProfile() {
     </div>
   </div>
 `;
+}
+
+async function loadIntegrationStatus() {
+  const card = document.getElementById('integrationsCard');
+  if (!card) return;
+
+  try {
+    const { data: { session } } = await sb.auth.getSession();
+    if (!session) { card.innerHTML = '<p style="font-size:0.83rem;color:var(--muted);">Please log in to manage integrations.</p>'; return; }
+
+    const { data, error } = await sb.from('integration_status').select('*').eq('provider', 'quickbooks').maybeSingle();
+    if (error) throw error;
+
+    if (data) {
+      const connectedDate = new Date(data.connected_at).toLocaleDateString('en-ZA');
+      card.innerHTML = `
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
+          <span style="width:10px;height:10px;border-radius:50%;background:#22c55e;display:inline-block;flex-shrink:0;"></span>
+          <div>
+            <div style="font-weight:600;font-size:0.9rem;">Connected to QuickBooks</div>
+            <div style="font-size:0.78rem;color:var(--muted);">Connected on ${connectedDate}</div>
+          </div>
+        </div>
+        <p style="font-size:0.8rem;color:var(--muted);line-height:1.5;margin-bottom:14px;">Accepted quotes automatically create matching invoices in QuickBooks.</p>
+        <button class="btn btn-outline" onclick="disconnectQuickBooks()">Disconnect QuickBooks</button>
+      `;
+    } else {
+      card.innerHTML = `
+        <p style="font-size:0.83rem;color:var(--muted);line-height:1.5;margin-bottom:14px;">Connect QuickBooks to automatically create an invoice there whenever a client accepts a quote.</p>
+        <button class="btn btn-red" style="color:#fff;" onclick="connectQuickBooks()">Connect QuickBooks</button>
+      `;
+    }
+  } catch (e) {
+    console.error('Failed to load integration status:', e);
+    card.innerHTML = '<p style="font-size:0.83rem;color:var(--muted);">Could not check connection status. Refresh to try again.</p>';
+  }
+}
+
+async function connectQuickBooks() {
+  const { data: { session } } = await sb.auth.getSession();
+  if (!session) { showToast('Please log in first', 'error'); return; }
+  window.location.href = '/api/qb/connect?access_token=' + session.access_token;
+}
+
+async function disconnectQuickBooks() {
+  if (!confirm('Disconnect QuickBooks? Accepted quotes will no longer automatically create invoices there.')) return;
+
+  const { data: { session } } = await sb.auth.getSession();
+  if (!session) { showToast('Please log in first', 'error'); return; }
+
+  try {
+    const res = await fetch('/api/qb/disconnect', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ access_token: session.access_token })
+    });
+    const result = await res.json();
+    if (!res.ok || !result.success) throw new Error(result.error || 'Failed to disconnect');
+    showToast('QuickBooks disconnected', 'success');
+    loadIntegrationStatus();
+  } catch (e) {
+    showToast('Could not disconnect: ' + e.message, 'error');
+  }
 }
 
 
