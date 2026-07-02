@@ -7707,7 +7707,7 @@ function printQuote() {
   // ═══════════════════════════════════════════════════════════════════════
   
   doc.setFillColor(...dark);
-  doc.rect(0, y, pageW, 9, 'F');
+  doc.rect(0, y, pageW, 11, 'F');
   
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(6.5);
@@ -7716,12 +7716,12 @@ function printQuote() {
   
   const deposit = document.getElementById('b_deposit')?.value || '';
   if (deposit) {
-    doc.text('Deposit: ' + deposit + ' required on acceptance. Balance due on completion.', margin, y + 4.8);
+    doc.text('Deposit: ' + deposit + ' required on acceptance. Balance due on completion.', margin, y + 5.5);
   }
   
   doc.setTextColor(150, 150, 150);
   doc.setFontSize(6);
-  doc.text('Powered by QForge | myquoteforge.co.za', pageW - margin, y + 5.2, { align: 'right' });
+  doc.text('Powered by QForge | myquoteforge.co.za', pageW - margin, y + 6.8, { align: 'right' });
   
   // ═══════════════════════════════════════════════════════════════════════
   // SIGNATURE AREA
