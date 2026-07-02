@@ -14,9 +14,7 @@
 const {
   getSupabaseUser,
   getValidQuickBooksAuth,
-  qbRequest,
-  findOrCreateCustomer,
-  findOrCreateServiceItem
+  createInvoice
 } = require('../../lib/qb-helpers');
 
 module.exports = async (req, res) => {
@@ -53,35 +51,11 @@ module.exports = async (req, res) => {
   }
 
   try {
-    const customer = await findOrCreateCustomer(accessToken, realmId, client);
-    const serviceItem = await findOrCreateServiceItem(accessToken, realmId);
-
-    const line = items.map(item => ({
-      DetailType: 'SalesItemLineDetail',
-      Amount: (item.qty || 1) * (item.price || 0),
-      Description: item.name + (item.desc ? ' - ' + item.desc : ''),
-      SalesItemLineDetail: {
-        ItemRef: { value: serviceItem.Id },
-        Qty: item.qty || 1,
-        UnitPrice: item.price || 0
-      }
-    }));
-
-    const invoicePayload = {
-      CustomerRef: { value: customer.Id },
-      Line: line
-    };
-    if (quoteNumber) invoicePayload.DocNumber = quoteNumber;
-
-    const invoiceRes = await qbRequest(accessToken, realmId, '/invoice', {
-      method: 'POST',
-      body: JSON.stringify(invoicePayload)
-    });
-
+    const invoice = await createInvoice(accessToken, realmId, client, items, quoteNumber);
     return res.status(200).json({
       success: true,
-      quickbooksInvoiceId: invoiceRes.Invoice.Id,
-      quickbooksDocNumber: invoiceRes.Invoice.DocNumber
+      quickbooksInvoiceId: invoice.Id,
+      quickbooksDocNumber: invoice.DocNumber
     });
   } catch (e) {
     console.error('QB sync-invoice error:', e.message, e.data ? JSON.stringify(e.data) : '');
