@@ -7687,6 +7687,7 @@ function printQuote() {
   // ═══════════════════════════════════════════════════════════════════════
   const notesVal = document.getElementById('b_notes')?.value?.trim() || '';
   if (notesVal) {
+    y += 2; // spacing before notes
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(7);
     doc.setTextColor(...red);
@@ -7696,9 +7697,9 @@ function printQuote() {
     doc.setFontSize(6.5);
     doc.setTextColor(...dark);
     const notesLines = doc.splitTextToSize(notesVal, contentW);
-    doc.text(notesLines, margin, y + 2.5);
+    doc.text(notesLines, margin, y + 3);
     
-    y += (notesLines.length * 2.5);
+    y += (notesLines.length * 2.5) + 5; // spacing after notes
   }
 
   // ═══════════════════════════════════════════════════════════════════════
@@ -7706,21 +7707,21 @@ function printQuote() {
   // ═══════════════════════════════════════════════════════════════════════
   
   doc.setFillColor(...dark);
-  doc.rect(0, y, pageW, 8, 'F');
+  doc.rect(0, y, pageW, 7.5, 'F');
   
   doc.setFont('helvetica', 'normal');
-  doc.setFontSize(7);
+  doc.setFontSize(6.5);
   doc.setTextColor(220, 220, 220);
-  doc.text('Thank you for your business. Payment is due within 30 days.', margin, y + 0.8);
+  doc.text('Thank you for your business. Payment is due within 30 days.', margin, y + 1.2);
   
   const deposit = document.getElementById('b_deposit')?.value || '';
   if (deposit) {
-    doc.text('Deposit: ' + deposit + ' required on acceptance. Balance due on completion.', margin, y + 2.5);
+    doc.text('Deposit: ' + deposit + ' required on acceptance. Balance due on completion.', margin, y + 2.8);
   }
   
   doc.setTextColor(150, 150, 150);
-  doc.setFontSize(7);
-  doc.text('Powered by QForge | myquoteforge.co.za', pageW - margin, y + 4.5, { align: 'right' });
+  doc.setFontSize(6.5);
+  doc.text('Powered by QForge | myquoteforge.co.za', pageW - margin, y + 4.4, { align: 'right' });
   
   // ═══════════════════════════════════════════════════════════════════════
   // SIGNATURE AREA
